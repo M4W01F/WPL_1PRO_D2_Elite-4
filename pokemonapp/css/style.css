@@ -1,0 +1,139 @@
+/* Algemene stijlen voor de website */
+body, h1, h2, p, a, img, div, footer, header, main, nav {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Instellen van lettertype en achtergrondkleur */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Header stijlen */
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Navigatie stijlen */
+nav {
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    position: relative;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    position: relative;
+}
+
+nav .image-container img {
+    max-width: 100px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Hoofdinhoud stijlen */
+main {
+    padding: 20px;
+    background-color: white;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 1200px;
+}
+
+main a {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+main a:hover {
+    background-color: #45a049;
+}
+
+/* Footer stijlen */
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: relative;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+}
+
+footer img {
+    max-width: 50px;
+    display: block;
+    margin: 10px auto;
+}
+
+/* Profielfoto stijlen */
+#profile-photo {
+    text-align: center;
+    margin: 20px;
+}
+
+#profile-photo img {
+    max-width: 150px;
+    border-radius: 50%;
+}
+
+#profile-photo button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#profile-photo button:hover {
+    background-color: #45a049;
+}
+
+/* Gebruikersinstellingen stijlen */
+#user-settings, #friend-management, #pokemon-info {
+    margin: 20px 0;
+}
+
+#user-settings label, #user-settings input, #user-settings button {
+    display: block;
+    margin: 10px 0;
+}
+
+#user-settings input, #user-settings button {
+    padding: 10px;
+    width: 100%;
+    max-width: 300px;
+}
+
+#user-settings button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#user-settings button:hover {
+    background-color: #45a049;
+}

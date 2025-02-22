@@ -4,17 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batteler</title>
+    <link rel="icon" type="image/png" href="./images/favicon.png">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <header>
-    --> De geselecteerde pokemon en buddy worden dynamisch gegenereerd met hun lvl en aantal hp
-    --> Rechts boven komt een knop om weg te lopen van je gevecht dit telt niet als een win of loss en word alleen getoont als een eerste interactie als gebruiker een andere interactie heeft gedaan word deze knop niet meer gegenereerd.
+        <!-- De geselecteerde pokemon en buddy worden dynamisch gegenereerd met hun lvl en aantal hp dit is de template maar word dynamisch gegenereerd met javascript in de volgende fase -->
+        <div id="pokemon-info">
+            <p>Pokemon: [Pokemon Name]</p>
+            <p>Level: [Pokemon Level]</p>
+            <p>HP: [Pokemon HP]</p>
+        </div>
+        <div id="buddy-info">
+            <p>Buddy: [Buddy Name]</p>
+            <p>Level: [Buddy Level]</p>
+            <p>HP: [Buddy HP]</p>
+        </div>
+        <!-- Rechts boven komt een knop om weg te lopen van je gevecht dit telt niet als een win of loss en word alleen getoont als een eerste interactie als gebruiker een andere interactie heeft gedaan word deze knop niet meer gegenereerd. -->
+        <a id="run-away" href="index.html" style="position: absolute; top: 10px; right: 10px;">Weglopen</a>
     </header>
     <main>
-    --> Je moves worden gegenereerd van je buddy
-    --> waneer je een move gebruik komt er een text block waar staat welke move je hebdt gebruikt en hoe effectief deze is.
-    --> Hier staat ook de tegenstanders move en effectiefness en beide jullie hp worden veranderd naar de correcte
-    --> Als tegestander of jouw pokemon 0 hp heeft telt dit direct als een win of loss
+        <!-- Je moves worden gegenereerd van je buddy dit is voor nu de template maar word gegeneraard met javascript naar opmaak van een structur om deze moves opteslaan -->
+        <div id="buddy-moves">
+            <button>[Move 1]</button>
+            <button>[Move 2]</button>
+            <button>[Move 3]</button>
+            <button>[Move 4]</button>
+        </div>
+        <!--
+        Dit zijn de templates hoe dit er uit gaat zien maar wordt in de zelvde container dynamisch gelaten
+             waneer je een move gebruik komt er een text block waar staat welke move je hebdt gebruikt en hoe effectief deze is.
+            <div id="move-result">
+                <p>Jij gebruikte: [Move]</p>
+                <p>Effectiviteit: [Effectiveness]</p>
+            </div>
+            Hier staat ook de tegenstanders move en effectiefness en beide jullie hp worden veranderd naar de correcte dit is de template daar van wordt met javascript uitgevoerd
+            <div id="opponent-move-result">
+                <p>Tegenstander gebruikte: [Move]</p>
+                <p>Effectiviteit: [Effectiveness]</p>
+                <p>Jouw HP: [New HP]</p>
+                <p>Tegenstander HP: [New HP]</p>
+            </div>
+        -->
+        <!-- Als tegestander of jouw pokemon 0 hp heeft telt dit direct als een win of loss dit wordt met javascript geregeld -->
     </main>
 </body>
 </html>

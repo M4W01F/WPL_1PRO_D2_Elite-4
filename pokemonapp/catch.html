@@ -4,21 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catch</title>
+    <link rel="icon" type="image/png" href="./images/favicon.png">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <header>
-    --> Hier komt de naam en lvl van de pokemon
+        <!-- Hier komt de naam en lvl van de pokemon -->
+        <h1>Pokemon Catch</h1>
+        <p>Naam: [Pokemon Name]</p>
+        <p>Level: [Pokemon Level]</p>
     </header>
     <main>
-    --> Hier komt een foto of gif of animatie van de gekoze pokemon
-    --> Foto of animatie van een pokeball dat geconnecteerd is naar een eventlistener om de pokemon te kunnen vangen
+        <!-- Hier komt een foto of gif of animatie van de gekozen pokemon -->
+        <div id="pokemon-image">
+            <img src="./images/chosen_pokemon.png" alt="Chosen Pokemon">
+        </div>
+        <!-- Foto of animatie van een pokeball dat geconnecteerd is naar een eventlistener om de pokemon te kunnen vangen -->
+        <div id="pokeball-container">
+            <img src="./images/pokeball.png" alt="Pokeball" id="pokeball">
+        </div>
     </main>
     <footer>
-    --> Als de vorige comment niet kan komt er een knop voor dit in de plaats
-    --> Toont aantal kansen dat de gebruiker nog heeft dit word met javascript gecalculeert
+        <!-- Als de vorige comment niet kan komt er een knop voor dit in de plaats -->
+        <button id="catch-pokemon">Catch Pokemon</button>
+        <!-- Toont aantal kansen dat de gebruiker nog heeft dit word met javascript gecalculeerd -->
+        <p>Aantal kansen: <span id="chances-left">3</span></p>
     </footer>
 
-    --> Als de pokemon succesvol gevangen wordt word er met javascript een volgendpaneel getoond die op default hidden staat om een nickname te geven aan de pokemon.
-    --> Zo niet wordt een event gecallled om terug naar index.html te gaan
+    <!-- Als de pokemon succesvol gevangen wordt word er met javascript een volgendpaneel getoond die op default hidden staat om een nickname te geven aan de pokemon. -->
+    <div id="nickname-panel" style="display: none;">
+        <p>Geef een bijnaam aan je Pokemon:</p>
+        <input type="text" id="pokemon-nickname">
+        <button id="submit-nickname">Submit</button>
+    </div>
+    <!-- Zo niet wordt een event gecallled om terug naar index.html te gaan -->
 </body>
 </html>
