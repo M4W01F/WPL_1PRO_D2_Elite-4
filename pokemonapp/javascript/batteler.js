@@ -46,25 +46,6 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
     document.getElementById('move-results').appendChild(resultDiv);
 }
 
-// Functie om een move te gebruiken (voorbeeld)
-function useMove(move) {
-    const effectiveness = Math.random() * 100; // Voorbeeld van effectiviteit
-    const playerHp = Math.max(0, pokemon.hp - Math.floor(Math.random() * 20));
-    const opponentHp = Math.max(0, buddy.hp - Math.floor(Math.random() * 20));
-
-    // Update de resultaten voor de speler's move
-    updateMoveResult(true, move, effectiveness, playerHp, opponentHp);
-
-    // Simuleer de tegenstander die een move gebruikt
-    const opponentMove = buddy.moves[Math.floor(Math.random() * buddy.moves.length)];
-    const opponentEffectiveness = Math.random() * 100; // Voorbeeld van effectiviteit
-    const newPlayerHp = Math.max(0, playerHp - Math.floor(Math.random() * 20));
-    const newOpponentHp = Math.max(0, opponentHp - Math.floor(Math.random() * 20));
-
-    // Update de resultaten voor de tegenstander's move
-    updateMoveResult(false, opponentMove, opponentEffectiveness, newPlayerHp, newOpponentHp);
-}
-
 // Voorbeeld data
 const pokemon = {
     name: 'Pikachu',
