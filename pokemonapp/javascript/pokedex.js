@@ -32,6 +32,7 @@ async function displayPokemonList() {
                 <strong>Naam: ${pokemonData.name} </strong>
                 <strong>Type: ${pokemonData.types} </strong>
             `;
+            listItem.style.border = "1px dashed red";
             listItem.onclick = () => pokemonDetails(pokemonData);
             pokemonList.appendChild(listItem);
         }
