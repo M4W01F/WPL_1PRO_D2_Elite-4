@@ -18,14 +18,14 @@ function updateInfo(pokemon, buddy) {
 
 // Functie om dynamisch de moves te genereren
 function updateBuddyMoves(moves) {
-    const moveButtons = moves.map(move => `<button>${move}</button>`).join('');
+    const moveButtons = moves.map(move => `<button onclick="handleMoveClick('${move}')">${move}</button>`).join('');
     document.getElementById('buddy-moves').innerHTML = moveButtons;
 }
 
 // Functie om dynamisch de resultaten van de moves bij te werken
 function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
     const resultDiv = document.createElement('div');
-    resultDiv.className = 'move-result';
+    resultDiv.className = 'move-resultaat';
 
     if (isPlayer) {
         resultDiv.innerHTML = `
@@ -42,18 +42,32 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
             <p>Tegenstander HP: ${opponentHp}</p>
         `;
     }
+    
+    document.getElementById('move-resultaat').appendChild(resultDiv);
+}
 
-    document.getElementById('move-results').appendChild(resultDiv);
+// Functie om een move te verwerken wanneer erop wordt geklikt
+function handleMoveClick(move) {
+    // Voorbeeld voor het verlies van hp
+    const effectiveness = Math.random() > 0.5 ? 'effectief' : 'niet effectief';
+    pokemon.hp -= Math.floor(Math.random() * 40);
+    buddy.hp -= Math.floor(Math.random() * 40);
+    
+    // Maak de move resultaat div leeg voordat een nieuw resultaat getoond word.
+    document.getElementById('move-resultaat').innerHTML = '';
+
+    updateMoveResult(true, move, effectiveness, buddy.hp, pokemon.hp);
+    updateInfo(pokemon, buddy);
 }
 
 // Voorbeeld data
-const pokemon = {
+let pokemon = {
     name: 'Pikachu',
     level: 15,
     hp: 100
 };
 
-const buddy = {
+let buddy = {
     name: 'Charmander',
     level: 10,
     hp: 80,
