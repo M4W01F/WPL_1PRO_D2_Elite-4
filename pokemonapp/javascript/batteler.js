@@ -61,13 +61,13 @@ function handleMoveClick(move) {
 }
 
 // Voorbeeld data
-let pokemon = {
+const pokemon = {
     name: 'Pikachu',
     level: 15,
     hp: 100
 };
 
-let buddy = {
+const buddy = {
     name: 'Charmander',
     level: 10,
     hp: 80,
