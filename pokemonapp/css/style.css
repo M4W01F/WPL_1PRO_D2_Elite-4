@@ -18,6 +18,9 @@ header {
     color: white;
     padding: 10px;
     text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 /* Navigatie stijlen */
@@ -141,3 +144,6 @@ footer img {
 a:hover{
    color: blue; 
 }
+
+
+
