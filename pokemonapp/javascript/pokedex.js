@@ -43,8 +43,61 @@ function pokemonDetails(pokemon) {
     document.getElementById('pokemon-naam').textContent = pokemon.name;
     document.getElementById('pokemon-level').textContent = pokemon.level;
     document.getElementById('pokemon-type').textContent = pokemon.types;
-    document.getElementById('pokemon-sprite').src = pokemon.sprite;
-    document.getElementById('pokemon-sprite').alt = pokemon.name;
+
+    const spriteElement = document.getElementById('pokemon-sprite');
+    spriteElement.src = pokemon.sprite;
+    spriteElement.alt = pokemon.name;
+
+    // Centreerd de sprite van de pokemon
+    spriteElement.style.display = 'block';
+    spriteElement.style.margin = '0 auto';
+
+    // Maakt dit veld zichtbaar
+    const detailsDiv = document.getElementById('pokemon-details');
+    if (detailsDiv) {
+        detailsDiv.hidden = false;
+
+        // Style voor pokemon detail
+        detailsDiv.style.position = 'fixed';
+        detailsDiv.style.top = '50%'; // Centreeerd vertikaal
+        detailsDiv.style.transform = 'translateY(-50%)'; // zorgt dat het in het midde is
+        detailsDiv.style.left = '20px'; // maakt wit ruimte links
+        detailsDiv.style.width = '225px'; // de dikte veranderd
+        detailsDiv.style.backgroundColor = '#f9f9f9'; // achtergrond kleur moet nog veranderen
+        detailsDiv.style.border = '1px solid gray'; // Border
+        detailsDiv.style.padding = '15px';
+        detailsDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)'; // Shaduw
+        detailsDiv.style.zIndex = '1000';
+    } else {
+        console.error('The "pokemon-details" div is missing from the DOM.');
+    }
+
+    const actionsContainer = document.getElementById('pokemon-acties');
+    actionsContainer.innerHTML = ''; // Verwijderd vorige knoppen
+
+    // Maakt "Battler" knop
+    const battleButton = document.createElement('button');
+    battleButton.textContent = 'Battler';
+    battleButton.onclick = () => {
+        
+    };
+    actionsContainer.appendChild(battleButton);
+
+    // Maakt "Vergelijken" knop
+    const compareButton = document.createElement('button');
+    compareButton.textContent = 'Vergelijken';
+    compareButton.onclick = () => {
+        
+    };
+    actionsContainer.appendChild(compareButton);
+
+    // Maakt "Catch" knop
+    const catchButton = document.createElement('button');
+    catchButton.textContent = 'Catch';
+    catchButton.onclick = () => {
+        
+    };
+    actionsContainer.appendChild(catchButton);
 }
 
 document.addEventListener('DOMContentLoaded', displayPokemonList);

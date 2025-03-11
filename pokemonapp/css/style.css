@@ -8,16 +8,19 @@ body, h1, h2, p, a, img, div, footer, header, main, nav {
 /* Instellen van lettertype en achtergrondkleur */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #75C2F6;
     color: #333;
 }
 
 /* Header stijlen */
 header {
-    background-color: #4CAF50;
+    background-color: #F4D160;
     color: white;
     padding: 10px;
     text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 /* Navigatie stijlen */
@@ -66,11 +69,15 @@ main a:hover {
 
 /* Footer stijlen */
 footer {
-    background-color: #333;
+    background-color: #F4D160;
     color: white;
     text-align: center;
     padding: 10px;
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+
+    
 }
 
 footer a {
@@ -136,4 +143,8 @@ footer img {
 
 #user-settings button:hover {
     background-color: #45a049;
+}
+
+a:hover{
+   color: blue; 
 }
