@@ -75,11 +75,25 @@ const buddy = {
 };
 
 // Functie om het gevecht te starten
-function startBattle() {
-    const selectedPokemonName = document.getElementById('pokemon-selector').value;
+async function startBattle() {
+    const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase();
+
+    if (!selectedPokemonName) {
+        alert('Typ de naam van een Pokémon om te beginnen!');
+        return;
+    }
+
+    try {
+        // Fetch Pokémon data van de API
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
+        if (!response.ok) {
+            throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
+        }
+
+        const pokemonData = await response.json();
 
     // Werk het globale `pokemon` object bij
-    pokemon.name = selectedPokemonName || 'Pikachu'; // Standaard naar Pikachu als het invoerveld leeg is
+    pokemon.name = selectedPokemonName;
     pokemon.level = 10; // Standaard niveau
     pokemon.hp = 100;   // Standaard HP
 
@@ -92,6 +106,9 @@ function startBattle() {
 
     document.querySelector('footer').style.display = 'none';
     document.querySelector('nav').style.display = 'none';
+    } catch (error) {
+        alert(error.message);
+    }
 }
 // Roep de functies aan om de informatie te updaten
 updateInfo(pokemon, buddy);
