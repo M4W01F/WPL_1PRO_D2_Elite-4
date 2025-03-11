@@ -9,35 +9,60 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <header>
-        <!-- Hier komt de naam en lvl van de pokemon -->
-        <h1>Pokemon Catch</h1>
-        <p>Naam: [Pokemon Name]</p>
-        <p>Level: [Pokemon Level]</p>
-    </header>
-    <main>
-        <!-- Hier komt een foto of gif of animatie van de gekozen pokemon -->
-        <div id="pokemon-image">
-            <img src="./images/chosen_pokemon.png" alt="Chosen Pokemon">
+    <nav>
+        <a href="./user.html" style="position: absolute; top: 10px; right: 10px;">Gebruikerspagina</a>
+        <div class="image-container">
+            <a href="./index.html">
+                <img src="./images/project.png" alt="Projectafbeelding">
+            </a>
         </div>
-        <!-- Foto of animatie van een pokeball dat geconnecteerd is naar een eventlistener om de pokemon te kunnen vangen -->
-        <div id="pokeball-container">
-            <img src="./images/pokeball.png" alt="Pokeball" id="pokeball">
+    </nav>
+
+    <main>
+        <!-- Setup container -->
+        <div id="setup-container">
+            <p>Welke Pokémon wil je vangen?</p>
+            <div class="dropdown-container">
+                <input type="text" id="pokemon-selector" placeholder="Typ of selecteer een Pokémon" />
+                <div id="pokemon-options" class="dropdown-content"></div>
+            </div>
+            <button onclick="startCatch()">Start met Vangen</button>
+        </div>
+
+        <!-- Pokémon informatie -->
+        <div id="catch-interface" style="display: none;">
+            <h1>Pokemon Catch</h1>
+            <p id="pokemon-name">Naam: [Pokemon Name]</p>
+            <p id="pokemon-level">Level: [Pokemon Level]</p>
+
+            <!-- Sprite van geselecteerde pokemon -->
+            <div id="pokemon-image">
+                <img src="./images/chosen_pokemon.png" alt="Chosen Pokemon">
+            </div>
+
+            <!-- Pokéball interactie -->
+            <div id="pokeball-container">
+                <img src="./images/Poke_Ball.webp" alt="Pokeball" id="pokeball">
+            </div>
+
+            <!-- Toont aantal kansen -->
+            <p>Aantal kansen: <span id="chances-left">3</span></p>
+
+            <!-- Bijnaam paneel toont op een successvolle catch -->
+            <div id="nickname-panel" style="display: none;">
+                <p>Geef een bijnaam aan je Pokemon:</p>
+                <input type="text" id="pokemon-nickname">
+                <button id="submit-nickname">Submit</button>
+            </div>
         </div>
     </main>
     <footer>
-        <!-- Als de vorige comment niet kan komt er een knop voor dit in de plaats -->
-        <button id="catch-pokemon">Catch Pokemon</button>
-        <!-- Toont aantal kansen dat de gebruiker nog heeft dit word met javascript gecalculeerd -->
-        <p>Aantal kansen: <span id="chances-left">3</span></p>
+        <a href="./buddy.html">
+            <img src="./images/current_buddy.png" alt="Huidige Buddy" id="current-buddy">
+        </a>
     </footer>
 
-    <!-- Als de pokemon succesvol gevangen wordt word er met javascript een volgendpaneel getoond die op default hidden staat om een nickname te geven aan de pokemon. -->
-    <div id="nickname-panel" style="display: none;">
-        <p>Geef een bijnaam aan je Pokemon:</p>
-        <input type="text" id="pokemon-nickname">
-        <button id="submit-nickname">Submit</button>
-    </div>
-    <!-- Zo niet wordt een event gecallled om terug naar index.html te gaan -->
+    <script src="./javascript/pokemonDropdown.js"></script>
+    <script src="./javascript/catch.js"></script>
 </body>
 </html>

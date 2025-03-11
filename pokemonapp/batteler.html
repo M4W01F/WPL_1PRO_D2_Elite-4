@@ -7,37 +7,50 @@
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
-    <script src="./javascript/batteler.js" defer></script>
+    
 </head>
 <body>
-    <header>
-        <!-- De geselecteerde pokemon en buddy worden dynamisch gegenereerd met hun lvl en aantal hp dit is de template maar word dynamisch gegenereerd met javascript in de volgende fase -->
-        <div id="pokemon-info">
-            <p>Pokemon: [Pokemon Name]</p>
-            <p>Level: [Pokemon Level]</p>
-            <p>HP: [Pokemon HP]</p>
+    <nav>
+        <a href="./user.html" style="position: absolute; top: 10px; right: 10px;">Gebruikerspagina</a>
+        <div class="image-container">
+            <a href="./index.html">
+                <img src="./images/project.png" alt="Projectafbeelding">
+            </a>
         </div>
-        <div id="buddy-info">
-            <p>Buddy: [Buddy Name]</p>
-            <p>Level: [Buddy Level]</p>
-            <p>HP: [Buddy HP]</p>
-        </div>
-        <!-- Rechts boven komt een knop om weg te lopen van je gevecht dit telt niet als een win of loss en word alleen getoont als een eerste interactie als gebruiker een andere interactie heeft gedaan word deze knop niet meer gegenereerd. -->
-        <a id="run-away" href="./index.html" style="position: absolute; top: 10px; right: 10px;">Weglopen</a>
-    </header>
-    <main>
-        <!-- Je moves worden gegenereerd van je buddy dit is voor nu de template maar word gegeneraard met javascript naar opmaak van een structur om deze moves opteslaan -->
-        <div id="buddy-moves">
-            <button>[Move 1]</button>
-            <button>[Move 2]</button>
-            <button>[Move 3]</button>
-            <button>[Move 4]</button>
-        </div>
-        <!-- Hier worden de resultaten dynamisch geladen -->
-        <div id="move-resultaat">
+    </nav>
 
+    <main>
+        <!-- Eerste opzet met aangepaste dropdown en knop -->
+        <div id="setup-container">
+            <p>Welke Pokémon wil je bevechten?</p>
+            <div class="dropdown-container">
+                <input type="text" id="pokemon-selector" placeholder="Typ of selecteer een Pokémon" />
+                <div id="pokemon-options" class="dropdown-content"></div>
+            </div>
+            <button onclick="startBattle()">Begin Gevecht</button>
         </div>
-        <!-- Als tegestander of jouw pokemon 0 hp heeft telt dit direct als een win of loss dit wordt met javascript geregeld -->
+
+        <!-- Gevechtsinterface die aanvankelijk verborgen is -->
+        <div id="battle-interface" style="display: none;">
+            <header>
+                <div id="pokemon-info"></div>
+                <div id="buddy-info"></div>
+                <a id="run-away" href="./batteler.html" style="position: absolute; top: 10px; right: 10px;">Weglopen</a>
+            </header>
+            <main>
+                <div id="buddy-moves"></div>
+                <div id="move-resultaat"></div>
+            </main>
+        </div>
     </main>
+
+    <footer>
+        <a href="./buddy.html">
+            <img src="./images/current_buddy.png" alt="Huidige Buddy" id="current-buddy">
+        </a>
+    </footer>
+
+    <script src="./javascript/pokemonDropdown.js"></script>
+    <script src="./javascript/batteler.js" defer></script>
 </body>
 </html>

@@ -74,6 +74,25 @@ const buddy = {
     moves: ['Scratch', 'Ember', 'Growl', 'Flamethrower']
 };
 
+// Functie om het gevecht te starten
+function startBattle() {
+    const selectedPokemonName = document.getElementById('pokemon-selector').value;
+
+    // Werk het globale `pokemon` object bij
+    pokemon.name = selectedPokemonName || 'Pikachu'; // Standaard naar Pikachu als het invoerveld leeg is
+    pokemon.level = 10; // Standaard niveau
+    pokemon.hp = 100;   // Standaard HP
+
+    // Werk de gevechtsinterface bij met JS-functies
+    updateInfo(pokemon, buddy);
+
+    // Wissel zichtbaarheid
+    document.getElementById('setup-container').style.display = 'none';
+    document.getElementById('battle-interface').style.display = 'block';
+
+    document.querySelector('footer').style.display = 'none';
+    document.querySelector('nav').style.display = 'none';
+}
 // Roep de functies aan om de informatie te updaten
 updateInfo(pokemon, buddy);
 updateBuddyMoves(buddy.moves);
