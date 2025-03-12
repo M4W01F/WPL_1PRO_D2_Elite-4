@@ -17,7 +17,7 @@ function getHealthBar(character) {
 
     // Genereer de hp balk
     return `
-        <div style="width: 80%; margin-left: 10%; background-color: lightgray; height: 10px; border-radius: 5px;">
+        <div style="width: 80%; margin-left: 10%; background-color: lightgray; height: 10px; border-radius: 5px; border: 2px solid black;">
             <div style="width: ${healthPercentage}%; background-color: ${color}; height: 100%; border-radius: 5px;"></div>
         </div>
     `;
@@ -93,29 +93,69 @@ function handleMoveClick(move) {
     // Als tegenstander of buddy hun hp op minstens 0 staat
     const resultDiv = document.createElement('div');
     resultDiv.className = 'move-resultaat';
+    resultDiv.style.position = 'relative'; // To position the arrow inside it
+    
     if (buddy.hp <= 0) {
         document.getElementById('move-resultaat').innerHTML = '';
         document.getElementById('buddy-moves').style.display = 'none';
         resultDiv.innerHTML = `
-        <p>${buddy.name} kan niet meer vechten!</p>
-        <br>
-        <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
-        <br>
-        <p>Je krijgt 1 Lost aangerekend.</p>
-    `;
+            <p>${buddy.name} kan niet meer vechten!</p>
+            <br>
+            <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
+            <br>
+            <p>Je krijgt 1 Lost aangerekend.</p>
+            <div class="click-arrow">⬇ Klik om verder te gaan ⬇</div>
+        `;
+    
+        resultDiv.onclick = () => {
+            window.location.href = 'index.html'; // Redirect to index.html
+        };
     }
     if (pokemon.hp <= 0) {
         document.getElementById('move-resultaat').innerHTML = '';
         document.getElementById('buddy-moves').style.display = 'none';
         resultDiv.innerHTML = `
-        <p>${pokemon.name} kan niet meer vechten!</p>
-        <br>
-        <p>${buddy.name} heeft dit gevecht gewonnen.</p>
-        <br>
-        <p>Je krijgt 1 Win aangerekend.</p>
-    `;
+            <p>${pokemon.name} kan niet meer vechten!</p>
+            <br>
+            <p>${buddy.name} heeft dit gevecht gewonnen.</p>
+            <br>
+            <p>Je krijgt 1 Win aangerekend.</p>
+            <div class="click-pijl">Klik om verder te gaan ></div>
+        `;
+    
+        resultDiv.onclick = () => {
+            window.location.href = 'index.html'; // Redirect to index.html
+        };
     }
+    
     document.getElementById('move-resultaat').appendChild(resultDiv);
+    
+    // Stijling voor pijl animatie
+    const style = document.createElement('style');
+    style.textContent = `
+        .click-pijl {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            animation: move-left-right 1.5s infinite;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        @keyframes move-left-right {
+            0% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(-10px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // Voorbeeld data
