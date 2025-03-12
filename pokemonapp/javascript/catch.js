@@ -16,7 +16,7 @@ async function startCatch() {
         const pokemonData = await response.json();
 
         // Update de Pokémon details dynamisch
-        document.getElementById('pokemon-name').textContent = `Naam: ${pokemonData.name}`;
+        document.getElementById('pokemon-baam').textContent = `Naam: ${pokemonData.name}`;
         document.getElementById('pokemon-level').textContent = `Level: ${Math.floor(Math.random() * 50 + 1)}`; // Random Level
 
         // toont de Pokémon sprite
@@ -37,20 +37,21 @@ async function startCatch() {
 
 // Pokeball click event
 document.getElementById('pokeball').addEventListener('click', () => {
-    const chancesLeft = document.getElementById('chances-left');
-    let currentChances = parseInt(chancesLeft.textContent);
+    const kansen = document.getElementById('kansen');
+    let aantalKansen = parseInt(kansen.textContent);
 
-    if (currentChances > 0) {
-        currentChances--;
-        chancesLeft.textContent = currentChances;
+    if (aantalKansen > 0) {
+        aantalKansen--;
+        kansen.textContent = aantalKansen;
 
         if (Math.random() > 0.5) { // Random success voorbeeeld
             document.getElementById('pokeball').style.display = 'none';
-            document.getElementById('chances-left').style.display = 'none';
+            document.getElementById('kansen').style.display = 'none';
+            document.getElementById('kans').style.display = 'none';
             alert('Gevangen! Geef je Pokémon een bijnaam.');
-            document.getElementById('nickname-panel').style.display = 'block';
+            document.getElementById('bijnaam-panel').style.display = 'block';
         } else {
-            if (currentChances === 0) {
+            if (aantalKansen === 0) {
                 alert('Geen kansen meer! Je wordt teruggeleid naar de hoofdpagina.');
                 window.location.href = './index.html';
             } else {
