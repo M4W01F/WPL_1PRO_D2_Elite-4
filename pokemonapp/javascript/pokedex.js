@@ -79,7 +79,8 @@ function pokemonDetails(pokemon) {
     const battleButton = document.createElement('button');
     battleButton.textContent = 'Battler';
     battleButton.onclick = () => {
-        
+        const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
+        window.location.href = `batteler.html?${urlParams}`; 
     };
     actionsContainer.appendChild(battleButton);
 
@@ -95,7 +96,8 @@ function pokemonDetails(pokemon) {
     const catchButton = document.createElement('button');
     catchButton.textContent = 'Catch';
     catchButton.onclick = () => {
-        
+        const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
+        window.location.href = `catch.html?${urlParams}`;
     };
     actionsContainer.appendChild(catchButton);
 }

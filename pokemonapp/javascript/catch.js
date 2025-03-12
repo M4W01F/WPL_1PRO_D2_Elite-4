@@ -1,5 +1,21 @@
-async function startCatch() {
-    const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase();
+// Haal pokemon naam uit pokedex
+function getPokemonNameFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pokemonName');
+}
+
+// Event Listener om catch te starten out pokedex
+document.addEventListener('DOMContentLoaded', () => {
+    const pokemonName = getPokemonNameFromURL();
+    if (pokemonName) {
+        startCatch(pokemonName);
+    } else {
+        console.error('Pokémon name is missing from the URL.');
+    }
+});
+
+async function startCatch(pokemonName) {
+    const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase() || pokemonName;
 
     if (!selectedPokemonName) {
         alert('Typ de naam van een Pokémon om te beginnen!');

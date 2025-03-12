@@ -1,3 +1,18 @@
+// Haal pokemon naam uit pokedex
+function getPokemonNameFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pokemonName');
+}
+
+// Event listeener om pokemon gevecht te starten uit pokedex
+document.addEventListener('DOMContentLoaded', () => {
+    const pokemonName = getPokemonNameFromURL();
+    if (pokemonName) {
+        startBattle(pokemonName); // Call startBattle with the Pokémon name
+    } else {
+        console.error('Pokémon name is missing from the URL.');
+    }
+});
 function getHealthBar(character) {
     // Dynamisch de maximale HP van het personage bepalen
     const maxHp = character.maxHp || 100; // Controleer of maxHp beschikbaar is, anders standaard op 100
@@ -175,8 +190,8 @@ const buddy = {
 };
 
 // Functie om het gevecht te starten
-async function startBattle() {
-    const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase();
+async function startBattle(pokemonName) {
+    const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase() || pokemonName;
 
     if (!selectedPokemonName) {
         alert('Typ de naam van een Pokémon om te beginnen!');
