@@ -43,8 +43,22 @@ async function displayPokemonList() {
 function pokemonDetails(pokemon) {
     document.getElementById('pokemon-id').textContent = pokemon.id;
     document.getElementById('pokemon-naam').textContent = pokemon.name;
-    document.getElementById('pokemon-level').textContent = pokemon.level;
-    document.getElementById('pokemon-type').textContent = pokemon.types;
+    
+    const pokemonTypeElement = document.getElementById('pokemon-type');
+    pokemonTypeElement.innerHTML = ''; // Verwijder eerdere inhoud
+    pokemon.types.split(', ').forEach(type => {
+        const typeBadge = document.createElement('span');
+        typeBadge.textContent = type; // Type naam toevoegen
+        typeBadge.className = 'type-badge'; // Voegd de classe toe
+        typeBadge.style.backgroundColor = getTypeColor(type);
+        typeBadge.style.color = '#fff';
+        typeBadge.style.padding = '3px 8px';
+        typeBadge.style.margin = '2px';
+        typeBadge.style.borderRadius = '5px';
+        typeBadge.style.display = 'inline-block';
+        pokemonTypeElement.appendChild(typeBadge); // Voeg badge toe aan de type container
+    });
+
 
     const spriteElement = document.getElementById('pokemon-sprite');
     spriteElement.src = pokemon.sprite;
