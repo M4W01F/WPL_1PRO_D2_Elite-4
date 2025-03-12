@@ -1,17 +1,44 @@
-// Functie om dynamisch de informatie van Pokemon en Buddy te genereren
+function getHealthBar(character) {
+    // Dynamisch de maximale HP van het personage bepalen
+    const maxHp = character.maxHp || 100; // Controleer of maxHp beschikbaar is, anders standaard op 100
+    const healthPercentage = (character.hp / maxHp) * 100;
+    let color;
+
+    // Stel de kleur in
+    if (healthPercentage > 75) {
+        color = "green";
+    } else if (healthPercentage > 50) {
+        color = "yellow";
+    } else if (healthPercentage > 25) {
+        color = "orange";
+    } else {
+        color = "red";
+    }
+
+    // Genereer de hp balk
+    return `
+        <div style="width: 80%; margin-left: 10%; background-color: lightgray; height: 10px; border-radius: 5px;">
+            <div style="width: ${healthPercentage}%; background-color: ${color}; height: 100%; border-radius: 5px;"></div>
+        </div>
+    `;
+}
+
+// Update de informatie van pokemon en buddy
 function updateInfo(pokemon, buddy) {
     const pokemonInfo = `
         <p><b>${pokemon.name}</b></p>
+        ${getHealthBar(pokemon)} <!-- Gezondheidsbalk voor Pokémon -->
         <img src="${pokemon.sprite}" alt="${pokemon.name} sprite" />
         <p>Level: ${pokemon.level}</p>
-        <p>HP: ${pokemon.hp}</p>
+        <p>HP: ${pokemon.hp}/${pokemon.maxHp || 100}</p> <!-- Dynamische max HP -->
     `;
 
     const buddyInfo = `
         <p><b>${buddy.name}</b></p>
+        ${getHealthBar(buddy)} <!-- Gezondheidsbalk voor Buddy -->
         <img src="${buddy.sprite}" alt="${buddy.name} sprite" />
         <p>Level: ${buddy.level}</p>
-        <p>HP: ${buddy.hp}</p>
+        <p>HP: ${buddy.hp}/${buddy.maxHp || 100}</p> <!-- Dynamische max HP -->
     `;
 
     document.getElementById('pokemon-info').innerHTML = pokemonInfo;
@@ -50,6 +77,8 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
 
 // Functie om een move te verwerken wanneer erop wordt geklikt
 function handleMoveClick(move) {
+    // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
+    document.getElementById('run-away').style.display = 'none';
     // Voorbeeld voor het verlies van hp
     const effectiveness = Math.random() > 0.5 ? 'effectief' : 'niet effectief';
     pokemon.hp -= Math.floor(Math.random() * 40);
@@ -60,19 +89,48 @@ function handleMoveClick(move) {
 
     updateMoveResult(true, move, effectiveness, buddy.hp, pokemon.hp);
     updateInfo(pokemon, buddy);
+
+    // Als tegenstander of buddy hun hp op minstens 0 staat
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'move-resultaat';
+    if (buddy.hp <= 0) {
+        document.getElementById('move-resultaat').innerHTML = '';
+        document.getElementById('buddy-moves').style.display = 'none';
+        resultDiv.innerHTML = `
+        <p>${buddy.name} kan niet meer vechten!</p>
+        <br>
+        <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
+        <br>
+        <p>Je krijgt 1 Lost aangerekend.</p>
+    `;
+    }
+    if (pokemon.hp <= 0) {
+        document.getElementById('move-resultaat').innerHTML = '';
+        document.getElementById('buddy-moves').style.display = 'none';
+        resultDiv.innerHTML = `
+        <p>${pokemon.name} kan niet meer vechten!</p>
+        <br>
+        <p>${buddy.name} heeft dit gevecht gewonnen.</p>
+        <br>
+        <p>Je krijgt 1 Win aangerekend.</p>
+    `;
+    }
+    document.getElementById('move-resultaat').appendChild(resultDiv);
 }
 
 // Voorbeeld data
 const pokemon = {
     name: '',
     level: 10,
-    hp: 100
+    hp: 100,
+    maxHp: 100
 };
 
 const buddy = {
     name: 'charmander',
     level: 10,
-    hp: 80,
+    hp: 100,
+    maxHp: 100,
     moves: ['Scratch', 'Ember', 'Growl', 'Flamethrower']
 };
 
