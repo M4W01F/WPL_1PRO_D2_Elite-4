@@ -16,7 +16,7 @@ async function startCatch() {
         const pokemonData = await response.json();
 
         // Update de Pokémon details dynamisch
-        document.getElementById('pokemon-baam').textContent = `Naam: ${pokemonData.name}`;
+        document.getElementById('pokemon-naam').textContent = `Naam: ${pokemonData.name}`;
         document.getElementById('pokemon-level').textContent = `Level: ${Math.floor(Math.random() * 50 + 1)}`; // Random Level
 
         // toont de Pokémon sprite

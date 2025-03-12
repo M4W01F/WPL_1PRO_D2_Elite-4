@@ -1,13 +1,15 @@
 // Functie om dynamisch de informatie van Pokemon en Buddy te genereren
 function updateInfo(pokemon, buddy) {
     const pokemonInfo = `
-        <p>Pokemon: ${pokemon.name}</p>
+        <p><b>${pokemon.name}</b></p>
+        <img src="${pokemon.sprite}" alt="${pokemon.name} sprite" />
         <p>Level: ${pokemon.level}</p>
         <p>HP: ${pokemon.hp}</p>
     `;
 
     const buddyInfo = `
-        <p>Buddy: ${buddy.name}</p>
+        <p><b>${buddy.name}</b></p>
+        <img src="${buddy.sprite}" alt="${buddy.name} sprite" />
         <p>Level: ${buddy.level}</p>
         <p>HP: ${buddy.hp}</p>
     `;
@@ -62,13 +64,13 @@ function handleMoveClick(move) {
 
 // Voorbeeld data
 const pokemon = {
-    name: 'Pikachu',
-    level: 15,
+    name: '',
+    level: 10,
     hp: 100
 };
 
 const buddy = {
-    name: 'Charmander',
+    name: 'charmander',
     level: 10,
     hp: 80,
     moves: ['Scratch', 'Ember', 'Growl', 'Flamethrower']
@@ -86,16 +88,23 @@ async function startBattle() {
     try {
         // Fetch Pokémon data van de API
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
+        const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddy.name.toLowerCase()}/`);
         if (!response.ok) {
             throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
         }
+        if (!buddyResponse.ok) {
+            throw new Error(`Pokémon met de naam "${buddy.name}" kon niet worden gevonden.`);
+        }
 
         const pokemonData = await response.json();
+        const buddyData = await buddyResponse.json();
 
     // Werk het globale `pokemon` object bij
     pokemon.name = selectedPokemonName;
-    pokemon.level = 10; // Standaard niveau
+    pokemon.level = 10; // Standaard niveau word later verander naar een random number generator voor max 5 levels boven de buddy level the zijn of min 5 levels onder.
     pokemon.hp = 100;   // Standaard HP
+    pokemon.sprite = pokemonData.sprites.front_default;
+    buddy.sprite = buddyData.sprites.back_default;
 
     // Werk de gevechtsinterface bij met JS-functies
     updateInfo(pokemon, buddy);
