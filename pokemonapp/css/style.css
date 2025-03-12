@@ -400,4 +400,5 @@ input[type="text"] {
     border-radius: 5px;
     font-weight: bold;
     margin-top: 10px;
+    border: 2px solid black;
 }
