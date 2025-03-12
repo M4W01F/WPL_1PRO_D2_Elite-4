@@ -30,7 +30,9 @@ async function displayPokemonList() {
                 <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
                 <strong>${pokemonData.id}</strong>
                 <strong>${pokemonData.name}</strong>
-                <strong>Type: ${pokemonData.types} </strong>
+                ${pokemonData.types.split(', ').map(type => `
+                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                `).join('')}
             `;
             listItem.style.border = "1px dashed gray";
             listItem.onclick = () => pokemonDetails(pokemonData);
@@ -101,5 +103,27 @@ function pokemonDetails(pokemon) {
     };
     actionsContainer.appendChild(catchButton);
 }
-
+function getTypeColor(type) {
+    const typeColors = {
+        fire: "#f08030",
+        water: "#6890f0",
+        grass: "#78c850",
+        electric: "#f8d030",
+        psychic: "#f85888",
+        ice: "#98d8d8",
+        dragon: "#7038f8",
+        dark: "#705848",
+        fairy: "#ee99ac",
+        normal: "#a8a878",
+        fighting: "#c03028",
+        flying: "#a890f0",
+        poison: "#a040a0",
+        ground: "#e0c068",
+        rock: "#b8a038",
+        bug: "#a8b820",
+        ghost: "#705898",
+        steel: "#b8b8d0"
+    };
+    return typeColors[type] || "#d3d3d3"; // Default color for unknown types
+}
 document.addEventListener('DOMContentLoaded', displayPokemonList);

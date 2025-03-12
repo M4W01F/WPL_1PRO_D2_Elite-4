@@ -39,25 +39,39 @@ function getHealthBar(character) {
 }
 
 // Update de informatie van pokemon en buddy
-function updateInfo(pokemon, buddy) {
+async function updateInfo(pokemon, buddy) {
+    const pokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}/`);
+    const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddy.name}/`);
+    const pokemonData = await pokemonResponse.json();
+    const buddyData = await buddyResponse.json();
+
+    // Get type colors based on the first type
+    const pokemonTypeColor = getTypeColor(pokemonData.types[0].type.name);
+    const buddyTypeColor = getTypeColor(buddyData.types[0].type.name);
+
+    // Update Pokémon Info Section
+    const pokemonInfoElement = document.getElementById('pokemon-info'); // Get the Pokémon div
+    pokemonInfoElement.style.backgroundColor = pokemonTypeColor; // Set the background color
     const pokemonInfo = `
         <p><b>${pokemon.name}</b></p>
-        ${getHealthBar(pokemon)} <!-- Gezondheidsbalk voor Pokémon -->
+        ${getHealthBar(pokemon)} <!-- Health bar -->
         <img src="${pokemon.sprite}" alt="${pokemon.name} sprite" />
         <p>Level: ${pokemon.level}</p>
-        <p>HP: ${pokemon.hp}/${pokemon.maxHp || 100}</p> <!-- Dynamische max HP -->
+        <p>HP: ${pokemon.hp}/${pokemon.maxHp || 100}</p>
     `;
+    pokemonInfoElement.innerHTML = pokemonInfo;
 
+    // Update Buddy Info Section
+    const buddyInfoElement = document.getElementById('buddy-info'); // Get the Buddy div
+    buddyInfoElement.style.backgroundColor = buddyTypeColor; // Set the background color
     const buddyInfo = `
         <p><b>${buddy.name}</b></p>
-        ${getHealthBar(buddy)} <!-- Gezondheidsbalk voor Buddy -->
+        ${getHealthBar(buddy)} <!-- Health bar -->
         <img src="${buddy.sprite}" alt="${buddy.name} sprite" />
         <p>Level: ${buddy.level}</p>
-        <p>HP: ${buddy.hp}/${buddy.maxHp || 100}</p> <!-- Dynamische max HP -->
+        <p>HP: ${buddy.hp}/${buddy.maxHp || 100}</p>
     `;
-
-    document.getElementById('pokemon-info').innerHTML = pokemonInfo;
-    document.getElementById('buddy-info').innerHTML = buddyInfo;
+    buddyInfoElement.innerHTML = buddyInfo;
 }
 
 // Functie om dynamisch de moves te genereren
@@ -119,7 +133,7 @@ function handleMoveClick(move) {
             <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
             <br>
             <p>Je krijgt 1 Lost aangerekend.</p>
-            <div class="click-arrow">⬇ Klik om verder te gaan ⬇</div>
+            <div class="click-arrow">Klik om verder te gaan --></div>
         `;
     
         resultDiv.onclick = () => {
@@ -231,6 +245,29 @@ async function startBattle(pokemonName) {
     } catch (error) {
         alert(error.message);
     }
+}
+function getTypeColor(type) {
+    const typeColors = {
+        fire: "#f08030",
+        water: "#6890f0",
+        grass: "#78c850",
+        electric: "#f8d030",
+        psychic: "#f85888",
+        ice: "#98d8d8",
+        dragon: "#7038f8",
+        dark: "#705848",
+        fairy: "#ee99ac",
+        normal: "#a8a878",
+        fighting: "#c03028",
+        flying: "#a890f0",
+        poison: "#a040a0",
+        ground: "#e0c068",
+        rock: "#b8a038",
+        bug: "#a8b820",
+        ghost: "#705898",
+        steel: "#b8b8d0"
+    };
+    return typeColors[type] || "#d3d3d3"; // Default color for unknown types
 }
 // Roep de functies aan om de informatie te updaten
 updateInfo(pokemon, buddy);
