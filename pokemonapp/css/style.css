@@ -366,3 +366,31 @@ input[type="text"] {
         transform: translateY(-55%);
     }
 }
+
+/* Stijl voor pokedex */
+#pokemon-list{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+#pokemon-list div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+#pokemon-list div img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+#pokemon-list div strong {
+    display: block;
+    margin-bottom: 5px;
+}

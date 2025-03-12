@@ -25,11 +25,11 @@ async function displayPokemonList() {
     for (let pokemonId = 1; pokemonId <= 1025; pokemonId++) {
         const pokemonData = await fetchPokemonData(pokemonId);
         if (pokemonData) {
-            const listItem = document.createElement('li');
+            const listItem = document.createElement('div');
             listItem.innerHTML = `
                 <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
-                <strong>ID: ${pokemonData.id} </strong>
-                <strong>Naam: ${pokemonData.name} </strong>
+                <strong>${pokemonData.id}</strong>
+                <strong>${pokemonData.name}</strong>
                 <strong>Type: ${pokemonData.types} </strong>
             `;
             listItem.style.border = "1px dashed gray";
