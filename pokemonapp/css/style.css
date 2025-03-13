@@ -141,20 +141,74 @@ footer img {
 
 
 body.Aanmelden{
-    background:#4CAF50;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
     display:flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    
 }
 
 .inlogformulier{
     max-width: 400px;
     width: 100%;
-    background-color: rgb(red, green, blue);
+    background-color:wheat;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 400px;
     text-align: center;
+}
+.inlogformulier h1{
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.inlogformulier label img{
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.inlogformulier button{
+    background-color: #007bff;
+    color: #ffff;
+    border: none;
+    padding: 10px 15px;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+.inlogformulier button:hover{
+    background-color: #0056b3;
+}
+.inlogformulier p {
+    font-size: 14px;
+    margin-top: 20px;
+    color: #666;
+
+}
+.inlogformulier p a {
+    color: #007bff;
+}
+.inlogformulier p a :hover{
+    text-decoration: underline;
+}
+
+@media screen and (max-width:600px) {
+    .inlogformulier{
+        padding: 15px;
+    }
+    .inlogformulier h1{
+        font-size: 20px;
+    }
+    .inlogformulier input{
+        font-size: 14px;
+    }
+    .inlogformulier button {
+        font-size: 14px;
+    }
+    
 }
