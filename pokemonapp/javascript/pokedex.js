@@ -34,7 +34,7 @@ async function displayPokemonList() {
                     <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
                 `).join('')}
             `;
-            listItem.style.border = "1px dashed gray";
+            listItem.style.border = "1px dashed red";
             listItem.onclick = () => pokemonDetails(pokemonData);
             pokemonList.appendChild(listItem);
         }
