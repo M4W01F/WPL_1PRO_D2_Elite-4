@@ -133,7 +133,7 @@ function handleMoveClick(move) {
             <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
             <br>
             <p>Je krijgt 1 Lost aangerekend.</p>
-            <div class="click-arrow">Klik om verder te gaan --></div>
+            <div class="click-pijl">Klik om verder te gaan ></div>
         `;
     
         resultDiv.onclick = () => {
