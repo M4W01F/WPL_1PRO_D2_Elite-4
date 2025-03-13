@@ -3,34 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collection</title>
+    <title>Pokedex</title>
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
+    <script src="./javascript/pokedex.js"></script>
 </head>
 <body>
+    <nav>
+        <div class="image-container">
+            <a href="./index.html">
+                <img src="./images/project.png" alt="Project Image">
+            </a>
+        </div>
+    </nav>
     <main>
+        <aside>
+            <!-- Als een pokemon geselecteerd wordt, genereert het de stats en informatie van deze pokemon op en ook de optie om dit als je buddy te maken -->
+
+            <div id="pokemon-details">
+                <img id="pokemon-sprite" src="" alt="pokemon sprite">
+                <p>Id: <span id="pokemon-id"></span></p>
+                <p>Naam: <span id="pokemon-naam"></span></p>
+                <p>Level: <span id="pokemon-level"></span></p>
+                <p>Type: <span id="pokemon-type"></span></p>
+            </div>
+        </aside>
         <!-- Een dynamisch gegenereerde lijst met gevangen pokemon dat gefilterd kan worden -->
         <div id="pokemon-list">
-            <p>Id: [Pokemon Id]</p>
-            <p>Naam: [Pokemon Name]</p>
-        </div>
-        <!-- Als een pokemon geselecteerd wordt, genereert het de stats en informatie van deze pokemon op en ook de optie om dit als je buddy te maken -->
-        <div id="pokemon-details">
-            <p>Id: [Selected Pokemon Id]</p>
-            <p>Naam: [Selected Pokemon Name]</p>
-            <p>Level: [Selected Pokemon Level]</p>
-            <p>Type: [Selected Pokemon Type]</p>
-            <p>HP: [Selected Pokemon HP]</p>
-            <button id="set-buddy">Maak als Buddy</button>
+
         </div>
     </main>
     <footer>
         <!-- Een knop om terug te gaan naar index.html -->
-        <a href="index.html">Terug naar Hoofdmenu</a>
+        <a href="./index.html">Terug naar Hoofdmenu</a>
     </footer>
-
-    <!-- JavaScript to handle dynamic content and filtering -->
-    <script src="./js/collection.js"></script>
 </body>
 </html>

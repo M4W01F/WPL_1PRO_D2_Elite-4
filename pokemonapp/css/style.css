@@ -137,3 +137,24 @@ footer img {
 #user-settings button:hover {
     background-color: #45a049;
 }
+/* stijl voor aanmeld en login pagina */
+
+
+body.Aanmelden{
+    background:#4CAF50;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.inlogformulier{
+    max-width: 400px;
+    width: 100%;
+    background-color: rgb(red, green, blue);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
