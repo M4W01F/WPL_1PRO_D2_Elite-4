@@ -152,7 +152,7 @@ body.Aanmelden{
     
 }
 
-.inlogformulier{
+.aanmeldformulier{
     max-width: 400px;
     width: 100%;
     background-color:wheat;
@@ -162,17 +162,17 @@ body.Aanmelden{
     width: 400px;
     text-align: center;
 }
-.inlogformulier h1{
+.aanmeldformulier h1{
     font-size: 26px;
     color: #333;
     margin-bottom: 20px;
 }
 
-.inlogformulier label img{
+.aanmeldformulier label img{
     margin-right: 10px;
     vertical-align: middle;
 }
-.inlogformulier button{
+.aanmeldformulier button{
     background-color: #007bff;
     color: #ffff;
     border: none;
@@ -181,33 +181,33 @@ body.Aanmelden{
     margin-top: 10px;
     transition: background-color 0.3s ease;
 }
-.inlogformulier button:hover{
+.aanmeldformulier button:hover{
     background-color: #0056b3;
 }
-.inlogformulier p {
+.aanmeldformulier p {
     font-size: 14px;
     margin-top: 20px;
     color: #666;
 
 }
-.inlogformulier p a {
+.aanmeldformulier p a {
     color: #007bff;
 }
-.inlogformulier p a :hover{
+.aanmeldformulier p a :hover{
     text-decoration: underline;
 }
 
 @media screen and (max-width:600px) {
-    .inlogformulier{
+    .aanmeldformulier{
         padding: 15px;
     }
-    .inlogformulier h1{
+    .aanmeldformulier h1{
         font-size: 20px;
     }
-    .inlogformulier input{
+    .aanmeldformulier input{
         font-size: 14px;
     }
-    .inlogformulier button {
+    .aanmeldformulier button {
         font-size: 14px;
     }
     
