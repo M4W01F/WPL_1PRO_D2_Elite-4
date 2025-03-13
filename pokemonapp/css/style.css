@@ -141,7 +141,7 @@ footer img {
 
 
 body.Aanmelden{
-    background-color: #f4f4f4;
+    background-color:#e9f5ff;
     margin: 0;
     padding: 0;
     height: 100%;
@@ -151,16 +151,23 @@ body.Aanmelden{
     align-items: center;
     
 }
-
-.aanmeldformulier{
-    max-width: 400px;
+.aanmeldachtergrond{
     width: 100%;
+    height: 100%;
+    background-image: url('../images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.aanmeldformulier{
+
+    max-width: 400px;
     background-color:wheat;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    width: 400px;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     text-align: center;
+
 }
 .aanmeldformulier h1{
     font-size: 26px;
