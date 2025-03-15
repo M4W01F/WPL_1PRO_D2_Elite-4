@@ -100,7 +100,7 @@ function pokemonDetails(pokemon, pokemonClass) {
     battleButton.textContent = 'Battler';
     battleButton.onclick = (event) => {
         if (pokemonClass === 'collectie') {
-            const confirmation = confirm('Ben je zeker dat je deze Pokémon wilt battelen?');
+            const confirmation = confirm('Ben je zeker dat je deze Pokémon wilt vangen?');
             if (!confirmation) {
                 event.stopPropagation(); // Stop de actie
                 return;
