@@ -409,3 +409,117 @@ input[type="text"] {
     margin-top: 10px;
     border: 2px solid black;
 }
+
+div.collectie {
+    border: 1px dashed green !important;
+}
+
+div.niet-gevangen {
+    border: 1px dashed red !important;
+}
+
+/* Stijlen voor buddy */
+#current-buddy {
+    border: 2px solid #333;
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 400px;
+}
+
+#current-buddy-info img {
+    display: block;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    border: 3px solid #eee;
+    width: 120px;
+    height: 120px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#current-buddy-info p {
+    font-size: 16px;
+    text-align: center;
+    color: #444;
+    margin: 5px 0;
+}
+
+#buddy-stats {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+#buddy-stats p {
+    font-size: 14px;
+    color: #555;
+    margin: 8px 0;
+}
+
+#buddy-evolution {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#buddy-evolution div {
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    margin: 5px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+#buddy-evolution div img {
+    width: 50px;
+    height: 50px;
+    margin-top: 5px;
+}
+
+#buddy-evolution p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.buddy-foot{
+    position: relative;
+}
+
+#current-buddy-footer{
+    display: inline-block;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+/* Media querie voor buddy */
+@media screen and (max-width: 768px) {
+    #current-buddy {
+        padding: 15px;
+        max-width: 95%;
+    }
+
+    #current-buddy-info img {
+        width: 90px;
+        height: 90px;
+    }
+
+    #buddy-evolution div {
+        width: 60px;
+        height: 60px;
+    }
+
+    #buddy-evolution div img {
+        width: 45px;
+        height: 45px;
+    }
+}
+
+/* Stijlen voor catch */
