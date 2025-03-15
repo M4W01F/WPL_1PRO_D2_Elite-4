@@ -29,6 +29,7 @@ nav {
     color: white;
     padding: 15px;
     position: relative;
+    
 }
 
 nav a {
@@ -148,6 +149,63 @@ footer img {
 a:hover{
    color: blue; 
 }
+/* stijlen voor login en aanmeld */
+body#Aanmelden ,body#inlog{
+min-height: 100vh;
+background-image: url(/pokemonapp/images/achtergrond.jpg);
+background-size: cover;
+background-position: right;
+overflow: hidden;
+border-radius: 10px;
+/* backdrop-filter: blur(10px); */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+height: 100vh;
+}
+
+    
+.aanmeldformulier .inlogformulier{
+    background-image: url(/pokemonapp/images/achtergrond.jpg);
+    background-size: cover;
+    background-position: right;
+    overflow: hidden;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    height: 300px;
+    max-width: 400px;
+    width: 90%;
+    padding-top: 50px;
+    /* border-radius:0 20px 20px 0; */
+}
+.aanmeldformulier h1{
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+.aanmeldformulier form div{
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border: 1.5px solid #c1c1c1;
+    border-radius: 5px;
+    padding: 10px;
+}
+.aanmeldformulier form div label img{
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+.aanmeldformulier input{
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    padding: 5px;
+}
+.aanmeldformulier button 
 
 /* Stijlen voor het dropdown menu */
 input[type="text"] {
