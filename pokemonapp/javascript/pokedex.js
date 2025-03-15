@@ -142,6 +142,6 @@ function getTypeColor(type) {
         ghost: "#705898",
         steel: "#b8b8d0"
     };
-    return typeColors[type] || "#d3d3d3"; // Default color for unknown types
+    return typeColors[type] || "#d3d3d3"; // Default kleur voor onbekende types
 }
 document.addEventListener('DOMContentLoaded', displayPokemonList);

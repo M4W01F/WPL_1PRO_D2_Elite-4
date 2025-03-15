@@ -196,7 +196,7 @@ const pokemon = {
 };
 
 const buddy = {
-    name: 'charmander',
+    name: 'charizard',
     level: 10,
     hp: 100,
     maxHp: 100,
@@ -246,6 +246,7 @@ async function startBattle(pokemonName) {
         alert(error.message);
     }
 }
+
 function getTypeColor(type) {
     const typeColors = {
         fire: "#f08030",
