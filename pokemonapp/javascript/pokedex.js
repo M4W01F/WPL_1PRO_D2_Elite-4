@@ -38,13 +38,13 @@ async function displayPokemonList() {
                 <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
             `).join('')}
             `;        
-            listItem.onclick = () => pokemonDetails(pokemonData);
+            listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
             pokemonList.appendChild(listItem);
         }
     }
 }
 
-function pokemonDetails(pokemon) {
+function pokemonDetails(pokemon, pokemonClass) {
     document.getElementById('pokemon-id').textContent = pokemon.id;
     document.getElementById('pokemon-naam').textContent = pokemon.name;
     
@@ -98,9 +98,16 @@ function pokemonDetails(pokemon) {
     // Maakt "Battler" knop
     const battleButton = document.createElement('button');
     battleButton.textContent = 'Battler';
-    battleButton.onclick = () => {
+    battleButton.onclick = (event) => {
+        if (pokemonClass === 'collectie') {
+            const confirmation = confirm('Ben je zeker dat je deze Pokémon wilt battelen?');
+            if (!confirmation) {
+                event.stopPropagation(); // Stop de actie
+                return;
+            }
+        }
         const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
-        window.location.href = `batteler.html?${urlParams}`; 
+        window.location.href = `batteler.html?${urlParams}`;
     };
     actionsContainer.appendChild(battleButton);
 
@@ -115,7 +122,14 @@ function pokemonDetails(pokemon) {
     // Maakt "Catch" knop
     const catchButton = document.createElement('button');
     catchButton.textContent = 'Catch';
-    catchButton.onclick = () => {
+    catchButton.onclick = (event) => {
+        if (pokemonClass === 'collectie') {
+            const confirmation = confirm('Ben je zeker dat je deze Pokémon opnieuw wilt vangen?');
+            if (!confirmation) {
+                event.stopPropagation(); // Stop de actie
+                return;
+            }
+        }
         const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
         window.location.href = `catch.html?${urlParams}`;
     };
