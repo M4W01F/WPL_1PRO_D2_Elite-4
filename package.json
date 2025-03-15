@@ -10,5 +10,8 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^22.13.4"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3"
   }
 }
