@@ -410,4 +410,11 @@ input[type="text"] {
     border: 2px solid black;
 }
 
+div.collectie {
+    border: 1px dashed green !important;
+}
+
+div.niet-gevangen {
+    border: 1px dashed red !important;
+}
 /* Stijlen voor catch */
