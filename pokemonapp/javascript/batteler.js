@@ -196,7 +196,7 @@ const pokemon = {
 };
 
 const buddy = {
-    name: 'charmander',
+    name: 'charizard',
     level: 10,
     hp: 100,
     maxHp: 100,
@@ -240,12 +240,12 @@ async function startBattle(pokemonName) {
     document.getElementById('setup-container').style.display = 'none';
     document.getElementById('battle-interface').style.display = 'block';
 
-    document.querySelector('footer').style.display = 'none';
     document.querySelector('nav').style.display = 'none';
     } catch (error) {
         alert(error.message);
     }
 }
+
 function getTypeColor(type) {
     const typeColors = {
         fire: "#f08030",

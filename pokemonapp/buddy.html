@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
+    <script src="./javascript/currentBuddy.js"></script>
 </head>
 <body>
     <nav>
@@ -16,34 +17,15 @@
             </a>
         </div>
     </nav>
-    <header>
-        <!-- Naam, bijnaam, pokemon id, wins en losses worden hier getoond -->
-        <!-- Dit word met javascript dynamisch getoont in volgende versie -->
-        <h1>Pokemon Buddy</h1>
-        <p>Naam: [Name]</p>
-        <p>Bijnaam: [Nickname]</p>
-        <p>ID: [Pokemon ID]</p>
-        <p>Wins: [Wins]</p>
-        <p>Losses: [Losses]</p>
-    </header>
-    <main>
-        <!-- Hier komen de stats en lvl -->
-        <!-- Dit word met javascript dynamisch getoont in volgende versie -->
-        <h2>Stats en Lvl</h2>
-        <p>Level: [Level]</p>
-        <p>Attack: [Attack]</p>
-        <p>Defense: [Defense]</p>
-        <p>Speed: [Speed]</p>
-    </main>
-    <aside>
-        <!-- Hier komt de foto van je pokemon, welk type het is en als je het kan evolven -->
-        <!-- Dit word met javascript dynamisch getoont in volgende versie -->
-        <h2>Pokemon Info</h2>
-        <img src="./images/buddy.png" alt="Pokemon Image">
-        <p>Type: [Type]</p>
-        <p>Kan Evolven: [Evolve Status]</p>
-    </aside>
-    <footer>
+    <div id="current-buddy">
+        <h2>Buddy Details</h2>
+        <div id="buddy-evolution" class="evolution-line"></div>
+        <div id="current-buddy-info"></div>
+        <div id="buddy-stats"></div>
+    </div>
+    
+    <script src="./javascript/currentBuddy.js"></script>
+    <footer class="buddy-foot">
         <!-- Een knop om terug naar index te gaan -->
         <a href="./index.html">Terug naar Hoofdmenu</a>
     </footer>
