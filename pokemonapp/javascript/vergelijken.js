@@ -1,3 +1,4 @@
+
 async function fetchPokemon(num) {
     const input = document.getElementById(`pokemon${num}`);
     const img = document.getElementById(`img${num}`);
@@ -22,5 +23,4 @@ async function fetchPokemon(num) {
         alert('Niet gelukt! Probeer opnieuw.');
     }
 }
-        
  
