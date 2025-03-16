@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Genereer de 3 starter Pokémon divs
 async function genereerStarterPokemon(container, popup, popupText, popupYes, popupNo) {
-    const starterIds = [1, 4, 7]; // IDs voor Bulbasaur, Charmander en Squirtle
+    const starterIds = [1, 7, 4]; // IDs voor Bulbasaur, Charmander en Squirtle
     for (const id of starterIds) {
         const pokemon = await haalPokemonGegevensOp(id);
         if (pokemon) {
             const div = document.createElement('div'); // Maak een div voor elke Pokémon
             div.className = 'starter-pokemon';
             div.innerHTML = `
-                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 100px; height: 100px;">
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 250px; height: 250px;">
                 <p><strong>${pokemon.name}</strong></p>
             `;
             div.onclick = () => {
