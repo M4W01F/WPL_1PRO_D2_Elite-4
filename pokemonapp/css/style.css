@@ -553,7 +553,9 @@ div.niet-gevangen {
 }
 
 #current-buddy-img{
-    position: absolute;
+    margin-top: -5%;
+    margin-right: 2.5%;
+    float: right;
     border: 2px solid #ccc;
     border-radius: 50%;
     background-color: #f9f9f9;

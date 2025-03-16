@@ -1,3 +1,7 @@
+document.addEventListener('DOMContentLoaded', () => {
+    updateBuddyMoves(buddy.moves);
+});
+
 // Haal Pokémon-gegevens op met behulp van een query (ID of naam)
 async function fetchPokemonData(query) {
     try {
@@ -232,3 +236,55 @@ async function updateFooterBuddySprite(query) {
 }
 
 document.addEventListener('DOMContentLoaded', () => updateFooterBuddySprite(6));
+
+const buddy = {
+    moves: ['scratch', 'ember', 'growl', 'flamethrower']
+};
+
+async function updateBuddyMoves(moves) {
+    const allLearnableMoves = await fetchPokemonLearnableMoves(6);
+    const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Exclude already-learned moves
+
+    const moveInputs = moves.map((move, index) => `
+        <div style="margin-bottom: 10px;">
+            <input type="text" placeholder="${move}" readonly style="margin-right: 10px; width: 90%;">
+            <select onchange="handleMoveChange(event, ${index})">
+                <option value="" disabled selected>Select a new move</option>
+                ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
+            </select>
+        </div>
+    `).join('');
+
+    document.getElementById('buddy-moves').innerHTML = moveInputs;
+}
+
+// Fetch moves dat de pokemon kan leeren.
+async function fetchPokemonLearnableMoves(pokemonId) {
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+        if (response.ok) {
+            const data = await response.json();
+            // Extract move namen
+            return data.moves.map(moveEntry => moveEntry.move.name);
+        } else {
+            console.error(`Failed to fetch learnable moves for Pokémon ID: ${pokemonId}`);
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching learnable moves:', error);
+        return [];
+    }
+}
+
+// Functie wanneer een move veranderd word
+function handleMoveChange(event, moveIndex) {
+    const selectedMove = event.target.value;
+    if (selectedMove) {
+        buddy.moves[moveIndex] = selectedMove;
+
+        updateBuddyMoves(buddy.moves);
+
+        alert(`Move changed successfully to: ${selectedMove}`);
+        console.log(`buddy.moves updated:`, buddy.moves);
+    }
+}
