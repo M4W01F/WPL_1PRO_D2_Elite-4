@@ -583,10 +583,38 @@ div.niet-gevangen {
     }
 }
 /* stijlen voor landingpagina */
+body{
+    background:#f2f2f2;
+}
+@keyframes slide{
+    from {transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
 .Landingpagina{
     text-align: center;
     background-color: #f4f4f4;
     text-align: center;
+
+}
+.carousel {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+.Landingpagina h1{
+    
 
 }
 .projecten{
@@ -594,8 +622,10 @@ div.niet-gevangen {
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+    /* overflow: hidden; */
 }
 .project{
+    /* height: 100px; */
     width: 200px;
     padding: 10px;
     background:white;
@@ -614,6 +644,24 @@ div.niet-gevangen {
 .project h2{
     font-size: 16px;
     margin-top: 10px;
+}
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1;
+}
+.carousel-button.prev {
+    left: 10px;
+}
+
+.carousel-button.next {
+    right: 10px;
 }
 
 /* Stijlen voor catch */
