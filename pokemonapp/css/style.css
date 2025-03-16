@@ -552,8 +552,8 @@ div.niet-gevangen {
     position: relative;
 }
 
-#current-buddy-footer{
-    display: inline-block;
+#current-buddy-img{
+    position: absolute;
     border: 2px solid #ccc;
     border-radius: 50%;
     background-color: #f9f9f9;

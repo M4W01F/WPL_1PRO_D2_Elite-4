@@ -219,7 +219,7 @@ async function updateFooterBuddySprite(query) {
         // Fetch Pokémon data using the query (ID or name)
         const pokemon = await fetchPokemonData(query);
         if (pokemon) {
-            const footerImg = document.getElementById('current-buddy-footer');
+            const footerImg = document.getElementById('current-buddy-img');
             // Update the image source and alt attributes
             footerImg.src = pokemon.sprites.front_default;
             footerImg.alt = pokemon.name;
