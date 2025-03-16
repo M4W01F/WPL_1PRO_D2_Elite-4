@@ -43,7 +43,6 @@ async function startCatch(pokemonName) {
         // veranderd de display settings
         document.getElementById('setup-container').style.display = 'none';
         document.getElementById('catch-interface').style.display = 'block';
-        document.querySelector('footer').style.display = 'none';
 
         console.log(`Start catching: ${pokemonData.name}`);
     } catch (error) {
