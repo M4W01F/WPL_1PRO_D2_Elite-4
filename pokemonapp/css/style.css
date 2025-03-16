@@ -46,6 +46,29 @@ nav .image-container img {
     display: block;
     margin: 0 auto;
 }
+/* background image voor vergelijken */
+.vergelijken-img{
+    background-image: url(../images/mogelijke\ pokedex.jpg);
+    background-size: 100%;
+}
+/* background voor vergelijk */
+.vergelijken-border{
+    
+}
+/* background image voor battler */
+.battler-img{
+    background-image: url(../images/mogelijke\ battler\ foto.jpg);
+    background-size: 80%;
+}
+/* footer wegdoen bij battler */
+.battler-footer{
+    background: none;
+}
+/* background image voor collection */
+/* .collection-img{
+    background-image: url(../images/achtergrond.jpg);
+    background-size: 100%;
+} */
 
 /* Hoofdinhoud stijlen */
 main {
