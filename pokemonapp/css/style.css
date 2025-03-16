@@ -165,8 +165,7 @@ align-items: center;
 height: 100vh;
 padding-top: 60px;
 }
-
-    
+  
 .aanmeldformulier .inlogformulier{
     background-image: url(/pokemonapp/images/achtergrond.jpg);
     background-size: cover;
@@ -181,7 +180,7 @@ padding-top: 60px;
     padding-top: 50px;
     /* border-radius:0 20px 20px 0; */
 }
-.aanmeldformulier .inlogformulier h1{
+.aanmeldformulier ,.inlogformulier h1{
     text-align: center;
     color:  #c1c1c1;
     margin-bottom: 20px;
@@ -199,7 +198,7 @@ padding-top: 60px;
     height: 24px;
     margin-right: 10px;
 }
-.aanmeldformulier .inlogformulier input{
+.aanmeldformulier ,.inlogformulier input{
     border: none;
     outline: none;
     width: 100%;
