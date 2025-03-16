@@ -220,11 +220,10 @@ document.addEventListener('DOMContentLoaded', setCurrentBuddy);
 
 async function updateFooterBuddySprite(query) {
     try {
-        // Fetch Pokémon data using the query (ID or name)
         const pokemon = await fetchPokemonData(query);
         if (pokemon) {
             const footerImg = document.getElementById('current-buddy-img');
-            // Update the image source and alt attributes
+
             footerImg.src = pokemon.sprites.front_default;
             footerImg.alt = pokemon.name;
         } else {
@@ -243,7 +242,9 @@ const buddy = {
 
 async function updateBuddyMoves(moves) {
     const allLearnableMoves = await fetchPokemonLearnableMoves(6);
-    const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Exclude already-learned moves
+    allLearnableMoves.sort((a, b) => a.localeCompare(b));
+
+    const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Haalt de all bestaande moves er uit
 
     const moveInputs = moves.map((move, index) => `
         <div style="margin-bottom: 10px;">
