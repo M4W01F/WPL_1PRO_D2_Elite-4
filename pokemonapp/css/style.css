@@ -252,7 +252,7 @@ padding-top: 60px;
     left: -30px;
 }
 .aanmeldformulier button:active::before,.inlogformulier button:active::before {
-    background: green;
+    background: whitesmoke;
     transition: 0s;
 }
 
