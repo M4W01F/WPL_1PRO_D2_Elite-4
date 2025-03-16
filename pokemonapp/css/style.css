@@ -163,6 +163,7 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 height: 100vh;
+padding-top: 60px;
 }
 
     
@@ -408,6 +409,7 @@ input[type="text"] {
     #run-away a {
         padding: 8px 12px;
     }
+
 }
 
 #pokemon-info, #buddy-info {
