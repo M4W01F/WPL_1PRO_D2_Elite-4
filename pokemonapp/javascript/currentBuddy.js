@@ -248,7 +248,7 @@ async function updateBuddyMoves(moves) {
 
     const moveInputs = moves.map((move, index) => `
         <div style="margin-bottom: 10px;">
-            <input type="text" placeholder="${move}" readonly style="margin-right: 10px; width: 90%;">
+            <input type="text" placeholder="${move}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
             <select onchange="handleMoveChange(event, ${index})">
                 <option value="" disabled selected>Selecteer een move</option>
                 ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
