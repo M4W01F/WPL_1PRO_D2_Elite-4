@@ -150,7 +150,7 @@ a:hover{
    color: blue; 
 }
 /* stijlen voor login en aanmeld */
-body#Aanmelden ,body#inlog{
+body .aanmeldformulier , body .inlogformulier{
 min-height: 100vh;
 background-image: url(/pokemonapp/images/achtergrond.jpg);
 background-size: cover;
@@ -163,6 +163,7 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 height: 100vh;
+padding-top: 60px;
 }
 
     
@@ -180,9 +181,9 @@ height: 100vh;
     padding-top: 50px;
     /* border-radius:0 20px 20px 0; */
 }
-.aanmeldformulier h1{
+.aanmeldformulier .inlogformulier h1{
     text-align: center;
-    color: #333;
+    color:  #c1c1c1;
     margin-bottom: 20px;
 }
 .aanmeldformulier form div{
@@ -198,14 +199,20 @@ height: 100vh;
     height: 24px;
     margin-right: 10px;
 }
-.aanmeldformulier input{
+.aanmeldformulier .inlogformulier input{
     border: none;
     outline: none;
     width: 100%;
     font-size: 14px;
     padding: 5px;
 }
-.aanmeldformulier button 
+.aanmeldformulier .inlogformulier button {
+    margin-top: 15px;
+}
+.aanmeldformulier p{
+    margin-top: 10px;
+    color: #c1c1c1;
+}
 
 /* Stijlen voor het dropdown menu */
 input[type="text"] {
@@ -411,6 +418,7 @@ input[type="text"] {
     #run-away a {
         padding: 8px 12px;
     }
+
 }
 
 #pokemon-info, #buddy-info {
