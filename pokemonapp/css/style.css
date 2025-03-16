@@ -221,7 +221,7 @@ padding-top: 60px;
     position: relative;
     cursor: pointer;
     overflow: hidden;
-    border: 2px solid var(--color);
+    border: 2px solid whitesmoke;
     transition: color 0.5s;
     z-index: 1;
     font-size: 17px;
@@ -234,13 +234,13 @@ padding-top: 60px;
     content:"";
     position: absolute;
     z-index: -1;
-    background: var(--color);
+    background: whitesmoke;
     height: 150px;
     width: 200px;
     border: 50%;
 }
 .aanmeldformulier button:hover, .inlogformulier button:hover{
-    color: #45a049;
+    color: grey;
 }
 .aanmeldformulier button::before, .inlogformulier button::before{
     top: 100%;
@@ -252,7 +252,7 @@ padding-top: 60px;
     left: -30px;
 }
 .aanmeldformulier button:active::before,.inlogformulier button:active::before {
-    background: green;
+    background: whitesmoke;
     transition: 0s;
 }
 
