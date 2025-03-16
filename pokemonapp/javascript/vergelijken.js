@@ -13,49 +13,86 @@ async function fetchPokemon(num) {
         }
 
         const pokemonData = await response.json();
-        img.src = pokemonData.sprites.front_default; 
 
+        img.src = pokemonData.sprites.front_default;
+        img.alt = `${pokemonData.name}`;
 
         statsTable.innerHTML = `
             <tr><th>Stat</th><th>Waarde</th></tr>
-            ${pokemonData.stats.map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`).join('')}
+            ${pokemonData.stats
+                .map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`)
+                .join('')}
         `;
 
+        const typesRow = document.createElement("tr");
+        const typeBadges = pokemonData.types
+            .map(
+                type =>
+                    `<span class="type-badge" style="background-color: ${getTypeColor(type.type.name)}; 
+                                  color: white; 
+                                  padding: 5px 10px; 
+                                  border-radius: 5px; 
+                                  margin-right: 5px;">
+                        ${type.type.name}
+                    </span>`
+            )
+            .join(" ");
+        typesRow.innerHTML = `
+            <td colspan="2">
+                <strong>Types:</strong><br>
+                ${typeBadges}
+            </td>
+        `;
+        statsTable.appendChild(typesRow);
 
-        const typesElement = document.createElement("p");
-        typesElement.innerHTML = `<tr><td>Types:</tr></td> ${pokemonData.types.map(type => type.type.name).join(", ")}`;
-        statsTable.appendChild(typesElement);
-
-
-        const weaknessesElement = document.createElement("p");
         const weaknesses = await getWeaknesses(pokemonData.types);
-        weaknessesElement.innerHTML = `<tr><td>Weaknesses:  </tr></td> ${weaknesses.join(", ")}`;
-        statsTable.appendChild(weaknessesElement);
+        const weaknessesRow = document.createElement("tr");
+        const weaknessBadges = weaknesses
+            .map(
+                weakness =>
+                    `<span class="type-badge" style="background-color: ${getTypeColor(weakness)}; 
+                                  color: white; 
+                                  padding: 5px 10px; 
+                                  border-radius: 5px; 
+                                  margin-right: 5px;">
+                        ${weakness}
+                    </span>`
+            )
+            .join(" ");
+        weaknessesRow.innerHTML = `
+            <td colspan="2">
+                <strong>Weaknesses:</strong><br>
+                ${weaknessBadges}
+            </td>
+        `;
+        statsTable.appendChild(weaknessesRow);
 
     } catch (error) {
-        alert('Niet gelukt! Probeer opnieuw.');
+        alert(`Fout: ${error.message}`);
     }
 }
 
-
 async function getWeaknesses(types) {
     const typeWeaknesses = {
-        "fire": ["water", "ground", "rock"],
-        "water": ["electric", "grass"],
-        "electric": ["ground"],
-        "grass": ["fire", "ice", "poison", "flying", "bug"],
-        "bug": ["fire", "flying", "rock"],
-        "rock": ["water", "grass", "fighting", "ground", "steel"],
-        "ground": ["water", "ice", "grass", "ice"],
-        "ice": ["fire", "fighting", "rock", "steel"],
-        "fighting": ["flying", "psychic", "fairy"],
-        "ghost": ["ghost", "dark"],
-        "psychic": ["bug", "ghost", "dark"],
-        "dark": ["fighting", "bug", "fairy"],
-        "fairy": ["poison", "steel"]
+        normal: ["fighting"],
+        fire: ["water", "ground", "rock"],
+        water: ["electric", "grass"],
+        electric: ["ground"],
+        grass: ["fire", "ice", "poison", "flying", "bug"],
+        bug: ["fire", "flying", "rock"],
+        rock: ["water", "grass", "fighting", "ground", "steel"],
+        ground: ["water", "ice", "grass"],
+        ice: ["fire", "fighting", "rock", "steel"],
+        fighting: ["flying", "psychic", "fairy"],
+        ghost: ["ghost", "dark"],
+        psychic: ["bug", "ghost", "dark"],
+        dark: ["fighting", "bug", "fairy"],
+        fairy: ["poison", "steel"],
+        poison: ["ground", "psychic"],
+        flying: ["electric", "ice", "rock"],
+        dragon: ["ice", "dragon", "fairy"],
+        steel: ["fire", "fighting", "ground"]
     };
-
-    //Zwaktes
     const weaknesses = [];
     for (const type of types) {
         const typeName = type.type.name;
@@ -64,22 +101,29 @@ async function getWeaknesses(types) {
         }
     }
 
-    return [...new Set(weaknesses)]; 
+    return [...new Set(weaknesses)];
 }
 
-//Evolutie path
-async function getEvolutionPath(pokemonName) {
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`);
-    const data = await response.json();
-    const evolutionUrl = data.evolution_chain.url;
-    const evolutionResponse = await fetch(evolutionUrl);
-    const evolutionData = await evolutionResponse.json();
-    const evolutionChain = [];
-    let evolution = evolutionData.chain;
-    while (evolution) {
-        evolutionChain.push(evolution.species.name);
-        evolution = evolution.evolves_to[0]; 
-    }
-
-    return evolutionChain;
+function getTypeColor(type) {
+    const typeColors = {
+        fire: "#f08030",
+        water: "#6890f0",
+        grass: "#78c850",
+        electric: "#f8d030",
+        psychic: "#f85888",
+        ice: "#98d8d8",
+        dragon: "#7038f8",
+        dark: "#705848",
+        fairy: "#ee99ac",
+        normal: "#a8a878",
+        fighting: "#c03028",
+        flying: "#a890f0",
+        poison: "#a040a0",
+        ground: "#e0c068",
+        rock: "#b8a038",
+        bug: "#a8b820",
+        ghost: "#705898",
+        steel: "#b8b8d0"
+    };
+    return typeColors[type] || "#d3d3d3";
 }

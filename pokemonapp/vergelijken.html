@@ -48,6 +48,7 @@
         .stats-table {
             width: 100%;
             margin-top: 10px;
+            margin-bottom: 10px;
             border-collapse: collapse;
         }
 
@@ -65,7 +66,12 @@
         }
         td, th, p{
             color: black;
+            width: 50%;
+            margin: 50px;
         }
+
+
+
     </style>
 </head>
 
@@ -80,9 +86,11 @@
     <main>
         <div class="vergelijken">
             <div class="pokemon-card">
+
                 <h2>Pokémon 1</h2>
                 <input type="text" id="pokemon1" placeholder="Type een Pokemon naam" onblur="fetchPokemon(1)">
                 <img id="img1" src="" alt="Pokemon 1">
+                <div id="buddy-evolution" class="evolution-line"></div>
                 <hr></hr>
                 <table class="stats-table" id="stats1"></table>
             </div>
@@ -90,6 +98,7 @@
                 <h2>Pokémon 2</h2>
                 <input type="text" id="pokemon2" placeholder="Type een Pokemon naam" onblur="fetchPokemon(2)">
                 <img id="img2" src="" alt="Pokemon 2">
+                <div id="evolution" class="evolution-line"></div>
                 <hr></hr>
                 <table class="stats-table" id="stats2"></table>
             </div>
