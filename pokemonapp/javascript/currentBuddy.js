@@ -95,6 +95,8 @@ async function setCurrentBuddy() {
         const evolutionDiv = document.getElementById('buddy-evolution');
 
         // Basisdetails weergeven
+        let level = 50; // Voorbeeld level
+
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
             <p><strong>Naam:</strong> ${pokemon.name}</p>
@@ -102,7 +104,7 @@ async function setCurrentBuddy() {
             <p><strong>ID:</strong> ${pokemon.id}</p>
             <p><strong>Wins:</strong> 10</p>
             <p><strong>Losses:</strong> 2</p>
-            <p><strong>Level:</strong> 50</p>
+            <p><strong>Level:</strong> ${level}</p>
         `;
         
         // Bereken statistieken
@@ -113,7 +115,7 @@ async function setCurrentBuddy() {
             speed: pokemon.stats[5].base_stat
         };
 
-        let level = 50; // Voorbeeldniveau
+
         let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
 
         for (let i = 1; i <= level; i++) {
