@@ -3,6 +3,7 @@ body, h1, h2, p, a, img, div, footer, header, main, nav {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    
 }
 
 /* Instellen van lettertype en achtergrondkleur */
@@ -14,7 +15,7 @@ body {
 
 /* Header stijlen */
 header {
-    background-color: #F4D160;
+    background-color: #0f0f0f8f;
     color: white;
     padding: 10px;
     text-align: center;
@@ -25,16 +26,18 @@ header {
 
 /* Navigatie stijlen */
 nav {
-    background-color: #333;
+    background-color:#0f0f0f8f ;
     color: white;
     padding: 15px;
     position: relative;
+    text-align: center;
 }
 
 nav a {
     color: white;
     text-decoration: none;
     margin: 0 10px;
+    text-align: center;
     position: relative;
 }
 
@@ -47,7 +50,7 @@ nav .image-container img {
 /* Hoofdinhoud stijlen */
 main {
     padding: 20px;
-    background-color: white;
+    text-align: center;
     margin: 20px auto;
     width: 90%;
     max-width: 1200px;
@@ -60,7 +63,7 @@ main a {
     display: inline-block;
     margin: 10px;
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: #0f0f0f8f;
     color: white;
     text-decoration: none;
     border-radius: 5px;
@@ -72,7 +75,7 @@ main a:hover {
 
 /* Footer stijlen */
 footer {
-    background-color: #F4D160;
+    background-color: #0f0f0f8f;
     color: white;
     text-align: center;
     padding: 10px;
