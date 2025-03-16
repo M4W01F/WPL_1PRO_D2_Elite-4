@@ -285,7 +285,6 @@ function handleMoveChange(event, moveIndex) {
 
         updateBuddyMoves(buddy.moves);
 
-        alert(`Move changed successfully to: ${selectedMove}`);
-        console.log(`buddy.moves updated:`, buddy.moves);
+        alert(`Move successvoll veranderd naar: ${selectedMove}`);
     }
 }
