@@ -7,30 +7,45 @@
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
+    <script src="./javascript/index.js"></script>
 </head>
-<body class="index">
+<body>
+    <section id="niet-ingelogged">
+        <h1 id="kies-starter">Kies uw starter Pokémon</h1>
+        <div id="pokemon-container"></div>
+        <div id="popup" style="display: none;">
+            <div id="popup-content">
+                <p id="popup-text"></p>
+                <button id="popup-yes">Ja</button>
+                <button id="popup-no">Nee</button>
+            </div>
+        </div>        
+    </section>
+    
+    
+    <section id="well-ingelogged" style="display: none;">
     <nav>
-        <a href="./user.html" style="position: absolute; top: 10px; right: 10px;">
-            User Page<!-- Foto van user komt hier -->
-        </a>
         <div class="image-container">
             <a href="./index.html">
                 <img src="./images/project.png" alt="Project Image">
+            </a>
+            <a href="./buddy.html">
+                <img src="" alt="Current Buddy" id="current-buddy-img">
             </a>
         </div>
     </nav>
     <main>
         <a href="./vergelijken.html">Vergelijken</a>
         <a href="./batteler.html">Batteler</a>
-        <a href="./collection.html">Collection</a>
+        <a href="./collectie.html">Collection</a>
         <a href="./pokedex.html">Pokedex</a>
         <a href="./buddy.html">Buddy</a>
         <a href="./catch.html">Catch</a>
     </main>
-    <footer class="incex" id="index">
-        <a href="./buddy.html">
-            <img src="./images/current_buddy.png" alt="Current Buddy" id="current-buddy">
-        </a>
+    <footer>
+
     </footer>
+    <script src="./javascript/currentBuddy.js"></script>
+    </section>
 </body>
 </html>
