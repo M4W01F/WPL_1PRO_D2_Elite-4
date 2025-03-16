@@ -52,7 +52,10 @@ main {
     width: 90%;
     max-width: 1200px;
 }
-
+.index{
+    background-image: url(../images/achtergrond-weiland.png) ; 
+    background-size: 100%;
+}
 main a {
     display: inline-block;
     margin: 10px;
@@ -148,6 +151,22 @@ footer img {
 a:hover{
    color: blue; 
 }
+/* css voor vergelijken  */
+section {
+    padding: 100px;
+}
+
+.vergelijken {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+ 
+
+}
+
+h2 {
+    padding-top: 5%;
+}
+
 
 /* Stijlen voor het dropdown menu */
 input[type="text"] {
