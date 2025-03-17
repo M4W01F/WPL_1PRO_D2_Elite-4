@@ -645,14 +645,18 @@ body #Landingpagina{
     min-height: 100vh;
     background: whitesmoke;
 }
+<<<<<<< HEAD
 .landingh1{
     color: black;
 }
 #LandingPagina{
+=======
+#Landingspagina{
+>>>>>>> 84f7ff81089dbaeb0ecfa4d521d995fdd0bb0615
     display: flex;
     min-height: 100vh;
     text-align: center;
-    background-color: #f4f4f4;
+    background: #f4f4f4;
     text-align: center;
 }
 #Landingpagina h1{
