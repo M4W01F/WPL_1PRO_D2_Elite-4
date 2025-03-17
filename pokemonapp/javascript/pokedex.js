@@ -25,22 +25,26 @@ async function displayPokemonList() {
     for (let pokemonId = 1; pokemonId <= 1025; pokemonId++) {
         const pokemonData = await fetchPokemonData(pokemonId);
         if (pokemonData) {
+            const pokemonClass = pokemonId <= 12 ? 'collectie' : 'niet-gevangen';
+
             const listItem = document.createElement('div');
+            listItem.className = pokemonClass;
             listItem.innerHTML = `
-                <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
-                <strong>${pokemonData.id}</strong>
-                <strong>${pokemonData.name}</strong>
-                ${pokemonData.types.split(', ').map(type => `
-                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-                `).join('')}
-            `;
-            listItem.style.border = "1px dashed gray";
-            listItem.onclick = () => pokemonDetails(pokemonData);
+            ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ''}
+            <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
+            <strong>${pokemonData.id}</strong>
+            <strong>${pokemonData.name}</strong>
+            ${pokemonData.types.split(', ').map(type => `
+                <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+            `).join('')}
+            `;        
+            listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
             pokemonList.appendChild(listItem);
         }
     }
 }
-function pokemonDetails(pokemon) {
+
+function pokemonDetails(pokemon, pokemonClass) {
     document.getElementById('pokemon-id').textContent = pokemon.id;
     document.getElementById('pokemon-naam').textContent = pokemon.name;
     
@@ -94,9 +98,16 @@ function pokemonDetails(pokemon) {
     // Maakt "Battler" knop
     const battleButton = document.createElement('button');
     battleButton.textContent = 'Battler';
-    battleButton.onclick = () => {
+    battleButton.onclick = (event) => {
+        if (pokemonClass === 'collectie') {
+            const confirmation = confirm('Ben je zeker dat je deze Pokémon wilt vangen?');
+            if (!confirmation) {
+                event.stopPropagation(); // Stop de actie
+                return;
+            }
+        }
         const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
-        window.location.href = `batteler.html?${urlParams}`; 
+        window.location.href = `batteler.html?${urlParams}`;
     };
     actionsContainer.appendChild(battleButton);
 
@@ -111,7 +122,14 @@ function pokemonDetails(pokemon) {
     // Maakt "Catch" knop
     const catchButton = document.createElement('button');
     catchButton.textContent = 'Catch';
-    catchButton.onclick = () => {
+    catchButton.onclick = (event) => {
+        if (pokemonClass === 'collectie') {
+            const confirmation = confirm('Ben je zeker dat je deze Pokémon opnieuw wilt vangen?');
+            if (!confirmation) {
+                event.stopPropagation(); // Stop de actie
+                return;
+            }
+        }
         const urlParams = new URLSearchParams({ pokemonName: pokemon.name });
         window.location.href = `catch.html?${urlParams}`;
     };
@@ -138,6 +156,6 @@ function getTypeColor(type) {
         ghost: "#705898",
         steel: "#b8b8d0"
     };
-    return typeColors[type] || "#d3d3d3"; // Default color for unknown types
+    return typeColors[type] || "#d3d3d3"; // Default kleur voor onbekende types
 }
 document.addEventListener('DOMContentLoaded', displayPokemonList);
