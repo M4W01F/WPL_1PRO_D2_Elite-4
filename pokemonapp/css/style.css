@@ -30,10 +30,7 @@ nav {
     color: white;
     padding: 15px;
     position: relative;
-<<<<<<< HEAD
-=======
     
->>>>>>> 0cc473b14cf23f51550582c334e964b3d8958b53
 }
 
 nav a {
@@ -180,8 +177,6 @@ footer img {
 a:hover{
    color: blue; 
 }
-<<<<<<< HEAD
-=======
 /* stijlen voor login en aanmeld */
 body .aanmeldformulier , body .inlogformulier{
 min-height: 100vh;
@@ -294,7 +289,6 @@ padding-top: 60px;
     margin-top: 10px;
     color: white;
 }
->>>>>>> 0cc473b14cf23f51550582c334e964b3d8958b53
 
 /* Stijlen voor het dropdown menu */
 input[type="text"] {
