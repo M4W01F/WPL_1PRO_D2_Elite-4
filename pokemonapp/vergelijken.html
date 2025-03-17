@@ -1,62 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
-
-    <title>Vergelijken</title>
+    <script src="./javascript/vergelijken.js"></script>
+    <title>Pokémon Vergelijken</title>
     <style>
-        section {
-            padding: 100px;
+        body {
+            text-align: center;
+            color: white;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: auto;
+            padding: 20px;
         }
 
         .vergelijken {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
-        h2 {
-            padding-top: 5%;
+        .pokemon-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 300px;
         }
 
-        
+        .pokemon-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .stats-table {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-collapse: collapse;
+        }
+
+        .stats-table, .stats-table th, .stats-table td {
+            border: 1px solid white;
+            padding: 8px;
+        }
+
+        .beschrijving {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 10px;
+            
+            border-radius: 5px;
+        }
+        td, th, p{
+            color: black;
+            width: 50%;
+            margin: 50px;
+        }
+
+
+
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>Pokemon Vergelijken</h1>
-    </header>
+        <nav>
+            <div class="image-container">
+                <a href="./index.html">
+                    <img src="./images/project.png" alt="Project Image">
+                </a>
+            </div>
+        </nav>
     <main>
         <div class="vergelijken">
-            <div>
-                <section>
-                    <h1>Evolutie</h1>
-                    <img src="" width="300px" height="200px" alt="" ">
+            <div class="pokemon-card">
 
-                    <h2>Naam Pokemon 1</h2>
-                    <p style=" border-radius: 5px; border: solid 1px; width: 50%; ">Statestieken</p>
-                </section>
+                <h2>Pokémon 1</h2>
+                <input type="text" id="pokemon1" placeholder="Type een Pokemon naam" onblur="fetchPokemon(1)">
+                <img id="img1" src="" alt="Pokemon 1">
+                <div id="buddy-evolution" class="evolution-line"></div>
+                <hr></hr>
+                <table class="stats-table" id="stats1"></table>
             </div>
-            <div>
-                <section>
-                    <h1>Evolutie</h1>
-                    <img src="" width=" 300px" height="200px" alt="">
-
-                    <h2>Naam Pokemon 2</h2>
-                    <p style="border-radius: 5px; border: solid 1px; width: 50%; ">Statestieken</p>
-                </section>
+            <div class="pokemon-card">
+                <h2>Pokémon 2</h2>
+                <input type="text" id="pokemon2" placeholder="Type een Pokemon naam" onblur="fetchPokemon(2)">
+                <img id="img2" src="" alt="Pokemon 2">
+                <div id="evolution" class="evolution-line"></div>
+                <hr></hr>
+                <table class="stats-table" id="stats2"></table>
             </div>
-            
+         
+        </div>
     </main>
-   
     <footer>
-        <!-- Een knop om terug naar index te gaan -->
         <a href="index.html">Terug naar Hoofdmenu</a>
     </footer>
 </body>
