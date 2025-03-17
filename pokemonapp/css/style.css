@@ -649,8 +649,7 @@ body #Landingpagina{
     color: black;
 }
 #LandingPagina{
-    display: grid;
-    grid-template-columns: auto;
+    display: flex;
     min-height: 100vh;
     text-align: center;
     background-color: #f4f4f4;
