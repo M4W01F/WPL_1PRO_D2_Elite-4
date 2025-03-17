@@ -11,7 +11,7 @@ body, h1, h2, p, a, img, div, footer, header, main, nav {
 }
 .battler-img{
     background-image: url(../images/mogelijke\ battler\ foto.jpg);
-    background-size: 90%;
+    background-size: 100%;
 }
 .collectie-img{
     background-image: url(../images/achtergrond3.jpg);
