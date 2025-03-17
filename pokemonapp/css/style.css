@@ -646,11 +646,11 @@ body #Landingpagina{
     background: whitesmoke
     ;
 }
-#Landingpagina{
+#Landingspagina{
     display: flex;
     min-height: 100vh;
     text-align: center;
-    background-color: #f4f4f4;
+    background: #f4f4f4;
     text-align: center;
 }
 .Landingpagina h1{
