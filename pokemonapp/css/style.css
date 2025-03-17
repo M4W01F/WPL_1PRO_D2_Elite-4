@@ -643,17 +643,20 @@ div.niet-gevangen {
 /* stijlen voor landingpagina */
 body #Landingpagina{
     min-height: 100vh;
-    background: whitesmoke
-    ;
+    background: whitesmoke;
 }
-#Landingpagina{
-    display: flex;
+.landingh1{
+    color: black;
+}
+#LandingPagina{
+    display: grid;
+    grid-template-columns: auto;
     min-height: 100vh;
     text-align: center;
     background-color: #f4f4f4;
     text-align: center;
 }
-.Landingpagina h1{
+#Landingpagina h1{
     text-align: center;
     color: #ddd;
 }

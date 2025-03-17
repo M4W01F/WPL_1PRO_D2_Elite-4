@@ -6,7 +6,8 @@ const nextButton = document.querySelector('.carousel-button.next');
 // Klonen voor een oneindige loop
 const firstClone = projects[0].cloneNode(true);
 const lastClone = projects[projects.length - 1].cloneNode(true);
-
+firstClone.id = 'first-clone';
+  lastClone.id = 'last-clone';
 track.appendChild(firstClone);
 track.insertBefore(lastClone, projects[0]);
 
@@ -62,3 +63,4 @@ projects.forEach((project) => {
     }
   });
 });
+
