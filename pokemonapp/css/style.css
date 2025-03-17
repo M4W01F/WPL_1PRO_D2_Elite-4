@@ -641,12 +641,12 @@ div.niet-gevangen {
     }
 }
 /* stijlen voor landingpagina */
-body .Landingpagina{
+body #Landingpagina{
     min-height: 100vh;
     background: whitesmoke
     ;
 }
-.Landingpagina{
+#Landingpagina{
     display: flex;
     min-height: 100vh;
     text-align: center;
@@ -717,7 +717,7 @@ body .Landingpagina{
     margin-top: 10px;
 }
 .carousel-button {
-    position: absolute;
+ position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.5);
