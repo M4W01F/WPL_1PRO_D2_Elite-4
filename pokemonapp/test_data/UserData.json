@@ -5,8 +5,8 @@
   "user_id": "001",
   "collection": [
     {
-      "pokemon_name": "Pikachu",
-      "pokemon_id": 1,
+      "pokemon_name": "pikachu",
+      "pokemon_id": 25,
       "level": 25,
       "stats": {
         "hp": 55,
@@ -59,8 +59,8 @@
       ]
     },
     {
-      "pokemon_name": "Bulbasaur",
-      "pokemon_id": 25,
+      "pokemon_name": "bulbasaur",
+      "pokemon_id": 1,
       "level": 15,
       "stats": {
         "hp": 45,
