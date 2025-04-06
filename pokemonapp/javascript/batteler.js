@@ -108,11 +108,17 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
 function handleMoveClick(move) {
     // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
     document.getElementById('run-away').style.display = 'none';
+    document.getElementById('move-resultaat').style.display = 'block';
     // Voorbeeld voor het verlies van hp
     const effectiveness = Math.random() > 0.5 ? 'effectief' : 'niet effectief';
     pokemon.hp -= Math.floor(Math.random() * 40);
     buddy.hp -= Math.floor(Math.random() * 40);
-    
+    if (pokemon.hp < 0) {
+        pokemon.hp = 0;
+    }
+    if (buddy.hp < 0) {
+        buddy.hp = 0;
+    }
     // Maak de move resultaat div leeg voordat een nieuw resultaat getoond word.
     document.getElementById('move-resultaat').innerHTML = '';
 
