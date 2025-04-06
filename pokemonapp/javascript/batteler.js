@@ -227,7 +227,7 @@ async function startBattle(pokemonName) {
         const buddyData = await buddyResponse.json();
 
     // Werk het globale `pokemon` object bij
-    pokemon.name = selectedPokemonName;
+    pokemon.name = pokemonData.name;
     pokemon.level = 10; // Standaard niveau word later verander naar een random number generator voor max 5 levels boven de buddy level the zijn of min 5 levels onder.
     pokemon.hp = 100;   // Standaard HP
     pokemon.sprite = pokemonData.sprites.front_default;
