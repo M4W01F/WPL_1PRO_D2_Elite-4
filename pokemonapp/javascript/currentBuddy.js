@@ -1,6 +1,52 @@
-document.addEventListener('DOMContentLoaded', () => {
-    updateBuddyMoves(buddy.moves);
-});
+async function loadJSON() {
+    try {
+        const response = await fetch('https://raw.githubusercontent.com/M4W01F/WPL_1PRO_D2_Elite-4/BackEnd-logic/pokemonapp/test_data/UserData.json');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status} - ${response.statusText}`);
+        }
+        const jsonData = await response.json();
+        getBuddyPokemonStats(jsonData);
+    } catch (error) {
+        console.error('Error loading JSON:', error);
+    }
+}
+
+loadJSON();
+async function getBuddyPokemonStats(data) {
+    // Find the Pokémon with isBuddy = true
+    const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
+
+    if (buddyPokemon) {
+        // Extract relevant details
+        const pokemonId = buddyPokemon.pokemon_id;
+        const level = buddyPokemon.level;
+
+        setCurrentBuddy(pokemonId);
+        updateFooterBuddySprite(pokemonId);
+        fetchPokemonLearnableMoves(pokemonId);
+
+        // Ensure the moves array contains exactly 4 moves, padding if necessary
+        const moves = buddyPokemon.moves.slice(0, 4);
+        while (moves.length < 4) {
+            moves.push({ name: null, power: null, accuracy: null, priority: null, damage_class: null, effect: null });
+        }
+
+        // Store the stats in constants
+        const buddyStats = {
+            id: pokemonId,
+            level: level,
+            moves: moves // Preserve structure, including `type` as is
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBuddyMoves(buddyStats.moves);
+        });
+        // Return the buddy stats
+        return buddyStats;
+    } else {
+        throw new Error('No buddy Pokémon found.');
+    }
+}
 
 // Haal Pokémon-gegevens op met behulp van een query (ID of naam)
 async function fetchPokemonData(query) {
@@ -90,9 +136,9 @@ function calculateCombinedWeaknesses(types) {
 
 
 // Stel huidige buddy in en toon informatie
-async function setCurrentBuddy() {
-    const pokemon = await fetchPokemonData(6); // Charizard als voorbeeld
-    const species = await fetchSpeciesData(6);
+async function setCurrentBuddy(pokemonId) {
+    const pokemon = await fetchPokemonData(pokemonId);
+    const species = await fetchSpeciesData(pokemonId);
     if (pokemon && species) {
         const buddyDiv = document.getElementById('current-buddy-info');
         const statsDiv = document.getElementById('buddy-stats');
@@ -234,21 +280,15 @@ async function updateFooterBuddySprite(query) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => updateFooterBuddySprite(6));
-
-const buddy = {
-    moves: ['scratch', 'ember', 'growl', 'flamethrower']
-};
-
-async function updateBuddyMoves(moves) {
-    const allLearnableMoves = await fetchPokemonLearnableMoves(6);
+async function updateBuddyMoves(moves, pokemonId) {
+    const allLearnableMoves = await fetchPokemonLearnableMoves(pokemonId);
     allLearnableMoves.sort((a, b) => a.localeCompare(b));
 
     const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Haalt de all bestaande moves er uit
 
     const moveInputs = moves.map((move, index) => `
         <div style="margin-bottom: 10px;">
-            <input type="text" placeholder="${move}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
+            <input type="text" placeholder="${move.name}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
             <select onchange="handleMoveChange(event, ${index})">
                 <option value="" disabled selected>Selecteer een move</option>
                 ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
@@ -281,9 +321,9 @@ async function fetchPokemonLearnableMoves(pokemonId) {
 function handleMoveChange(event, moveIndex) {
     const selectedMove = event.target.value;
     if (selectedMove) {
-        buddy.moves[moveIndex] = selectedMove;
+        buddyStats.moves[moveIndex] = selectedMove;
 
-        updateBuddyMoves(buddy.moves);
+        updateBuddyMoves(buddyStats.moves);
 
         alert(`Move successvoll veranderd naar: ${selectedMove}`);
     }
