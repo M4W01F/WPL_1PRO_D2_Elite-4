@@ -14,7 +14,49 @@
         "defense": 40,
         "speed": 90
       },
-      "isBuddy": true
+      "isBuddy": true,
+      "moves": [
+        {
+          "name": "thunderbolt",
+          "power": 90,
+          "accuracy": 100,
+          "priority": 0,
+          "type": "electric",
+          "damage_class": "special",
+          "effect": "Paralyzes target",
+          "chance": "1/10"
+        },
+        {
+          "name": "quick-attack",
+          "power": 40,
+          "accuracy": 100,
+          "priority": 1,
+          "type": "normal",
+          "damage_class": "physical",
+          "effect": "Moves first"
+        },
+        {
+          "name": "agility",
+          "power": null,
+          "accuracy": null,
+          "priority": 0,
+          "type": "psychic",
+          "damage_class": "status",
+          "effect": "Boosts Speed",
+          "stat_changes": {
+            "speed": 2
+          }
+        },
+        {
+          "name": "electro-ball",
+          "power": "Varies",
+          "accuracy": 100,
+          "priority": 0,
+          "type": "electric",
+          "damage_class": "special",
+          "effect": "Stronger if user is faster"
+        }
+      ]
     },
     {
       "pokemon_name": "Bulbasaur",
@@ -26,7 +68,50 @@
         "defense": 49,
         "speed": 45
       },
-      "isBuddy": false
+      "isBuddy": false,
+      "moves": [
+        {
+          "name": "razor-leaf",
+          "power": 55,
+          "accuracy": 95,
+          "priority": 0,
+          "type": "grass",
+          "damage_class": "physical",
+          "effect": "High crit ratio"
+        },
+        {
+          "name": "vine-whip",
+          "power": 45,
+          "accuracy": 100,
+          "priority": 0,
+          "type": "grass",
+          "damage_class": "physical",
+          "effect": "Standard grass attack"
+        },
+        {
+          "name": "growth",
+          "power": null,
+          "accuracy": null,
+          "priority": 0,
+          "type": "normal",
+          "damage_class": "status",
+          "effect": "Boosts Attack & Special Attack",
+          "stat_changes": {
+            "attack": 1,
+            "special-attack": 1
+          }
+        },
+        {
+          "name": "leech-seed",
+          "power": null,
+          "accuracy": 90,
+          "priority": 0,
+          "type": "grass",
+          "damage_class": "status",
+          "effect": "Drains HP each turn",
+          "chance": "1/10"
+        }
+      ]
     }
   ]
 }
