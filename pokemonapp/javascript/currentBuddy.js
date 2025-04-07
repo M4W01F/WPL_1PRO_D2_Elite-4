@@ -15,7 +15,7 @@ loadJSON();
 async function getBuddyPokemonStats(data) {
     // vind de buddy
     const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
-console.log(buddyPokemon)
+
     if (buddyPokemon) {
         const pokemonId = buddyPokemon.pokemon_id;
         const level = buddyPokemon.level;
@@ -32,10 +32,8 @@ console.log(buddyPokemon)
             level: level,
             moves: moveNames
         };
-        document.addEventListener('DOMContentLoaded', () => {
-            updateBuddyMoves(buddyStats.moves);
-        });
-        
+
+        updateBuddyMoves(buddyStats.id, buddyStats.moves);
         setCurrentBuddy(buddyStats.id, buddyStats.level);
         updateFooterBuddySprite(buddyStats.id);
         fetchPokemonLearnableMoves(buddyStats.id);
@@ -255,7 +253,6 @@ function getTypeColor(type) {
     };
     return typeColors[type] || "#d3d3d3";
 }
-document.addEventListener('DOMContentLoaded', setCurrentBuddy);
 
 async function updateFooterBuddySprite(query) {
     try {
@@ -273,54 +270,84 @@ async function updateFooterBuddySprite(query) {
     }
 }
 
-async function updateBuddyMoves(moves, pokemonId) {
-    console.log("Moves received:", moves);
-    const allLearnableMoves = await fetchPokemonLearnableMoves(pokemonId);
-    allLearnableMoves.sort((a, b) => a.localeCompare(b));
+async function updateBuddyMoves(id, moves) {
+    try {
+        console.log("Updating buddy moves:", moves);
+        console.log("BuddyStats ID:", id);
 
-    // Extract only the names from the moves array
-    const moveNames = moves.map(move => move.name);
-    const availableMoves = allLearnableMoves.filter(move => !moveNames.includes(move));
+        const allLearnableMoves = await fetchPokemonLearnableMoves(id);
 
-    const moveInputs = moveNames.map((moveName, index) => `
-        <div style="margin-bottom: 10px;">
-            <input type="text" placeholder="${moveName}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
-            <select onchange="handleMoveChange(event, ${index})">
-                <option value="" disabled selected>Selecteer een move</option>
-                ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
-            </select>
-        </div>
-    `).join('');
+        console.log("Fetched learnable moves:", allLearnableMoves);
 
-    document.getElementById('buddy-moves').innerHTML = moveInputs;
+        if (!Array.isArray(allLearnableMoves) || allLearnableMoves.length === 0) {
+            console.error("No learnable moves fetched for the Pokémon.");
+            document.getElementById('buddy-moves').innerHTML = "<p>No learnable moves available.</p>";
+            return;
+        }
+
+        const availableMoves = allLearnableMoves.filter(move => !moves.includes(move));
+
+        console.log("Available moves after filtering:", availableMoves);
+
+        if (!Array.isArray(availableMoves) || availableMoves.length === 0) {
+            console.error("No available moves to display.");
+            document.getElementById('buddy-moves').innerHTML = "<p>No available moves to choose from.</p>";
+            return;
+        }
+
+        const moveInputs = moves.map((moveName, index) => `
+            <div style="margin-bottom: 10px;">
+                <input type="text" placeholder="${moveName}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
+                    <select onchange="handleMoveChange(${index}, ${moves})">
+                    <option value="" disabled selected>Selecteer een move</option>
+                    ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
+                </select>
+            </div>
+        `).join('');
+
+        document.getElementById('buddy-moves').innerHTML = moveInputs;
+    } catch (error) {
+        console.error("Error updating buddy moves:", error);
+        document.getElementById('buddy-moves').innerHTML = "<p>An error occurred while updating moves.</p>";
+    }
 }
 
-// Fetch moves dat de pokemon kan leeren.
 async function fetchPokemonLearnableMoves(pokemonId) {
     try {
+        console.log("Fetching learnable moves for Pokémon ID:", pokemonId);
+
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
         if (response.ok) {
             const data = await response.json();
-            // Extract move namen
-            return data.moves.map(moveEntry => moveEntry.move.name);
+
+            console.log("Fetched data:", data);
+
+            const moveNames = data.moves.map(moveEntry => moveEntry.move.name);
+            console.log("Extracted move names:", moveNames);
+
+            return moveNames;
         } else {
             console.error(`Failed to fetch learnable moves for Pokémon ID: ${pokemonId}`);
             return [];
         }
     } catch (error) {
-        console.error('Error fetching learnable moves:', error);
+        console.error("Error fetching learnable moves:", error);
         return [];
     }
 }
 
-// Functie wanneer een move veranderd word
-function handleMoveChange(event, moveIndex) {
-    const selectedMove = event.target.value;
+function handleMoveChange(moveIndex, moves) {
+    console.log("test")
+    const selectedMove = moves[moveIndex];
+    console.log(selectedMove)
+    console.log("move selector",selectedMove)
     if (selectedMove) {
-        buddyStats.moves[moveIndex] = selectedMove;
+        moves[moveIndex] = selectedMove;
 
-        updateBuddyMoves(buddyStats.moves);
+        console.log(`Move changed successfully to: ${selectedMove}`);
 
-        alert(`Move successvoll veranderd naar: ${selectedMove}`);
+        updateBuddyMoves(moves);
+
+        alert(`Move succesvol veranderd naar: ${selectedMove}`);
     }
 }
