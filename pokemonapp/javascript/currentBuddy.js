@@ -15,7 +15,7 @@ loadJSON();
 async function getBuddyPokemonStats(data) {
     // vind de buddy
     const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
-
+console.log(buddyPokemon)
     if (buddyPokemon) {
         const pokemonId = buddyPokemon.pokemon_id;
         const level = buddyPokemon.level;
