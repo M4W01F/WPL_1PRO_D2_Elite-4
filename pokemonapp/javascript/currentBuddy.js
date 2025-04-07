@@ -276,6 +276,7 @@ async function updateBuddyMoves(id, moves) {
         console.log("BuddyStats ID:", id);
 
         const allLearnableMoves = await fetchPokemonLearnableMoves(id);
+        allLearnableMoves.sort((a, b) => a.localeCompare(b));
 
         console.log("Fetched learnable moves:", allLearnableMoves);
 
