@@ -13,36 +13,32 @@ async function loadJSON() {
 
 loadJSON();
 async function getBuddyPokemonStats(data) {
-    // Find the Pokémon with isBuddy = true
+    // vind de buddy
     const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
 
     if (buddyPokemon) {
-        // Extract relevant details
         const pokemonId = buddyPokemon.pokemon_id;
         const level = buddyPokemon.level;
 
-        setCurrentBuddy(pokemonId);
-        updateFooterBuddySprite(pokemonId);
-        fetchPokemonLearnableMoves(pokemonId);
-
-        // Ensure the moves array contains exactly 4 moves, padding if necessary
-        const moves = buddyPokemon.moves.slice(0, 4);
-        while (moves.length < 4) {
-            moves.push({ name: null, power: null, accuracy: null, priority: null, damage_class: null, effect: null });
+        // Extract alleen move namen en maakt zeker dat er alleen 4 moves zijn niet meer
+        const moveNames = (buddyPokemon?.moves || []).map(move => move.name || "Unknown Move").slice(0, 4);
+        while (moveNames.length < 4) {
+            moveNames.push("Unknown Move"); // Placeholder
         }
 
-        // Store the stats in constants
+        // Behuid de stats
         const buddyStats = {
             id: pokemonId,
             level: level,
-            moves: moves // Preserve structure, including `type` as is
+            moves: moveNames
         };
-        
         document.addEventListener('DOMContentLoaded', () => {
             updateBuddyMoves(buddyStats.moves);
         });
-        // Return the buddy stats
-        return buddyStats;
+        
+        setCurrentBuddy(buddyStats.id, buddyStats.level);
+        updateFooterBuddySprite(buddyStats.id);
+        fetchPokemonLearnableMoves(buddyStats.id);
     } else {
         throw new Error('No buddy Pokémon found.');
     }
@@ -136,16 +132,13 @@ function calculateCombinedWeaknesses(types) {
 
 
 // Stel huidige buddy in en toon informatie
-async function setCurrentBuddy(pokemonId) {
+async function setCurrentBuddy(pokemonId, level) {
     const pokemon = await fetchPokemonData(pokemonId);
     const species = await fetchSpeciesData(pokemonId);
     if (pokemon && species) {
         const buddyDiv = document.getElementById('current-buddy-info');
         const statsDiv = document.getElementById('buddy-stats');
         const evolutionDiv = document.getElementById('buddy-evolution');
-
-        // Basisdetails weergeven
-        let level = 50; // Voorbeeld level
 
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
@@ -281,14 +274,17 @@ async function updateFooterBuddySprite(query) {
 }
 
 async function updateBuddyMoves(moves, pokemonId) {
+    console.log("Moves received:", moves);
     const allLearnableMoves = await fetchPokemonLearnableMoves(pokemonId);
     allLearnableMoves.sort((a, b) => a.localeCompare(b));
 
-    const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Haalt de all bestaande moves er uit
+    // Extract only the names from the moves array
+    const moveNames = moves.map(move => move.name);
+    const availableMoves = allLearnableMoves.filter(move => !moveNames.includes(move));
 
-    const moveInputs = moves.map((move, index) => `
+    const moveInputs = moveNames.map((moveName, index) => `
         <div style="margin-bottom: 10px;">
-            <input type="text" placeholder="${move.name}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
+            <input type="text" placeholder="${moveName}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
             <select onchange="handleMoveChange(event, ${index})">
                 <option value="" disabled selected>Selecteer een move</option>
                 ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
