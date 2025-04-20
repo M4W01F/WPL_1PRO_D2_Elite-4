@@ -7,7 +7,7 @@
     {
       "pokemon_name": "pikachu",
       "pokemon_id": 25,
-      "level": 25,
+      "level": 30,
       "stats": {
         "hp": 57,
         "attack": 90,
