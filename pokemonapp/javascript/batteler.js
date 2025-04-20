@@ -1,3 +1,201 @@
+// Laad het JSON-bestand, vind de buddy-Pokémon, en werk de voettekst-sprite bij
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const filePath = "./test_data/UserData.json"; // Pad naar JSON-bestand
+        const response = await fetch(filePath); // Haal JSON-bestand op
+        jsonData = await response.json(); // Parse JSON-bestand
+        console.log("Loaded JSON data:", jsonData);
+
+        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.isBuddy === true); // Vind de buddy Pokémon
+        if (buddyPokemon) {
+            await getBuddyPokemonStats(jsonData); // Verwerk buddy-Pokémon-statistieken
+        } else {
+            console.error("Geen buddy Pokémon gevonden.");
+        }
+    } catch (error) {
+        console.error("Fout bij het laden van JSON of bijwerken van buddy sprite:", error);
+    }
+});
+
+// Zet een cookie
+function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+
+// Haal een cookie op
+function getCookie(name) {
+    const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+        const [key, val] = cookie.split('=');
+        acc[key] = decodeURIComponent(val);
+        return acc;
+    }, {});
+    return cookies[name];
+}
+
+// Controleer of een cookie leeg is
+function isCookieEmpty(name) {
+    const cookieValue = getCookie(name);
+    return !cookieValue || cookieValue === '';
+}
+
+async function initializeMovesFromJSON(id) {
+    try {
+        const cookieMoves = getCookie(`buddy_${id}_moves`);
+        if (cookieMoves && !isCookieEmpty(`buddy_${id}_moves`)) {
+            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
+            return JSON.parse(cookieMoves); // Gebruik moves uit cookies
+        }
+
+        console.log("Cookies zijn leeg. Moves worden geladen uit JSON.");
+
+        const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
+        const response = await fetch(filePath);
+        const jsonData = await response.json();
+
+        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
+        if (buddyPokemon) {
+            const moves = buddyPokemon.moves.map(move => move.name || "Onbekende Beweging");
+            console.log("Moves geladen uit JSON:", moves);
+
+            // Sla de moves op in cookies
+            setCookie(`buddy_${id}_moves`, JSON.stringify(moves), 7);
+            console.log("Moves succesvol opgeslagen in cookies:", moves);
+
+            return moves;
+        } else {
+            console.error("Geen buddy Pokémon gevonden in JSON.");
+            return [];
+        }
+    } catch (error) {
+        console.error("Fout bij het initialiseren van moves:", error);
+        return [];
+    }
+}
+
+// Laad de moves uit cookies
+async function loadMoves(id) {
+    try {
+        // Controleer of moves in de cookies bestaan
+        const cookieMoves = getCookie(`buddy_${id}_moves`);
+        if (!cookieMoves || isCookieEmpty(`buddy_${id}_moves`)) {
+            console.log("Cookies zijn leeg, moves worden geladen uit JSON.");
+
+            // Laad JSON-gegevens
+            const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
+            const response = await fetch(filePath);
+            jsonData = await response.json();
+
+            // Vind de buddy Pokémon en stel cookies in
+            const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
+            if (buddyPokemon) {
+                setCookie(`buddy_${id}_moves`, JSON.stringify(buddyPokemon.moves), 7);
+                console.log("Moves opgeslagen in cookies:", buddyPokemon.moves);
+                return buddyPokemon.moves; // Retourneer de moves uit de JSON
+            } else {
+                console.error("Geen buddy Pokémon gevonden in JSON.");
+                return [];
+            }
+        } else {
+            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
+            return JSON.parse(cookieMoves); // Retourneer de moves uit de cookies
+        }
+    } catch (error) {
+        console.error("Fout bij het laden van moves:", error);
+        return [];
+    }
+}
+
+// Buddy stats en moves
+async function getBuddyPokemonStats(data) {
+    try {
+        // Vind de buddy-Pokémon in de JSON-gegevens
+        const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
+
+        if (buddyPokemon) {
+            const pokemonId = buddyPokemon.pokemon_id; // ID van de buddy-Pokémon
+            const level = buddyPokemon.level; // Niveau van de buddy
+
+            // Controleer of moves al in cookies bestaan
+            const moves = await initializeMovesFromJSON(pokemonId); // Haal moves uit cookies of JSON
+            console.log("Moves geladen:", moves);
+
+            // Stel de buddy-statistieken samen
+            const buddyStats = {
+                id: pokemonId,
+                level: level,
+                moves: moves
+            };
+
+            console.log("Buddy-Pokémon-statistieken:", buddyStats);
+            
+            // Roep de functies aan om de informatie te updaten
+            updateBuddyMoves(buddyStats.moves);
+            setCurrentBuddy(buddyStats.id, buddyStats.level)
+
+        } else {
+            console.error("Geen buddy-Pokémon gevonden in de JSON-gegevens.");
+        }
+    } catch (error) {
+        console.error("Fout bij het verwerken van buddy-Pokémon-statistieken:", error);
+    }
+}
+
+// Stel huidige buddy in en toon informatie
+async function setCurrentBuddy(pokemonId, level) {
+    const buddyData = await fetchPokemonData(pokemonId);
+
+    if (buddyData) {
+        
+        // Bereken statistieken
+        const baseStats = {
+            hp: buddyData.stats[0].base_stat,
+            attack: buddyData.stats[1].base_stat,
+            defense: buddyData.stats[2].base_stat,
+            speed: buddyData.stats[5].base_stat
+        };
+
+
+        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
+
+        for (let i = 1; i <= level; i++) {
+            hp += hp / 50;
+            attack += attack / 50;
+            defense += defense / 50;
+            speed += speed / 50;
+        }
+        console.log(buddyData.name);
+        buddy.name = buddyData.name;
+        buddy.level = level;
+        buddy.maxHp = Math.round(hp, 0);
+        buddy.hp = Math.round(hp, 0);
+        buddy.attack = attack;
+        buddy.defense = defense;
+        buddy.speed = speed;
+        // Bereken typen en zwaktes dynamisch
+        const types = buddyData.types.map(typeInfo => typeInfo.type.name);
+
+        //const weaknesses = calculateCombinedWeaknesses(types); dit pas later
+    }
+}
+
+// Haal Pokémon-gegevens op met behulp van een query (ID of naam)
+async function fetchPokemonData(query) {
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+        if (response.ok) {
+            const pokemon = await response.json();
+            return pokemon; // Retourneer het Pokémon-object
+        } else {
+            console.error(`Kan de Pokémon niet ophalen met query: ${query}.`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Fout bij het ophalen van Pokémon-gegevens:`, error);
+        return null;
+    }
+}
+
 // Haal pokemon naam uit pokedex
 function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -78,9 +276,26 @@ async function updateInfo(pokemon, buddy) {
 
 // Functie om dynamisch de moves te genereren
 function updateBuddyMoves(moves) {
-    const moveButtons = moves.map(move => `<button onclick="handleMoveClick('${move}')">${move}</button>`).join('');
+    if (!Array.isArray(moves) || moves.length === 0) {
+        console.error("Moves-array is ongeldig of leeg.");
+        document.getElementById('buddy-moves').innerHTML = "<p>Geen moves beschikbaar.</p>";
+        return;
+    }
+
+    console.log("Buddy moves bijwerken:", moves);
+
+    // Dynamisch UI voor moves genereren
+    const moveButtons = moves.map(move => `
+        <button onclick="handleMoveClick('${move}')">${move}</button>
+    `).join('');
+
     document.getElementById('buddy-moves').innerHTML = moveButtons;
 }
+
+// Roep de functie aan nadat de DOM is geladen
+document.addEventListener("DOMContentLoaded", async () => {
+    await updateBuddyMoves();
+});
 
 // Functie om dynamisch de resultaten van de moves bij te werken
 function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
@@ -198,20 +413,20 @@ function handleMoveClick(move) {
 // Voorbeeld data
 const pokemon = {
     name: '',
-    level: 10,
-    hp: 100,
-    maxHp: 100
+    level: 0,
+    hp: 0,
+    maxHp: 0,
+    moves: ['', '', '', '']
 };
 
 const buddy = {
-    name: 'charizard',
-    level: 10,
-    hp: 100,
-    maxHp: 100,
-    moves: ['Scratch', 'Ember', 'Growl', 'Flamethrower']
+    name: "",
+    level: 0,
+    hp: 0,
+    maxHp: 0,
+    moves: ['', '', '', '']
 };
 
-// Functie om het gevecht te starten
 async function startBattle(pokemonName) {
     const selectedPokemonName = document.getElementById('pokemon-selector').value.toLowerCase() || pokemonName;
 
@@ -234,31 +449,58 @@ async function startBattle(pokemonName) {
         const pokemonData = await response.json();
         const buddyData = await buddyResponse.json();
 
-    // Werk het globale `pokemon` object bij
-    pokemon.name = pokemonData.name;
-    pokemon.level = 10; // Standaard niveau word later verander naar een random number generator voor max 5 levels boven de buddy level the zijn of min 5 levels onder.
-    pokemon.hp = 100;   // Standaard HP
-    pokemon.sprite = pokemonData.sprites.front_default;
-    buddy.sprite = buddyData.sprites.back_default;
+        // Werk het globale `pokemon` object bij
+        const baseStats = {
+            hp: pokemonData.stats[0].base_stat,
+            attack: pokemonData.stats[1].base_stat,
+            defense: pokemonData.stats[2].base_stat,
+            speed: pokemonData.stats[5].base_stat
+        };
 
-    // Werk de gevechtsinterface bij met JS-functies
-    updateInfo(pokemon, buddy);
+        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
 
-    // Wissel zichtbaarheid
-    document.getElementById('setup-container').style.display = 'none';
-    document.getElementById('battle-interface').style.display = 'block';
+        pokemon.name = pokemonData.name;
+        pokemon.level = buddy.level + [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
+        for (let i = 1; i <= pokemon.level; i++) {
+            hp += hp / 50;
+            attack += attack / 50;
+            defense += defense / 50;
+            speed += speed / 50;
+        }
+        pokemon.hp = Math.round(hp);
+        pokemon.maxHp = Math.round(hp, 0);
+        pokemon.attack = attack;
+        pokemon.defense = defense;
+        pokemon.speed = speed;
 
-    document.querySelector('nav').style.display = 'none';
+        pokemon.sprite = pokemonData.sprites.front_default;
+        buddy.sprite = buddyData.sprites.back_default;
+
+        // Tegenstander moves
+        const learnableMoves = pokemonData.moves.filter(move => {
+            return move.version_group_details.some(detail =>
+                detail.level_learned_at <= pokemon.level && detail.move_learn_method.name === 'level-up'
+            );
+        }).map(move => move.move.name);
+
+        // Select the last 4 moves
+        pokemon.moves = learnableMoves.slice(-4);
+
+        // Werk de gevechtsinterface bij met JS-functies
+        updateInfo(pokemon, buddy);
+
+        // Wissel zichtbaarheid
+        document.getElementById('setup-container').style.display = 'none';
+        document.getElementById('battle-interface').style.display = 'block';
+
+        document.querySelector('nav').style.display = 'none';
     } catch (error) {
         alert(error.message);
     }
 }
 
-// Roep de functies aan om de informatie te updaten
-updateInfo(pokemon, buddy);
-updateBuddyMoves(buddy.moves);
 
-
+// Kleuren van het type
 function getTypeColor(type) {
     const typeColors = {
         fire: "#f08030",
