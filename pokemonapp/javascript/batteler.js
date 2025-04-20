@@ -483,10 +483,10 @@ async function startBattle(pokemonName) {
             );
         }).map(move => move.move.name);
 
-        // Select the last 4 moves
+        // Selecteerd de laatste 4 moves
         pokemon.moves = learnableMoves.slice(-4);
 
-        // Werk de gevechtsinterface bij met JS-functies
+        // Werk de gevechtsinterface aan
         updateInfo(pokemon, buddy);
 
         // Wissel zichtbaarheid
