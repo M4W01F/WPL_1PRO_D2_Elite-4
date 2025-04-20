@@ -254,6 +254,11 @@ async function startBattle(pokemonName) {
     }
 }
 
+// Roep de functies aan om de informatie te updaten
+updateInfo(pokemon, buddy);
+updateBuddyMoves(buddy.moves);
+
+
 function getTypeColor(type) {
     const typeColors = {
         fire: "#f08030",
@@ -277,6 +282,3 @@ function getTypeColor(type) {
     };
     return typeColors[type] || "#d3d3d3"; // Default color for unknown types
 }
-// Roep de functies aan om de informatie te updaten
-updateInfo(pokemon, buddy);
-updateBuddyMoves(buddy.moves);
