@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Pokémon name is missing from the URL.');
     }
 });
+
+// De bar met uw hp en kleuren op hoeveel precentage
 function getHealthBar(character) {
     // Dynamisch de maximale HP van het personage bepalen
     const maxHp = character.maxHp || 100; // Controleer of maxHp beschikbaar is, anders standaard op 100

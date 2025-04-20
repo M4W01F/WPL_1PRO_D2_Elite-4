@@ -143,7 +143,7 @@ function updateFooterBuddySprite(pokemon) {
     }
 }
 
-// Extraheer buddy-Pokémon-statistieken en gebruik deze in je applicatie
+// Buddy stats en moves
 async function getBuddyPokemonStats(data) {
     try {
         // Vind de buddy-Pokémon in de JSON-gegevens
