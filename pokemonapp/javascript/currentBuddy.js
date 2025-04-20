@@ -1,13 +1,14 @@
+const fs = require('fs');
+const path = require('path');
+
 async function loadJSON() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/M4W01F/WPL_1PRO_D2_Elite-4/BackEnd-logic/pokemonapp/test_data/UserData.json');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.status} - ${response.statusText}`);
-        }
-        const jsonData = await response.json();
-        getBuddyPokemonStats(jsonData);
+        const filePath = path.join(__dirname, '../test_data/UserData.json'); // Resolving absolute path
+        console.log('Resolved Path:', filePath); // Debugging step: check the resolved path
+        const response = JSON.parse(fs.readFileSync(filePath, 'utf-8')); // Load and parse the file
+        getBuddyPokemonStats(response);
     } catch (error) {
-        console.error('Error loading JSON:', error);
+        console.error('Error loading JSON:', error); // Log the error with details
     }
 }
 
