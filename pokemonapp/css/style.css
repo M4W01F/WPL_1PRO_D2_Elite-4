@@ -968,7 +968,7 @@ div.niet-gevangen {
 /* Stijlen voor catch */
 
 
-/* media querries */
+/* media querries */:
 @media (min-width: 601px) and (max-width: 1024px) {
   
     main{
@@ -982,12 +982,15 @@ div.niet-gevangen {
         
         
     }
-    .index-img{
+
+    /* background image niet laten repeaten */
+     .index-img{
         background-image: url(../images/achtergrond-weiland.png);
         background-repeat:no-repeat;
         background-size:cover;
-        background-size:100vh;
+        background-size:100%;
+        
         background-position:center;
         background-attachment: fixed;
-    }
+    } 
 }
