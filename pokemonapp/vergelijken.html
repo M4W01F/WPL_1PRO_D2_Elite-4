@@ -7,14 +7,14 @@
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
-    <script src="./javascript/vergelijken.js"></script>
+    <script src="./javascript/test.js"></script>
     <title>Pokémon Vergelijken</title>
     <style>
         body {
             text-align: center;
             color: white;
+            
         }
-
         main {
             display: flex;
             flex-direction: column;
@@ -53,7 +53,9 @@
             border-collapse: collapse;
         }
 
-        .stats-table, .stats-table th, .stats-table td {
+        .stats-table,
+        .stats-table th,
+        .stats-table td {
             border: 1px solid white;
             padding: 8px;
         }
@@ -62,48 +64,65 @@
             max-width: 800px;
             margin: 20px auto;
             padding: 10px;
-            
             border-radius: 5px;
         }
-        td, th, p{
+
+        td,
+        th,
+        p {
             color: black;
             width: 50%;
             margin: 50px;
         }
 
+        .type-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+            color: white;
+        }
 
-
+        .weakness-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
-        <nav>
-            <div class="image-container">
-                <a href="./index.html">
-                    <img src="./images/project.png" alt="Project Image">
-                </a>
-            </div>
-        </nav>
+    <nav>
+        <div class="image-container">
+            <a href="./index.html">
+                <img src="./images/project.png" alt="Project Image">
+            </a>
+        </div>
+    </nav>
     <main>
         <div class="vergelijken">
             <div class="pokemon-card">
-
                 <h2>Pokémon 1</h2>
                 <input type="text" id="pokemon1" placeholder="Type een Pokemon naam" onblur="fetchPokemon(1)">
                 <img id="img1" src="" alt="Pokemon 1">
                 <div id="buddy-evolution" class="evolution-line"></div>
-                <hr></hr>
+                <hr>
                 <table class="stats-table" id="stats1"></table>
+                <div id="types1"></div> <!-- To show types -->
+                <div id="weaknesses1"></div> <!-- To show weaknesses -->
             </div>
             <div class="pokemon-card">
                 <h2>Pokémon 2</h2>
                 <input type="text" id="pokemon2" placeholder="Type een Pokemon naam" onblur="fetchPokemon(2)">
                 <img id="img2" src="" alt="Pokemon 2">
                 <div id="evolution" class="evolution-line"></div>
-                <hr></hr>
+                <hr>
                 <table class="stats-table" id="stats2"></table>
+                <div id="types2"></div> <!-- To show types -->
+                <div id="weaknesses2"></div> <!-- To show weaknesses -->
             </div>
-         
         </div>
     </main>
     <footer>

@@ -1,7 +1,9 @@
-async function fetchPokemon(num) {
-    const input = document.getElementById(`pokemon${num}`);
-    const img = document.getElementById(`img${num}`);
-    const statsTable = document.getElementById(`stats${num}`);
+async function fetchPokemon(pokemonNum) {
+    const input = document.getElementById(`pokemon${pokemonNum}`);
+    const img = document.getElementById(`img${pokemonNum}`);
+    const statsTable = document.getElementById(`stats${pokemonNum}`);
+    const typesDiv = document.getElementById(`types${pokemonNum}`);
+    const weaknessesDiv = document.getElementById(`weaknesses${pokemonNum}`);
     const pokemonName = input.value.toLowerCase().trim();
 
     if (!pokemonName) return;
@@ -20,19 +22,15 @@ async function fetchPokemon(num) {
         statsTable.innerHTML = `
             <tr><th>Stat</th><th>Waarde</th></tr>
             ${pokemonData.stats
-                .map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`)
-                .join('')}
+            .map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`)
+            .join('')}
         `;
 
         const typesRow = document.createElement("tr");
         const typeBadges = pokemonData.types
             .map(
                 type =>
-                    `<span class="type-badge" style="background-color: ${getTypeColor(type.type.name)}; 
-                                  color: white; 
-                                  padding: 5px 10px; 
-                                  border-radius: 5px; 
-                                  margin-right: 5px;">
+                    `<span class="type-badge" style="background-color: ${getTypeColor(type.type.name)}; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
                         ${type.type.name}
                     </span>`
             )
@@ -46,15 +44,12 @@ async function fetchPokemon(num) {
         statsTable.appendChild(typesRow);
 
         const weaknesses = await getWeaknesses(pokemonData.types);
+        
         const weaknessesRow = document.createElement("tr");
         const weaknessBadges = weaknesses
             .map(
                 weakness =>
-                    `<span class="type-badge" style="background-color: ${getTypeColor(weakness)}; 
-                                  color: white; 
-                                  padding: 5px 10px; 
-                                  border-radius: 5px; 
-                                  margin-right: 5px;">
+                    `<span class="weakness-badge" style="background-color: ${getTypeColor(weakness)}; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
                         ${weakness}
                     </span>`
             )
@@ -72,36 +67,52 @@ async function fetchPokemon(num) {
     }
 }
 
+// Bereken gecombineerde zwaktes voor multi-typed Pokémon
 async function getWeaknesses(types) {
-    const typeWeaknesses = {
-        normal: ["fighting"],
-        fire: ["water", "ground", "rock"],
-        water: ["electric", "grass"],
-        electric: ["ground"],
-        grass: ["fire", "ice", "poison", "flying", "bug"],
-        bug: ["fire", "flying", "rock"],
-        rock: ["water", "grass", "fighting", "ground", "steel"],
-        ground: ["water", "ice", "grass"],
-        ice: ["fire", "fighting", "rock", "steel"],
-        fighting: ["flying", "psychic", "fairy"],
-        ghost: ["ghost", "dark"],
-        psychic: ["bug", "ghost", "dark"],
-        dark: ["fighting", "bug", "fairy"],
-        fairy: ["poison", "steel"],
-        poison: ["ground", "psychic"],
-        flying: ["electric", "ice", "rock"],
-        dragon: ["ice", "dragon", "fairy"],
-        steel: ["fire", "fighting", "ground"]
+    const typeEffectiveness = {
+        normal: { double_damage_from: ["fighting"], half_damage_from: ["ghost"], no_damage_from: ["ghost"] },
+        fire: { double_damage_from: ["water", "rock", "ground"], half_damage_from: ["fire", "grass", "ice", "bug", "steel", "fairy"], no_damage_from: [] },
+        water: { double_damage_from: ["electric", "grass"], half_damage_from: ["fire", "water", "ice", "steel"], no_damage_from: [] },
+        grass: { double_damage_from: ["fire", "ice", "poison", "flying", "bug"], half_damage_from: ["water", "electric", "grass", "ground"], no_damage_from: [] },
+        electric: { double_damage_from: ["ground"], half_damage_from: ["electric", "flying", "steel"], no_damage_from: [] },
+        ice: { double_damage_from: ["fire", "fighting", "rock", "steel"], half_damage_from: ["ice"], no_damage_from: [] },
+        fighting: { double_damage_from: ["flying", "psychic", "fairy"], half_damage_from: ["bug", "rock", "dark"], no_damage_from: [] },
+        poison: { double_damage_from: ["ground", "psychic"], half_damage_from: ["grass", "fighting", "poison", "bug", "fairy"], no_damage_from: [] },
+        ground: { double_damage_from: ["water", "grass", "ice"], half_damage_from: ["poison", "rock"], no_damage_from: ["electric"] },
+        flying: { double_damage_from: ["electric", "ice", "rock"], half_damage_from: ["grass", "fighting", "bug"], no_damage_from: ["ground"] },
+        psychic: { double_damage_from: ["bug", "ghost", "dark"], half_damage_from: ["fighting", "psychic"], no_damage_from: [] },
+        bug: { double_damage_from: ["fire", "flying", "rock"], half_damage_from: ["grass", "fighting", "ground"], no_damage_from: [] },
+        rock: { double_damage_from: ["water", "grass", "fighting", "ground", "steel"], half_damage_from: ["normal", "fire", "poison", "flying"], no_damage_from: [] },
+        ghost: { double_damage_from: ["ghost", "dark"], half_damage_from: ["poison", "bug"], no_damage_from: ["normal", "fighting"] },
+        dragon: { double_damage_from: ["ice", "dragon", "fairy"], half_damage_from: ["fire", "water", "electric", "grass"], no_damage_from: [] },
+        dark: { double_damage_from: ["fighting", "bug", "fairy"], half_damage_from: ["ghost", "dark"], no_damage_from: ["psychic"] },
+        steel: { double_damage_from: ["fire", "fighting", "ground"], half_damage_from: ["normal", "grass", "ice", "flying", "psychic", "bug", "rock", "dragon", "steel", "fairy"], no_damage_from: ["poison"] },
+        fairy: { double_damage_from: ["poison", "steel"], half_damage_from: ["fighting", "bug", "dark"], no_damage_from: ["dragon"] }
     };
-    const weaknesses = [];
+
+    const weaknesses = new Set();
+    let isFlying = false;
+
+    // Zoek uit of de Pokémon een Flying-type heeft
     for (const type of types) {
+        if (type.type.name === "flying") {
+            isFlying = true;
+        }
+
         const typeName = type.type.name;
-        if (typeWeaknesses[typeName]) {
-            weaknesses.push(...typeWeaknesses[typeName]);
+        if (typeEffectiveness[typeName]) {
+            // Voeg de zwaktes toe aan de set
+            typeEffectiveness[typeName].double_damage_from.forEach(weakness => weaknesses.add(weakness));
         }
     }
 
-    return [...new Set(weaknesses)];
+    // Als de Pokémon een Flying-type heeft, pas dan de Ground-zwakte aan
+    if (isFlying) {
+        weaknesses.delete("ground"); // Verwijder Ground als zwakte
+    }
+
+    // Return de zwaktes als een array
+    return [...weaknesses];
 }
 
 function getTypeColor(type) {
