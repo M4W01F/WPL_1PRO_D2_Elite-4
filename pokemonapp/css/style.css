@@ -81,7 +81,8 @@ nav .image-container img {
 /* Hoofdinhoud stijlen */
 main {
     padding: 20px;
-    background-color: white;
+    background-color: #0f0f0f8f;
+    color: white;
     margin: 20px auto;
     width: 90%;
     max-width: 1200px;
@@ -315,6 +316,7 @@ input[type="text"] {
 
 /* Stijlen voor de aangepaste dropdown-container */
 .dropdown-container {
+    margin-top: 10px;
     position: relative;
     display: inline-block;
 }
@@ -428,6 +430,8 @@ input[type="text"] {
     overflow: hidden;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
+    
+    
 }
 
 #battle-interface main {
@@ -441,6 +445,7 @@ input[type="text"] {
     background-color: #ffffff; 
     border-top: 2px solid #ccc; 
     box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.1);
+    
 }
 
 #buddy-moves {
@@ -969,9 +974,14 @@ div.niet-gevangen {
 
 
 /* media querries */
+
+
+
+
 @media (min-width: 601px) and (max-width: 1024px) {
- 
-    M-index{
+ /* begin querries voor index pagina tot lijn 1014 */
+
+    .M-index{
       display:flex;
       flex-direction: column;
       align-items: center;
@@ -1006,4 +1016,26 @@ div.niet-gevangen {
         background-position:center;
         background-attachment: fixed;
     } 
+    /* einde querries voor index pagina */
+
+
+    /* begin querries vergelijken */
+    .M-vergelijken{
+       background-color: #0f0f0f8f;
+    }
+
+    /* einde querries vergelijken */
+
+
+    /* begin querries battler */
+    #battle-interface{
+        margin-top: 200px;
+        background-color: unset;
+
+    }
+   .M-batteler{
+    background-color:#0f0f0f8f;
+   }
+    /* einde querries battler */
+
 }
