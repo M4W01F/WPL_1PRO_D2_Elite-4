@@ -22,8 +22,8 @@ async function fetchPokemon(pokemonNum) {
         statsTable.innerHTML = `
             <tr><th>Stat</th><th>Waarde</th></tr>
             ${pokemonData.stats
-            .map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`)
-            .join('')}
+                .map(stat => `<tr><td>${stat.stat.name}</td><td>${stat.base_stat}</td></tr>`)
+                .join('')}
         `;
 
         const typesRow = document.createElement("tr");
@@ -43,17 +43,16 @@ async function fetchPokemon(pokemonNum) {
         `;
         statsTable.appendChild(typesRow);
 
-        const weaknesses = await getWeaknesses(pokemonData.types);
-        
+        const types = pokemonData.types.map(typeInfo => typeInfo.type.name);
+        const weaknesses = calculateCombinedWeaknesses(types);
+
+
         const weaknessesRow = document.createElement("tr");
-        const weaknessBadges = weaknesses
-            .map(
-                weakness =>
-                    `<span class="weakness-badge" style="background-color: ${getTypeColor(weakness)}; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
-                        ${weakness}
-                    </span>`
-            )
-            .join(" ");
+        const weaknessBadges = weaknesses.map(({ type, multiplier }) => `
+            <span class="type-badge" style="background-color: ${getTypeColor(type)}; color: #fff; border-radius: 5px; padding: 5px 10px; margin-right: 5px;">
+                ${type} (${multiplier}x)
+            </span>
+        `).join('');
         weaknessesRow.innerHTML = `
             <td colspan="2">
                 <strong>Weaknesses:</strong><br>
@@ -68,7 +67,7 @@ async function fetchPokemon(pokemonNum) {
 }
 
 // Bereken gecombineerde zwaktes voor multi-typed Pokémon
-async function getWeaknesses(types) {
+function calculateCombinedWeaknesses(types) {
     const typeEffectiveness = {
         normal: { double_damage_from: ["fighting"], half_damage_from: ["ghost"], no_damage_from: ["ghost"] },
         fire: { double_damage_from: ["water", "rock", "ground"], half_damage_from: ["fire", "grass", "ice", "bug", "steel", "fairy"], no_damage_from: [] },
@@ -90,29 +89,33 @@ async function getWeaknesses(types) {
         fairy: { double_damage_from: ["poison", "steel"], half_damage_from: ["fighting", "bug", "dark"], no_damage_from: ["dragon"] }
     };
 
-    const weaknesses = new Set();
-    let isFlying = false;
+    const weaknesses = {};
 
-    // Zoek uit of de Pokémon een Flying-type heeft
-    for (const type of types) {
-        if (type.type.name === "flying") {
-            isFlying = true;
-        }
+    // Proceseerd elk type
+    types.forEach(type => {
+        const effectiveness = typeEffectiveness[type];
+        if (!effectiveness) return;
 
-        const typeName = type.type.name;
-        if (typeEffectiveness[typeName]) {
-            // Voeg de zwaktes toe aan de set
-            typeEffectiveness[typeName].double_damage_from.forEach(weakness => weaknesses.add(weakness));
-        }
-    }
+        // Toont double shade van dit type.
+        effectiveness.double_damage_from.forEach(weakness => {
+            weaknesses[weakness] = (weaknesses[weakness] || 1) * 2;
+        });
 
-    // Als de Pokémon een Flying-type heeft, pas dan de Ground-zwakte aan
-    if (isFlying) {
-        weaknesses.delete("ground"); // Verwijder Ground als zwakte
-    }
+        // Plaats half shade van dit type
+        effectiveness.half_damage_from.forEach(resistance => {
+            weaknesses[resistance] = (weaknesses[resistance] || 1) / 2;
+        });
 
-    // Return de zwaktes als een array
-    return [...weaknesses];
+        // Plaats geen shade vam dit type
+        effectiveness.no_damage_from.forEach(immunity => {
+            weaknesses[immunity] = 0; // Op 0 gezet om immuniteit te aantonen.
+        });
+    });
+
+    // Filter de multipliers uit die 1 of 0 zijn
+    return Object.entries(weaknesses)
+        .filter(([_, multiplier]) => multiplier > 1)
+        .map(([type, multiplier]) => ({ type, multiplier }));
 }
 
 function getTypeColor(type) {

@@ -110,7 +110,7 @@ async function setCurrentBuddy() {
             <p><strong>Losses:</strong> 2</p>
             <p><strong>Level:</strong> ${level}</p>
         `;
-        
+
         // Bereken statistieken
         const baseStats = {
             hp: pokemon.stats[0].base_stat,
@@ -170,9 +170,9 @@ async function setCurrentBuddy() {
         evolutionDiv.innerHTML = `
             <p><strong>Evolutie Lijn:</strong></p>
             ${await Promise.all(
-                evolutionChain.map(async name => {
-                    const evoData = await fetchPokemonData(name);
-                    return `
+            evolutionChain.map(async name => {
+                const evoData = await fetchPokemonData(name);
+                return `
                         <div style="
                             display: inline-block;
                             border: 3px solid #ccc;
@@ -186,8 +186,8 @@ async function setCurrentBuddy() {
                             <img src="${evoData.sprites.front_default}" alt="${evoData.name}" style="width: 50px; height: 50px;">
                         </div>
                     `;
-                })
-            ).then(sprites => sprites.join(''))}
+            })
+        ).then(sprites => sprites.join(''))}
         `;
     }
 }
