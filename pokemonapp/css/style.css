@@ -423,7 +423,7 @@ input[type="text"] {
     background-repeat: no-repeat;
     background-size: cover;
     width: 90%;
-    height: 400px;
+    height: 300px;
     margin: 0 auto;
     border: 2px solid black;
     position: relative;
@@ -1029,13 +1029,23 @@ div.niet-gevangen {
 
     /* begin querries battler */
     #battle-interface{
+        
+        
         margin-top: 200px;
-        background-color: unset;
-
+       
+        
     }
    .M-batteler{
     background-color:#0f0f0f8f;
+    
    }
+   #battle-interface header{
+    height:400px;
+   }
+   #pokemon-info, #buddy-info {
+    width: 150px;
+    height: 190px;
+}
     /* einde querries battler */
 
 }
