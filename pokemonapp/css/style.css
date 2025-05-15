@@ -82,7 +82,7 @@ nav .image-container img {
 main {
     padding: 20px;
     background-color: #0f0f0f8f;
-    color: white;
+    color: black;
     margin: 20px auto;
     width: 90%;
     max-width: 1200px;
@@ -827,11 +827,14 @@ div.niet-gevangen {
 /* Stijl index starter pokemons */
 #niet-ingelogged {
     background-image: url(../images/starter.jpg);
+    background-size: 100vh;
+    background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     display: flex;
     flex-direction: column;
     align-items: center;
+    
     min-height: 100vh;
     background-color: #f5f5f5;
 }
@@ -842,7 +845,7 @@ div.niet-gevangen {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 58%;
+    gap: 43%;
     margin-top: 12.5%;
 }
 
@@ -852,6 +855,7 @@ div.niet-gevangen {
     font-weight: bold;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     color: #333;
+    font-style: italic;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -1047,5 +1051,12 @@ div.niet-gevangen {
     height: 190px;
 }
     /* einde querries battler */
+
+    /* begin querries pokedex  */
+
+    #pokemon-list{
+        
+        
+    }
 
 }
