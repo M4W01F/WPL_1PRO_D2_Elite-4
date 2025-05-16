@@ -112,19 +112,24 @@ async function fetchPokemonLearnableMoves(pokemonId) {
         console.log("Fetching learnable moves for Pokémon ID:", pokemonId);
 
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-        if (response.ok) {
-            const data = await response.json();
-
-            console.log("Fetched data:", data);
-
-            const moveNames = data.moves.map(moveEntry => moveEntry.move.name);
-            console.log("Extracted move names:", moveNames);
-
-            return moveNames;
-        } else {
+        if (!response.ok) {
             console.error(`Failed to fetch learnable moves for Pokémon ID: ${pokemonId}`);
             return [];
         }
+
+        const data = await response.json();
+        console.log("Fetched data:", data);
+
+        // Filter op moved dat je can leeren door bepaalde levels.
+        const levelUpMoves = data.moves.filter(moveEntry =>
+            moveEntry.version_group_details.some(detail =>
+                detail.move_learn_method.name === "level-up"
+            )
+        ).map(moveEntry => moveEntry.move.name);
+
+        console.log("Extracted level-up move names:", levelUpMoves);
+        return levelUpMoves;
+
     } catch (error) {
         console.error("Error fetching learnable moves:", error);
         return [];
@@ -151,7 +156,9 @@ async function getBuddyPokemonStats(data) {
 
         if (buddyPokemon) {
             const pokemonId = buddyPokemon.pokemon_id; // ID van de buddy-Pokémon
-            const level = buddyPokemon.level; // Niveau van de buddy
+            const level = buddyPokemon.level; // Level van de buddy
+            const wins = buddyPokemon.wins;
+            const loses = buddyPokemon.loses;
 
             // Controleer of moves al in cookies bestaan
             const moves = await initializeMovesFromJSON(pokemonId); // Haal moves uit cookies of JSON
@@ -161,7 +168,9 @@ async function getBuddyPokemonStats(data) {
             const buddyStats = {
                 id: pokemonId,
                 level: level,
-                moves: moves
+                moves: moves,
+                wins: wins,
+                loses: loses
             };
 
             console.log("Buddy-Pokémon-statistieken:", buddyStats);
@@ -171,7 +180,7 @@ async function getBuddyPokemonStats(data) {
             updateFooterBuddySprite(pokemon);
 
             updateBuddyMoves(buddyStats.id, buddyStats.moves);
-            setCurrentBuddy(buddyStats.id, buddyStats.level);
+            setCurrentBuddy(buddyStats.id, buddyStats.level, buddyStats.wins, buddyStats.loses);
             fetchPokemonLearnableMoves(buddyStats.id);
         } else {
             console.error("Geen buddy-Pokémon gevonden in de JSON-gegevens.");
@@ -182,7 +191,7 @@ async function getBuddyPokemonStats(data) {
 }
 
 // Stel huidige buddy in en toon informatie
-async function setCurrentBuddy(pokemonId, level) {
+async function setCurrentBuddy(pokemonId, level, wins, loses) {
     const pokemon = await fetchPokemonData(pokemonId);
     const species = await fetchSpeciesData(pokemonId);
     if (pokemon && species) {
@@ -195,8 +204,8 @@ async function setCurrentBuddy(pokemonId, level) {
             <p><strong>Naam:</strong> ${pokemon.name}</p>
             <p><strong>Bijnaam:</strong> Blaze</p>
             <p><strong>ID:</strong> ${pokemon.id}</p>
-            <p><strong>Wins:</strong> 10</p>
-            <p><strong>Losses:</strong> 2</p>
+            <p><strong>Wins:</strong> ${wins}</p>
+            <p><strong>Losses:</strong> ${loses}</p>
             <p><strong>Level:</strong> ${level}</p>
         `;
         

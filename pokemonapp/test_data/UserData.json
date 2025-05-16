@@ -8,6 +8,8 @@
       "pokemon_name": "pikachu",
       "pokemon_id": 25,
       "level": 30,
+      "wins": 5,
+      "loses": 3,
       "stats": {
         "hp": 57,
         "attack": 90,
@@ -62,6 +64,8 @@
       "pokemon_name": "bulbasaur",
       "pokemon_id": 1,
       "level": 15,
+      "wins": 5,
+      "loses": 1,
       "stats": {
         "hp": 60,
         "attack": 65,
