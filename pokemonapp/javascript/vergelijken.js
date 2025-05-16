@@ -1,3 +1,5 @@
+const { stat } = require("fs");
+
 async function fetchPokemon(pokemonNum) {
     const input = document.getElementById(`pokemon${pokemonNum}`);
     const img = document.getElementById(`img${pokemonNum}`);
@@ -60,6 +62,11 @@ async function fetchPokemon(pokemonNum) {
             </td>
         `;
         statsTable.appendChild(weaknessesRow);
+
+        //Voor visueel te vergelijken
+        if (pokemon1IsLoaded() && pokemon2IsLoaded()) {
+            comparePokemonStats();
+        }
 
     } catch (error) {
         alert(`Fout: ${error.message}`);
@@ -140,4 +147,64 @@ function getTypeColor(type) {
         steel: "#b8b8d0"
     };
     return typeColors[type] || "#d3d3d3";
+}
+
+function getStatValues(statsTableId) {
+    const rows = document.querySelectorAll(`#${statsTableId} tr`);
+    const stats = {};
+    // Rijen van index 1 t/m 6 (want index 0 is header, daarna 6 stats)
+    for (let i = 1; i <= 6; i++) {
+        const cells = rows[i].cells;
+        if (cells.length < 2) continue;
+        const statName = cells[0].textContent.trim();
+        const statValue = parseInt(cells[1].textContent);
+        stats[statName] = statValue;
+    }
+    return stats;
+}
+
+function comparePokemonStats() {
+    const statNames = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
+    const comparisonTable = document.getElementById("comparisonTable");
+    comparisonTable.innerHTML = `<tr><th>Stat</th><th>Vergelijking</th></tr>`;
+    
+    statNames.forEach(statName => {
+        const row1 = Array.from(document.querySelectorAll("#stats1 tr"))
+            .find(row => row.children[0]?.textContent === statName);
+        const row2 = Array.from(document.querySelectorAll("#stats2 tr"))
+            .find(row => row.children[0]?.textContent === statName);
+
+        if (!row1 || !row2) return;
+
+        const statValue1 = parseInt(row1.children[1].textContent);
+        const statValue2 = parseInt(row2.children[1].textContent);
+
+        let arrow = "==";
+        let color = "white";
+
+        if (statValue1 > statValue2) {
+            arrow = "<<";
+            color = "limegreen";
+        } else if (statValue1 < statValue2) {
+            arrow = ">>";
+            color = "red";
+        }
+
+        comparisonTable.innerHTML += `
+            <tr>
+                <td style="color: ${color}; font-weight: bold;">${statName}</td>
+                <td style="color: ${color}; font-size: 20px;">${arrow}</td>
+            </tr>
+        `;
+    });
+}
+
+function pokemon1IsLoaded() {
+    const stats1 = document.getElementById("stats1").rows;
+    return stats1.length > 2;
+}
+
+function pokemon2IsLoaded() {
+    const stats2 = document.getElementById("stats2").rows;
+    return stats2.length > 2;
 }
