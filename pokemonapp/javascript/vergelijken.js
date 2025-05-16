@@ -183,10 +183,10 @@ function comparePokemonStats() {
         let color = "white";
 
         if (statValue1 > statValue2) {
-            arrow = "<<";
-            color = "limegreen";
-        } else if (statValue1 < statValue2) {
             arrow = ">>";
+            color = "green";
+        } else if (statValue1 < statValue2) {
+            arrow = "<<";
             color = "red";
         }
 
