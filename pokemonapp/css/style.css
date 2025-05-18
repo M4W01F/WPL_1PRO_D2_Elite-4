@@ -983,7 +983,7 @@ div.niet-gevangen {
 
 
 @media (min-width: 601px) and (max-width: 1024px) {
- /* begin querries voor index pagina tot lijn 1014 */
+ /* begin querries voor index pagina */
 
     .M-index{
       display:flex;
@@ -1009,7 +1009,16 @@ div.niet-gevangen {
         
         
     }
-    
+    #pokemon-container{
+        flex-direction: column;
+        align-items: center;
+        margin: 20px;
+        
+    }
+    #niet-ingelogged{
+        background-size:cover;
+    }
+
     /* background image niet laten repeaten */
      .index-img{
         background-image: url(../images/achtergrond-weiland.png);
