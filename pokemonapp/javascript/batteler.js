@@ -180,7 +180,6 @@ async function setCurrentBuddy(pokemonId, level) {
         buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
         buddy.weakness = calculateCombinedWeaknesses(buddy.types);
-        
     }
 }
 
@@ -308,7 +307,7 @@ async function updateBuddyMoves(moves) {
                 border: 1px solid black;
                 color: white;
                 justify-content: center;
-            " onclick="handleMoveClick('${move}')">
+            " onclick="handleMoveClick('${move,moveType,movePower,moveAccuracy}')">
                 ${move}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
             </button>
         `;
@@ -348,14 +347,10 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
 }
 
 // Functie om een move te verwerken wanneer erop wordt geklikt
-async function handleMoveClick(move) {
-    const moveInfo = await GetMoveInfo(move);
-    const moveType = moveInfo.type;
-    const movePower = moveInfo.power || "N/A";
-    const moveAccuracy = moveInfo.accuracy || "N/A";
-
+async function handleMoveClick(move,moveType,movePower,moveAccuracy) {
     // zwaktes
     console.log(pokemon.weakness)
+    console.log(buddy.weakness)
     // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
     document.getElementById('run-away').style.display = 'none';
     document.getElementById('move-resultaat').style.display = 'block';
@@ -514,8 +509,7 @@ async function startBattle(pokemonName) {
         pokemon.sDefense = sDefense;
         pokemon.types = pokemonData.types.map(typeInfo => typeInfo.type.name);
         pokemon.weakness = calculateCombinedWeaknesses(pokemon.types);
-        console.log(pokemon.weakness)
-
+        
         pokemon.sprite = pokemonData.sprites.front_default;
         buddy.sprite = buddyData.sprites.back_default;
 
@@ -541,7 +535,6 @@ async function startBattle(pokemonName) {
         alert(error.message);
     }
 }
-
 
 // Kleuren van het type
 function getTypeColor(type) {
