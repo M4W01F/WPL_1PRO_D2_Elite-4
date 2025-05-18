@@ -120,15 +120,28 @@ async function fetchPokemonLearnableMoves(pokemonId) {
         const data = await response.json();
         console.log("Fetched data:", data);
 
-        // Filter op moved dat je can leeren door bepaalde levels.
-        const levelUpMoves = data.moves.filter(moveEntry =>
+        // Filter moves learned through level-up and TM/HM
+        const learnableMoves = data.moves.filter(moveEntry =>
             moveEntry.version_group_details.some(detail =>
-                detail.move_learn_method.name === "level-up"
+                ["level-up", "machine"].includes(detail.move_learn_method.name)
             )
         ).map(moveEntry => moveEntry.move.name);
 
-        console.log("Extracted level-up move names:", levelUpMoves);
-        return levelUpMoves;
+        // Fetch move details to filter out status moves AND remove moves with power <= 0 or null
+        const filteredMovePromises = learnableMoves.map(async (moveName) => {
+            const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveName}`);
+            if (!moveResponse.ok) return null;
+
+            const moveData = await moveResponse.json();
+
+            // Remove status moves and moves with power null or 0
+            return (moveData.damage_class.name !== "status" && moveData.power > 0) ? moveName : null;
+        });
+
+        const filteredMoves = (await Promise.all(filteredMovePromises)).filter(move => move);
+        console.log("Extracted moves with valid power:", filteredMoves);
+
+        return filteredMoves;
 
     } catch (error) {
         console.error("Error fetching learnable moves:", error);
