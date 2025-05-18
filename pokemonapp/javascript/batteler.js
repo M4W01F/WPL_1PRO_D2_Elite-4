@@ -168,7 +168,6 @@ async function setCurrentBuddy(pokemonId, level) {
             sAttack += sAttack / 50;
             sDefense += sDefense / 50;
         }
-        console.log(buddyData.name);
         buddy.name = buddyData.name;
         buddy.level = level;
         buddy.maxHp = Math.round(hp, 0);
@@ -181,6 +180,7 @@ async function setCurrentBuddy(pokemonId, level) {
         buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
         buddy.weakness = calculateCombinedWeaknesses(buddy.types);
+        
     }
 }
 
@@ -348,7 +348,14 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
 }
 
 // Functie om een move te verwerken wanneer erop wordt geklikt
-function handleMoveClick(move) {
+async function handleMoveClick(move) {
+    const moveInfo = await GetMoveInfo(move);
+    const moveType = moveInfo.type;
+    const movePower = moveInfo.power || "N/A";
+    const moveAccuracy = moveInfo.accuracy || "N/A";
+
+    // zwaktes
+    console.log(pokemon.weakness)
     // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
     document.getElementById('run-away').style.display = 'none';
     document.getElementById('move-resultaat').style.display = 'block';
@@ -507,6 +514,7 @@ async function startBattle(pokemonName) {
         pokemon.sDefense = sDefense;
         pokemon.types = pokemonData.types.map(typeInfo => typeInfo.type.name);
         pokemon.weakness = calculateCombinedWeaknesses(pokemon.types);
+        console.log(pokemon.weakness)
 
         pokemon.sprite = pokemonData.sprites.front_default;
         buddy.sprite = buddyData.sprites.back_default;
@@ -562,26 +570,116 @@ function getTypeColor(type) {
 
 // Bereken gecombineerde zwaktes voor multi-typed Pokémon
 function calculateCombinedWeaknesses(types) {
-    const typeEffectiveness = {
-        normal: { double_damage_from: ["fighting"], half_damage_from: ["ghost"], no_damage_from: ["ghost"] },
-        fire: { double_damage_from: ["water", "rock", "ground"], half_damage_from: ["fire", "grass", "ice", "bug", "steel", "fairy"], no_damage_from: [] },
-        water: { double_damage_from: ["electric", "grass"], half_damage_from: ["fire", "water", "ice", "steel"], no_damage_from: [] },
-        grass: { double_damage_from: ["fire", "ice", "poison", "flying", "bug"], half_damage_from: ["water", "electric", "grass", "ground"], no_damage_from: [] },
-        electric: { double_damage_from: ["ground"], half_damage_from: ["electric", "flying", "steel"], no_damage_from: [] },
-        ice: { double_damage_from: ["fire", "fighting", "rock", "steel"], half_damage_from: ["ice"], no_damage_from: [] },
-        fighting: { double_damage_from: ["flying", "psychic", "fairy"], half_damage_from: ["bug", "rock", "dark"], no_damage_from: [] },
-        poison: { double_damage_from: ["ground", "psychic"], half_damage_from: ["grass", "fighting", "poison", "bug", "fairy"], no_damage_from: [] },
-        ground: { double_damage_from: ["water", "grass", "ice"], half_damage_from: ["poison", "rock"], no_damage_from: ["electric"] },
-        flying: { double_damage_from: ["electric", "ice", "rock"], half_damage_from: ["grass", "fighting", "bug"], no_damage_from: ["ground"] },
-        psychic: { double_damage_from: ["bug", "ghost", "dark"], half_damage_from: ["fighting", "psychic"], no_damage_from: [] },
-        bug: { double_damage_from: ["fire", "flying", "rock"], half_damage_from: ["grass", "fighting", "ground"], no_damage_from: [] },
-        rock: { double_damage_from: ["water", "grass", "fighting", "ground", "steel"], half_damage_from: ["normal", "fire", "poison", "flying"], no_damage_from: [] },
-        ghost: { double_damage_from: ["ghost", "dark"], half_damage_from: ["poison", "bug"], no_damage_from: ["normal", "fighting"] },
-        dragon: { double_damage_from: ["ice", "dragon", "fairy"], half_damage_from: ["fire", "water", "electric", "grass"], no_damage_from: [] },
-        dark: { double_damage_from: ["fighting", "bug", "fairy"], half_damage_from: ["ghost", "dark"], no_damage_from: ["psychic"] },
-        steel: { double_damage_from: ["fire", "fighting", "ground"], half_damage_from: ["normal", "grass", "ice", "flying", "psychic", "bug", "rock", "dragon", "steel", "fairy"], no_damage_from: ["poison"] },
-        fairy: { double_damage_from: ["poison", "steel"], half_damage_from: ["fighting", "bug", "dark"], no_damage_from: ["dragon"] }
-    };
+const typeEffectiveness = {
+    normal: { 
+        double_damage_from: ["fighting"], 
+        half_damage_from: [], 
+        no_damage_from: ["ghost"], 
+        single_damage_from: ["normal", "fire", "water", "electric", "grass", "ice", "poison", "ground", "flying", "psychic", "bug", "rock", "dragon", "dark", "steel", "fairy"]
+    },
+    fire: { 
+        double_damage_from: ["water", "rock", "ground"], 
+        half_damage_from: ["fire", "grass", "ice", "bug", "steel", "fairy"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "electric", "fighting", "poison", "flying", "psychic", "ghost", "dragon", "dark"]
+    },
+    water: { 
+        double_damage_from: ["electric", "grass"], 
+        half_damage_from: ["fire", "water", "ice", "steel"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "fairy"]
+    },
+    grass: { 
+        double_damage_from: ["fire", "ice", "poison", "flying", "bug"], 
+        half_damage_from: ["water", "electric", "grass", "ground"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fighting", "psychic", "rock", "ghost", "dragon", "dark", "steel", "fairy"]
+    },
+    electric: { 
+        double_damage_from: ["ground"], 
+        half_damage_from: ["electric", "flying", "steel"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fire", "water", "grass", "ice", "fighting", "poison", "psychic", "bug", "rock", "ghost", "dragon", "dark", "fairy"]
+    },
+    ice: { 
+        double_damage_from: ["fire", "fighting", "rock", "steel"], 
+        half_damage_from: ["ice"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "water", "electric", "grass", "poison", "ground", "flying", "psychic", "bug", "ghost", "dragon", "dark", "fairy"]
+    },
+    fighting: { 
+        double_damage_from: ["flying", "psychic", "fairy"], 
+        half_damage_from: ["bug", "rock", "dark"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fire", "water", "electric", "grass", "ice", "poison", "ground", "ghost", "dragon", "steel", "fighting"]
+    },
+    poison: { 
+        double_damage_from: ["ground", "psychic"], 
+        half_damage_from: ["grass", "fighting", "poison", "bug", "fairy"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fire", "water", "electric", "ice", "flying", "rock", "ghost", "dragon", "dark", "steel"]
+    },
+    ground: { 
+        double_damage_from: ["water", "grass", "ice"], 
+        half_damage_from: ["poison", "rock"], 
+        no_damage_from: ["electric"], 
+        single_damage_from: ["normal", "fire", "electric", "ice", "fighting", "psychic", "bug", "ghost", "dragon", "dark", "steel", "fairy"]
+    },
+    flying: { 
+        double_damage_from: ["electric", "ice", "rock"], 
+        half_damage_from: ["grass", "fighting", "bug"], 
+        no_damage_from: ["ground"], 
+        single_damage_from: ["normal", "fire", "water", "electric", "poison", "psychic", "ghost", "dragon", "dark", "steel", "fairy"]
+    },
+    psychic: { 
+        double_damage_from: ["bug", "ghost", "dark"], 
+        half_damage_from: ["fighting", "psychic"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fire", "water", "electric", "grass", "ice", "poison", "ground", "flying", "rock", "dragon", "steel", "fairy"]
+    },
+    bug: { 
+        double_damage_from: ["fire", "flying", "rock"], 
+        half_damage_from: ["grass", "fighting", "ground"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "water", "electric", "ice", "poison", "psychic", "ghost", "dragon", "dark", "steel", "fairy", "bug"]
+    },
+    rock: { 
+        double_damage_from: ["water", "grass", "fighting", "ground", "steel"], 
+        half_damage_from: ["normal", "fire", "poison", "flying"], 
+        no_damage_from: [], 
+        single_damage_from: ["electric", "ice", "psychic", "bug", "ghost", "dragon", "dark", "fairy", "rock"]
+    },
+    ghost: { 
+        double_damage_from: ["ghost", "dark"], 
+        half_damage_from: ["poison", "bug"], 
+        no_damage_from: ["normal", "fighting"], 
+        single_damage_from: ["fire", "water", "electric", "grass", "ice", "ground", "flying", "psychic", "rock", "dragon", "steel", "fairy"]
+    },
+    dragon: { 
+        double_damage_from: ["ice", "dragon", "fairy"], 
+        half_damage_from: ["fire", "water", "electric", "grass"], 
+        no_damage_from: [], 
+        single_damage_from: ["normal", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dark", "steel"]
+    },
+    dark: { 
+        double_damage_from: ["fighting", "bug", "fairy"], 
+        half_damage_from: ["ghost", "dark"], 
+        no_damage_from: ["psychic"], 
+        single_damage_from: ["normal", "fire", "water", "electric", "grass", "ice", "poison", "ground", "flying", "rock", "dragon", "steel"]
+    },
+    steel: { 
+        double_damage_from: ["fire", "fighting", "ground"], 
+        half_damage_from: ["normal", "grass", "ice", "flying", "psychic", "bug", "rock", "dragon", "steel", "fairy"], 
+        no_damage_from: ["poison"], 
+        single_damage_from: ["water", "electric", "dark", "ghost"]
+    },
+    fairy: { 
+        double_damage_from: ["poison", "steel"], 
+        half_damage_from: ["fighting", "bug", "dark"], 
+        no_damage_from: ["dragon"], 
+        single_damage_from: ["normal", "fire", "water", "electric", "grass", "ice", "ground", "flying", "psychic", "rock", "ghost", "steel"]
+    }
+};
 
     const weaknesses = {};
 
@@ -590,26 +688,26 @@ function calculateCombinedWeaknesses(types) {
         const effectiveness = typeEffectiveness[type];
         if (!effectiveness) return;
 
-        // Toont double shade van dit type.
         effectiveness.double_damage_from.forEach(weakness => {
             weaknesses[weakness] = (weaknesses[weakness] || 1) * 2;
         });
 
-        // Plaats half shade van dit type
         effectiveness.half_damage_from.forEach(resistance => {
             weaknesses[resistance] = (weaknesses[resistance] || 1) / 2;
         });
 
-        // Plaats geen shade vam dit type
         effectiveness.no_damage_from.forEach(immunity => {
-            weaknesses[immunity] = 0; // Op 0 gezet om immuniteit te aantonen.
+            weaknesses[immunity] = 0;
+        });
+
+        effectiveness.single_damage_from.forEach(neutral => {
+            weaknesses[neutral] = weaknesses[neutral] || 1; // Zorgt ervoor dat normale schade correct wordt weergegeven
         });
     });
 
+
     // Filter de multipliers uit die 1 of 0 zijn
-    return Object.entries(weaknesses)
-        .filter(([_, multiplier]) => multiplier > 1)
-        .map(([type, multiplier]) => ({ type, multiplier }));
+    return Object.entries(weaknesses).map(([type, multiplier]) => ({ type, multiplier }));
 }
 
 async function GetMoveInfo(moveName) {
