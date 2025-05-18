@@ -214,16 +214,20 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
             hp: pokemon.stats[0].base_stat,
             attack: pokemon.stats[1].base_stat,
             defense: pokemon.stats[2].base_stat,
+            sAttack: pokemon.stats[3].base_stat,
+            sDefense: pokemon.stats[4].base_stat,
             speed: pokemon.stats[5].base_stat
         };
 
 
-        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
+        let hp = baseStats.hp, attack = baseStats.attack, sAttack = baseStats.sAttack, defense = baseStats.defense, sDefense = baseStats.sDefense, speed = baseStats.speed;
 
         for (let i = 1; i <= level; i++) {
             hp += hp / 50;
             attack += attack / 50;
             defense += defense / 50;
+            sAttack += sAttack / 50;
+            sDefense += sDefense / 50;
             speed += speed / 50;
         }
 
@@ -243,10 +247,12 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
 
         statsDiv.innerHTML = `
             <p><strong>Stats:</strong></p>
-            <p><strong>HP: ${Math.floor(hp)}</strong></p>
-            <p><strong>Attack: ${Math.floor(attack)}</strong></p>
-            <p><strong>Defense: ${Math.floor(defense)}</strong></p>
-            <p><strong>Speed: ${Math.floor(speed)}</strong></p><br>
+            <p><strong>HP: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${Math.floor(hp)}</b></strong></p>
+            <p><strong>Attack: &nbsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${Math.floor(attack)}</b></strong></p>
+            <p><strong>Defense: &ensp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${Math.floor(defense)}</b></strong></p>
+            <p><strong>Special-Atack: &ensp;&ensp;&emsp;&emsp;<b>${Math.floor(sAttack)}</b></strong></p>
+            <p><strong>Special-Defence: &nbsp;&ensp;&emsp;<b>${Math.floor(sDefense)}</b></strong></p>
+            <p><strong>Speed: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${Math.floor(speed)}</b></strong></p><br>
             <p><strong>Types:</strong></p>
             ${typeBadges}<br><br>
             <p><strong>Zwaktes:</strong></p>

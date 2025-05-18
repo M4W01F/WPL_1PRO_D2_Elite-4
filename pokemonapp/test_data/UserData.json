@@ -11,10 +11,12 @@
       "wins": 5,
       "loses": 3,
       "stats": {
-        "hp": 57,
-        "attack": 90,
-        "defense": 65,
-        "speed": 147
+        "hp": 63,
+        "attack": 99,
+        "defense": 72,
+        "special-attack": 90,
+        "special-defense": 90,
+        "speed": 163
       },
       "isBuddy": true,
       "moves": [
@@ -70,6 +72,8 @@
         "hp": 60,
         "attack": 65,
         "defense": 65,
+        "special-attack": 87,
+        "special-defense": 87,
         "speed": 60
       },
       "isBuddy": false,

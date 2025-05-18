@@ -152,17 +152,21 @@ async function setCurrentBuddy(pokemonId, level) {
             hp: buddyData.stats[0].base_stat,
             attack: buddyData.stats[1].base_stat,
             defense: buddyData.stats[2].base_stat,
+            sAttack: buddyData.stats[3].base_stat,
+            sDefense: buddyData.stats[4].base_stat,
             speed: buddyData.stats[5].base_stat
         };
 
 
-        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
+        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
 
         for (let i = 1; i <= level; i++) {
             hp += hp / 50;
             attack += attack / 50;
             defense += defense / 50;
             speed += speed / 50;
+            sAttack += sAttack / 50;
+            sDefense += sDefense / 50;
         }
         console.log(buddyData.name);
         buddy.name = buddyData.name;
@@ -172,10 +176,11 @@ async function setCurrentBuddy(pokemonId, level) {
         buddy.attack = attack;
         buddy.defense = defense;
         buddy.speed = speed;
+        buddy.sAttack = sAttack;
+        buddy.sDefense = sDefense;
+        buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
-        const types = buddyData.types.map(typeInfo => typeInfo.type.name);
-
-        //const weaknesses = calculateCombinedWeaknesses(types); dit pas later
+        buddy.weakness = calculateCombinedWeaknesses(buddy.types);
     }
 }
 
@@ -275,7 +280,7 @@ async function updateInfo(pokemon, buddy) {
 }
 
 // Functie om dynamisch de moves te genereren
-function updateBuddyMoves(moves) {
+async function updateBuddyMoves(moves) {
     if (!Array.isArray(moves) || moves.length === 0) {
         console.error("Moves-array is ongeldig of leeg.");
         document.getElementById('buddy-moves').innerHTML = "<p>Geen moves beschikbaar.</p>";
@@ -284,12 +289,33 @@ function updateBuddyMoves(moves) {
 
     console.log("Buddy moves bijwerken:", moves);
 
-    // Dynamisch UI voor moves genereren
-    const moveButtons = moves.map(move => `
-        <button onclick="handleMoveClick('${move}')">${move}</button>
-    `).join('');
+    const moveDataPromises = moves.map(async (move) => {
+        const moveInfo = await GetMoveInfo(move); // Fetch move details
+        const moveType = moveInfo.type;
+        const moveColor = getTypeColor(moveType);
+        const movePower = moveInfo.power || "N/A";
+        const moveAccuracy = moveInfo.accuracy || "N/A";
 
-    document.getElementById('buddy-moves').innerHTML = moveButtons;
+        return `
+            <button style="
+                background-color: ${moveColor};
+                padding-top: 10px;
+                padding-right: 10px;
+                padding-bottom: 90px;
+                font-size: 15px;
+                font-weight: bold;
+                border-radius: 8px;
+                border: 1px solid black;
+                color: white;
+                justify-content: center;
+            " onclick="handleMoveClick('${move}')">
+                ${move}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
+            </button>
+        `;
+    });
+
+    const moveButtons = await Promise.all(moveDataPromises);
+    document.getElementById('buddy-moves').innerHTML = moveButtons.join('');
 }
 
 // Roep de functie aan nadat de DOM is geladen
@@ -454,10 +480,13 @@ async function startBattle(pokemonName) {
             hp: pokemonData.stats[0].base_stat,
             attack: pokemonData.stats[1].base_stat,
             defense: pokemonData.stats[2].base_stat,
+            sAttack: pokemonData.stats[3].base_stat,
+            sDefense: pokemonData.stats[4].base_stat,
             speed: pokemonData.stats[5].base_stat
         };
 
-        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed;
+
+        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
 
         pokemon.name = pokemonData.name;
         pokemon.level = buddy.level + [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
@@ -466,12 +495,18 @@ async function startBattle(pokemonName) {
             attack += attack / 50;
             defense += defense / 50;
             speed += speed / 50;
+            sAttack += sAttack / 50;
+            sDefense += sDefense / 50;
         }
         pokemon.hp = Math.round(hp);
         pokemon.maxHp = Math.round(hp, 0);
         pokemon.attack = attack;
         pokemon.defense = defense;
         pokemon.speed = speed;
+        pokemon.sAttack = sAttack;
+        pokemon.sDefense = sDefense;
+        pokemon.types = pokemonData.types.map(typeInfo => typeInfo.type.name);
+        pokemon.weakness = calculateCombinedWeaknesses(pokemon.types);
 
         pokemon.sprite = pokemonData.sprites.front_default;
         buddy.sprite = buddyData.sprites.back_default;
@@ -523,4 +558,74 @@ function getTypeColor(type) {
         steel: "#b8b8d0"
     };
     return typeColors[type] || "#d3d3d3"; // Default color for unknown types
+}
+
+// Bereken gecombineerde zwaktes voor multi-typed Pokémon
+function calculateCombinedWeaknesses(types) {
+    const typeEffectiveness = {
+        normal: { double_damage_from: ["fighting"], half_damage_from: ["ghost"], no_damage_from: ["ghost"] },
+        fire: { double_damage_from: ["water", "rock", "ground"], half_damage_from: ["fire", "grass", "ice", "bug", "steel", "fairy"], no_damage_from: [] },
+        water: { double_damage_from: ["electric", "grass"], half_damage_from: ["fire", "water", "ice", "steel"], no_damage_from: [] },
+        grass: { double_damage_from: ["fire", "ice", "poison", "flying", "bug"], half_damage_from: ["water", "electric", "grass", "ground"], no_damage_from: [] },
+        electric: { double_damage_from: ["ground"], half_damage_from: ["electric", "flying", "steel"], no_damage_from: [] },
+        ice: { double_damage_from: ["fire", "fighting", "rock", "steel"], half_damage_from: ["ice"], no_damage_from: [] },
+        fighting: { double_damage_from: ["flying", "psychic", "fairy"], half_damage_from: ["bug", "rock", "dark"], no_damage_from: [] },
+        poison: { double_damage_from: ["ground", "psychic"], half_damage_from: ["grass", "fighting", "poison", "bug", "fairy"], no_damage_from: [] },
+        ground: { double_damage_from: ["water", "grass", "ice"], half_damage_from: ["poison", "rock"], no_damage_from: ["electric"] },
+        flying: { double_damage_from: ["electric", "ice", "rock"], half_damage_from: ["grass", "fighting", "bug"], no_damage_from: ["ground"] },
+        psychic: { double_damage_from: ["bug", "ghost", "dark"], half_damage_from: ["fighting", "psychic"], no_damage_from: [] },
+        bug: { double_damage_from: ["fire", "flying", "rock"], half_damage_from: ["grass", "fighting", "ground"], no_damage_from: [] },
+        rock: { double_damage_from: ["water", "grass", "fighting", "ground", "steel"], half_damage_from: ["normal", "fire", "poison", "flying"], no_damage_from: [] },
+        ghost: { double_damage_from: ["ghost", "dark"], half_damage_from: ["poison", "bug"], no_damage_from: ["normal", "fighting"] },
+        dragon: { double_damage_from: ["ice", "dragon", "fairy"], half_damage_from: ["fire", "water", "electric", "grass"], no_damage_from: [] },
+        dark: { double_damage_from: ["fighting", "bug", "fairy"], half_damage_from: ["ghost", "dark"], no_damage_from: ["psychic"] },
+        steel: { double_damage_from: ["fire", "fighting", "ground"], half_damage_from: ["normal", "grass", "ice", "flying", "psychic", "bug", "rock", "dragon", "steel", "fairy"], no_damage_from: ["poison"] },
+        fairy: { double_damage_from: ["poison", "steel"], half_damage_from: ["fighting", "bug", "dark"], no_damage_from: ["dragon"] }
+    };
+
+    const weaknesses = {};
+
+    // Proceseerd elk type
+    types.forEach(type => {
+        const effectiveness = typeEffectiveness[type];
+        if (!effectiveness) return;
+
+        // Toont double shade van dit type.
+        effectiveness.double_damage_from.forEach(weakness => {
+            weaknesses[weakness] = (weaknesses[weakness] || 1) * 2;
+        });
+
+        // Plaats half shade van dit type
+        effectiveness.half_damage_from.forEach(resistance => {
+            weaknesses[resistance] = (weaknesses[resistance] || 1) / 2;
+        });
+
+        // Plaats geen shade vam dit type
+        effectiveness.no_damage_from.forEach(immunity => {
+            weaknesses[immunity] = 0; // Op 0 gezet om immuniteit te aantonen.
+        });
+    });
+
+    // Filter de multipliers uit die 1 of 0 zijn
+    return Object.entries(weaknesses)
+        .filter(([_, multiplier]) => multiplier > 1)
+        .map(([type, multiplier]) => ({ type, multiplier }));
+}
+
+async function GetMoveInfo(moveName) {
+    const url = `https://pokeapi.co/api/v2/move/${moveName}`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return {
+            type: data.type.name,
+            power: data.power,
+            accuracy: data.accuracy,
+            priority: data.priority,
+            damage_class: data.damage_class.name,
+            effect: data.effect_entries.length > 0 ? data.effect_entries[0].effect : "No effect description available"
+        };
+    } catch (error) {
+        console.error("Error fetching move data:", error);
+    }
 }
