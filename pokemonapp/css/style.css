@@ -607,6 +607,7 @@ div.niet-gevangen {
     margin-top: 20px;
     border-top: 1px solid #ddd;
     padding-top: 15px;
+    justify-self: center;
 }
 
 #buddy-stats p {
@@ -659,6 +660,7 @@ div.niet-gevangen {
 }
 
 /* Media querie voor buddy */
+/* Kleine schermen (tablets & kleiner) */
 @media screen and (max-width: 768px) {
     #current-buddy {
         padding: 15px;
@@ -678,6 +680,71 @@ div.niet-gevangen {
     #buddy-evolution div img {
         width: 45px;
         height: 45px;
+    }
+
+    #current-buddy-info p,
+    #buddy-stats p,
+    #buddy-evolution p {
+        font-size: 18px;
+    }
+}
+
+/* Medium schermen (laptops & kleine desktops) */
+@media screen and (min-width: 769px) and (max-width: 1280px) {
+    #current-buddy {
+        max-width: 600px;
+        padding: 20px;
+    }
+
+    #current-buddy-info img {
+        width: 110px;
+        height: 110px;
+    }
+
+    #buddy-evolution div {
+        width: 80px;
+        height: 80px;
+    }
+
+    #buddy-evolution div img {
+        width: 65px;
+        height: 65px;
+    }
+
+    #current-buddy-info p,
+    #buddy-stats p,
+    #buddy-evolution p {
+        font-size: 20px;
+    }
+}
+
+/* Large screens */
+@media screen and (min-width: 1281px) {
+    #current-buddy {
+        max-width: 800px;
+        padding: 25px;
+        font-size: xx-large;
+    }
+
+    #current-buddy-info img {
+        width: 130px;
+        height: 130px;
+    }
+
+    #buddy-evolution div {
+        width: 100px;
+        height: 100px;
+    }
+
+    #buddy-evolution div img {
+        width: 80px;
+        height: 80px;
+    }
+
+    #current-buddy-info p,
+    #buddy-stats p,
+    #buddy-evolution p {
+        font-size: 22px;
     }
 }
 /* stijlen voor landingpagina */

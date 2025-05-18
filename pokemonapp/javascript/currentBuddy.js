@@ -309,21 +309,37 @@ async function updateBuddyMoves(id, moves) {
 
         const allLearnableMoves = await fetchPokemonLearnableMoves(id);
         allLearnableMoves.sort((a, b) => a.localeCompare(b)); // Alfabetisch gesorteerd
-
         const availableMoves = allLearnableMoves.filter(move => !moves.includes(move)); // Filter bestaande moves
         console.log("Beschikbare moves:", availableMoves);
 
-        const moveInputs = moves.map((moveName, index) => `
-            <div style="margin-bottom: 10px;">
-                <input type="text" placeholder="${moveName}" readonly style="margin-right: 10px; width: 90%; font-weight: bolder;">
-                <select onchange="handleMoveChange(${index}, '${id}')">
-                    <option value="" disabled selected>Selecteer een move</option>
-                    ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
-                </select>
-            </div>
-        `).join('');
+        // Fetch move details voor elke move
+        const moveDataPromises = moves.map(async (moveName, index) => {
+            const moveInfo = await GetMoveInfo(moveName); // Fetch move details
+            const moveType = moveInfo.type;
+            const moveColor = getTypeColor(moveType);
+            const movePower = moveInfo.power || "N/A";
+            const moveAccuracy = moveInfo.accuracy || "N/A";
 
-        document.getElementById('buddy-moves').innerHTML = moveInputs;
+            return `
+        <div style="margin-bottom: 2%; padding: 1%; border-radius: 2%; background-color: ${moveColor}; color: white; width: 95%; height: auto;">
+            <div style="width: 100%; text-align: left;">
+                <span style="font-size: 2vw; font-weight: bold; display: block;">${moveName}</span>
+                <hr style="border: 0.5px solid rgba(255,255,255,0.5); margin: 1% 0;">
+                <p style="margin: 1% 0; font-size: 1.5vw;">🗡️ <strong>Power:</strong> ${movePower}</p>
+                <p style="margin: 1% 0; font-size: 1.5vw;">🎯 <strong>Accuracy:</strong> ${moveAccuracy}%</p>
+            </div>
+            <select onchange="handleMoveChange(${index}, '${id}')" 
+                    style="background: white; border: none; padding: 0.5%; border-radius: 2%; font-size: 1.5vw; width: 100%; display: block; margin-top: 1%;">
+                <option value="" disabled selected>Selecteer een move</option>
+                ${availableMoves.map(learnableMove => `<option value="${learnableMove}">${learnableMove}</option>`).join('')}
+            </select>
+        </div>
+
+            `;
+        });
+
+        const moveInputs = await Promise.all(moveDataPromises);
+        document.getElementById('buddy-moves').innerHTML = moveInputs.join('');
     } catch (error) {
         console.error("Fout bij het bijwerken van buddy moves:", error);
         document.getElementById('buddy-moves').innerHTML = "<p>Er is een fout opgetreden bij het bijwerken van moves.</p>";
@@ -501,4 +517,22 @@ function getTypeColor(type) {
         steel: "#b8b8d0"
     };
     return typeColors[type] || "#d3d3d3";
+}
+
+async function GetMoveInfo(moveName) {
+    const url = `https://pokeapi.co/api/v2/move/${moveName}`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return {
+            type: data.type.name,
+            power: data.power,
+            accuracy: data.accuracy,
+            priority: data.priority,
+            damage_class: data.damage_class.name,
+            effect: data.effect_entries.length > 0 ? data.effect_entries[0].effect : "No effect description available"
+        };
+    } catch (error) {
+        console.error("Error fetching move data:", error);
+    }
 }
