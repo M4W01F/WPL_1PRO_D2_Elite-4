@@ -294,6 +294,7 @@ async function updateBuddyMoves(moves) {
         const moveColor = getTypeColor(moveType);
         const movePower = moveInfo.power || "N/A";
         const moveAccuracy = moveInfo.accuracy || "N/A";
+        const movePriority = moveInfo.priority;
 
         return `
             <button style="
@@ -307,7 +308,7 @@ async function updateBuddyMoves(moves) {
                 border: 1px solid black;
                 color: white;
                 justify-content: center;
-            " onclick="handleMoveClick('${move,moveType,movePower,moveAccuracy}')">
+            " onclick="handleMoveClick('${move,moveType,movePower,moveAccuracy,movePriority}')">
                 ${move}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
             </button>
         `;
@@ -347,10 +348,45 @@ function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
 }
 
 // Functie om een move te verwerken wanneer erop wordt geklikt
-async function handleMoveClick(move,moveType,movePower,moveAccuracy) {
-    // zwaktes
-    console.log(pokemon.weakness)
-    console.log(buddy.weakness)
+async function handleMoveClick(move,moveType,movePower,moveAccuracy,priority) {
+    const chosenMove = chooseBestMove(pokemon, buddy);
+        const moveInfo = await GetMoveInfo(chosenMove);
+        const enemyType = moveInfo.type;
+        const enemyPower = moveInfo.power || 40;
+        const enemyAccuracy = moveInfo.accuracy || 100;
+        const enemyPriority = moveInfo.priority;
+    let firstAttacker, secondAttacker;
+    if (buddy.speed >= pokemon.speed) {
+        if (enemyPriority === 1 && priority === 0) {
+            // Tegestander beweegt eerst
+            firstAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+            secondAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+        }
+        else if (enemyPriority === 1 && priority === 1) {
+            // Buddy gaat eerst
+            firstAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+            secondAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+        }
+        else{
+            // Buddy gaat eerst
+            firstAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+            secondAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+        }
+    }
+    else if (pokemon.speed > buddy.speed) {
+        if (enemyPriority === 0 && priority === 1) {
+            firstAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+            secondAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+        }
+        else if (enemyPriority === 1 && priority === 1) {
+            firstAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+            secondAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+        }
+        else{
+            firstAttacker = { name: "Pokemon", move: move, power: movePower, type: moveType, accuracy: moveAccuracy };
+            secondAttacker = { name: "Buddy", move: chosenMove, power: enemyPower, type: enemyType, accuracy: enemyAccuracy };
+        }
+    }
     // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
     document.getElementById('run-away').style.display = 'none';
     document.getElementById('move-resultaat').style.display = 'block';
@@ -514,15 +550,18 @@ async function startBattle(pokemonName) {
         buddy.sprite = buddyData.sprites.back_default;
 
         // Tegenstander moves
-        const learnableMoves = pokemonData.moves.filter(move => {
-            return move.version_group_details.some(detail =>
-                detail.level_learned_at <= pokemon.level && detail.move_learn_method.name === 'level-up'
-            );
-        }).map(move => move.move.name);
+        const learnableMoves = pokemonData.moves
+            .filter(move => {
+                return move.version_group_details.some(detail =>
+                    detail.level_learned_at <= pokemon.level && detail.move_learn_method.name === 'level-up'
+                );
+            })
+            .filter(move => move.power >= 10) 
+            .map(move => move.move.name);
 
         // Selecteerd de laatste 4 moves
         pokemon.moves = learnableMoves.slice(-4);
-
+        
         // Werk de gevechtsinterface aan
         updateInfo(pokemon, buddy);
 
