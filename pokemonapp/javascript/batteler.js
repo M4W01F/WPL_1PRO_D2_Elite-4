@@ -180,6 +180,8 @@ async function setCurrentBuddy(pokemonId, level) {
         buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
         buddy.weakness = calculateCombinedWeaknesses(buddy.types);
+
+        buddy.chosenMove = null;
     }
 }
 
@@ -261,7 +263,7 @@ async function updateInfo(pokemon, buddy) {
         ${getHealthBar(pokemon)} <!-- Health bar -->
         <img src="${pokemon.sprite}" alt="${pokemon.name} sprite" />
         <p>Level: ${pokemon.level}</p>
-        <p>HP: ${pokemon.hp}/${pokemon.maxHp || 100}</p>
+        <p>HP: ${Math.round(pokemon.hp)}/${pokemon.maxHp || 100}</p>
     `;
     pokemonInfoElement.innerHTML = pokemonInfo;
 
@@ -273,7 +275,7 @@ async function updateInfo(pokemon, buddy) {
         ${getHealthBar(buddy)} <!-- Health bar -->
         <img src="${buddy.sprite}" alt="${buddy.name} sprite" />
         <p>Level: ${buddy.level}</p>
-        <p>HP: ${buddy.hp}/${buddy.maxHp || 100}</p>
+        <p>HP: ${Math.round(buddy.hp)}/${buddy.maxHp || 100}</p>
     `;
     buddyInfoElement.innerHTML = buddyInfo;
 }
@@ -307,7 +309,7 @@ async function updateBuddyMoves(moves) {
                 border: 1px solid black;
                 color: white;
                 justify-content: center;
-            " onclick="handleMoveClick('${move,moveType,movePower,moveAccuracy}')">
+            " onclick="handleMoveClick('${move}')">
                 ${move}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
             </button>
         `;
@@ -323,120 +325,162 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Functie om dynamisch de resultaten van de moves bij te werken
-function updateMoveResult(isPlayer, move, effectiveness, playerHp, opponentHp) {
+function updateMoveResult(isPlayer, move, effectiveness) {
     const resultDiv = document.createElement('div');
-    resultDiv.className = 'move-resultaat';
+    resultDiv.className = 'move-resultaat click-next';
 
-    if (isPlayer) {
-        resultDiv.innerHTML = `
-            <p>Jij gebruikte: ${move}</p>
-            <p>Effectiviteit: ${effectiveness}</p>
-            <p>Jouw HP: ${playerHp}</p>
-            <p>Tegenstander HP: ${opponentHp}</p>
-        `;
+    let effectivenessText;
+    if (effectiveness === 0) {
+        effectivenessText = 'Immuun';
+    } else if (effectiveness < 1) {
+        effectivenessText = 'Niet effectief';
+    } else if (effectiveness >= 1 && effectiveness < 2) {
+        effectivenessText = 'Effectief';
+    } else if (effectiveness >= 2 && effectiveness <= 4) {
+        effectivenessText = 'Super effectief';
     } else {
-        resultDiv.innerHTML = `
-            <p>Tegenstander gebruikte: ${move}</p>
-            <p>Effectiviteit: ${effectiveness}</p>
-            <p>Jouw HP: ${playerHp}</p>
-            <p>Tegenstander HP: ${opponentHp}</p>
-        `;
+        effectivenessText = 'Extreem effectief';
     }
-    
+
+    resultDiv.innerHTML = `
+        <p>${isPlayer ? 'Jij' : 'Tegenstander'} gebruikte: ${move}</p>
+        <p>Effectiviteit: ${effectivenessText}</p>
+        <p>Jouw HP: ${Math.round(buddy.hp)}</p>
+        <p>Tegenstander HP: ${Math.round(pokemon.hp)}</p>
+        <br>
+        <p>Klik om verder te gaan ></p>
+    `;
+
+    resultDiv.onclick = () => {
+        resultDiv.remove();
+        continueBattle();
+    };
+
     document.getElementById('move-resultaat').appendChild(resultDiv);
 }
+
 
 // Functie om een move te verwerken wanneer erop wordt geklikt
-async function handleMoveClick(move,moveType,movePower,moveAccuracy) {
-    // zwaktes
-    console.log(pokemon.weakness)
-    console.log(buddy.weakness)
-    // Maakt het dat je moet vechten en dat je niet zomaar kan weglopen wanner je denkt dat je gaat verliezen.
+async function handleMoveClick(move) {
     document.getElementById('run-away').style.display = 'none';
     document.getElementById('move-resultaat').style.display = 'block';
-    // Voorbeeld voor het verlies van hp
-    const effectiveness = Math.random() > 0.5 ? 'effectief' : 'niet effectief';
-    pokemon.hp -= Math.floor(Math.random() * 40);
-    buddy.hp -= Math.floor(Math.random() * 40);
-    if (pokemon.hp < 0) {
-        pokemon.hp = 0;
-    }
-    if (buddy.hp < 0) {
-        buddy.hp = 0;
-    }
-    // Maak de move resultaat div leeg voordat een nieuw resultaat getoond word.
-    document.getElementById('move-resultaat').innerHTML = '';
+    document.getElementById('buddy-moves').style.visibility = 'hidden';
 
-    updateMoveResult(true, move, effectiveness, buddy.hp, pokemon.hp);
-    updateInfo(pokemon, buddy);
+    console.log(pokemon.weakness);
+    console.log(buddy.weakness);
 
-    // Als tegenstander of buddy hun hp op minstens 0 staat
-    const resultDiv = document.createElement('div');
-    resultDiv.className = 'move-resultaat';
-    resultDiv.style.position = 'relative'; // To position the arrow inside it
-    
-    if (buddy.hp <= 0) {
-        document.getElementById('move-resultaat').innerHTML = '';
-        document.getElementById('buddy-moves').style.display = 'none';
-        resultDiv.innerHTML = `
-            <p>${buddy.name} kan niet meer vechten!</p>
-            <br>
-            <p>${pokemon.name} heeft dit gevecht gewonnen.</p>
-            <br>
-            <p>Je krijgt 1 Lost aangerekend.</p>
-            <div class="click-pijl">Klik om verder te gaan ></div>
-        `;
-    
-        resultDiv.onclick = () => {
-            window.location.href = 'index.html'; // Redirect to index.html
-        };
-    }
-    if (pokemon.hp <= 0) {
-        document.getElementById('move-resultaat').innerHTML = '';
-        document.getElementById('buddy-moves').style.display = 'none';
-        resultDiv.innerHTML = `
-            <p>${pokemon.name} kan niet meer vechten!</p>
-            <br>
-            <p>${buddy.name} heeft dit gevecht gewonnen.</p>
-            <br>
-            <p>Je krijgt 1 Win aangerekend.</p>
-            <div class="click-pijl">Klik om verder te gaan ></div>
-        `;
-    
-        resultDiv.onclick = () => {
-            window.location.href = 'index.html'; // Redirect to index.html
-        };
-    }
-    
-    document.getElementById('move-resultaat').appendChild(resultDiv);
-    
-    // Stijling voor pijl animatie
-    const style = document.createElement('style');
-    style.textContent = `
-        .click-pijl {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            animation: move-left-right 1.5s infinite;
-            font-size: 12px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    buddy.chosenMove = move;
+
+    const attackOrder = await determineAttackOrder(pokemon, buddy);
+
+    let currentIndex = 0;
+
+    function processAttack() {
+        if (currentIndex >= attackOrder.length) {
+            document.getElementById('buddy-moves').style.visibility = 'visible';
+            return;
         }
 
-        @keyframes move-left-right {
-            0% {
-                transform: translateX(0);
-            }
-            50% {
-                transform: translateX(-10px);
-            }
-            100% {
-                transform: translateX(0);
-            }
+        const attacker = attackOrder[currentIndex];
+        const defender = attacker === pokemon ? buddy : pokemon;
+        const move = attacker.chosenMove;
+
+        if (move) {
+            GetMoveInfo(move).then(moveInfo => {
+                const moveType = moveInfo.type;
+
+                calculateDamage(attacker, defender, move).then(damage => {
+                    const effectiveness = defender.weakness.find(weakness => weakness.type === moveType)?.multiplier || 1;
+                    let effectivenessText;
+                    if (effectiveness === 0) {
+                        effectivenessText = 'Immuun';
+                    } else if (effectiveness < 1) {
+                        effectivenessText = 'Niet effectief';
+                    } else if (effectiveness >= 1 && effectiveness < 2) {
+                        effectivenessText = 'Effectief';
+                    } else if (effectiveness >= 2 && effectiveness <= 4) {
+                        effectivenessText = 'Super effectief';
+                    } else {
+                        effectivenessText = 'Extreem effectief';
+                    }
+
+                    defender.hp -= damage;
+
+                    // Zorg ervoor dat HP niet onder 0 zakt
+                    if (defender.hp < 0) {
+                        defender.hp = 0;
+                    }
+
+                    updateInfo(pokemon, buddy);
+                    document.getElementById('move-resultaat').innerHTML = '';
+
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'move-resultaat click-next';
+                    resultDiv.innerHTML = `
+                        <p>${attacker === buddy ? 'Jij' : 'Tegenstander'} gebruikte: ${move}</p>
+                        <p>Effectiviteit: ${effectivenessText}</p>
+                        <p>Jouw HP: ${Math.round(buddy.hp)}</p>
+                        <p>Tegenstander HP: ${Math.round(pokemon.hp)}</p>
+                        <br>
+                        <p>Klik om verder te gaan >>></p>
+                    `;
+
+                    document.getElementById('move-resultaat').appendChild(resultDiv);
+
+                    if (defender.hp <= 0) {
+                        checkBattleEnd();
+                        return;
+                    }
+
+                    resultDiv.onclick = () => {
+                        resultDiv.remove();
+                        currentIndex++;
+                        processAttack();
+                    };
+                });
+            });
+        } else {
+            currentIndex++;
+            processAttack();
         }
-    `;
-    document.head.appendChild(style);
+    }
+
+    function checkBattleEnd() {
+        document.getElementById('move-resultaat').innerHTML = '';
+        document.getElementById('buddy-moves').style.display = 'none';
+
+        let msg1, msg2, msg3;
+        if (buddy.hp <= 0) {
+            msg1 = `${buddy.name} kan niet meer vechten!`;
+            msg2 = `${pokemon.name} heeft dit gevecht gewonnen.`;
+            msg3 = 'Je krijgt 1 Lost aangerekend.';
+        } else if (pokemon.hp <= 0) {
+            msg1 = `${pokemon.name} kan niet meer vechten!`;
+            msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
+            msg3 = 'Je krijgt 1 Win aangerekend.';
+        }
+
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'move-resultaat click-next';
+        resultDiv.innerHTML = `
+            <p>${msg1}</p>
+            <br>
+            <p>${msg2}</p>
+            <br>
+            <p>${msg3}</p>
+            <div class="click-pijl">Klik om verder te gaan ></div>
+        `;
+
+        resultDiv.onclick = () => {
+            window.location.href = 'index.html';
+        };
+
+        document.getElementById('move-resultaat').appendChild(resultDiv);
+    }
+
+    processAttack();
 }
+
 
 // Voorbeeld data
 const pokemon = {
@@ -522,6 +566,27 @@ async function startBattle(pokemonName) {
 
         // Selecteerd de laatste 4 moves
         pokemon.moves = learnableMoves.slice(-4);
+
+        let maxDamage = 0;
+        let chosenMove = null;
+
+        for (const move of pokemon.moves) {
+            const moveInfo = await GetMoveInfo(move);
+            const movePower = moveInfo.power || 0;
+            const moveType = moveInfo.type;
+
+            if (movePower > 0) {
+                const typeEffectiveness = buddy.weakness.find(weakness => weakness.type === moveType)?.multiplier || 1;
+                const damage = movePower * typeEffectiveness;
+
+                if (damage > maxDamage) {
+                    maxDamage = damage;
+                    chosenMove = move;
+                }
+            }
+        }
+
+        pokemon.chosenMove = chosenMove;
 
         // Werk de gevechtsinterface aan
         updateInfo(pokemon, buddy);
@@ -718,5 +783,46 @@ async function GetMoveInfo(moveName) {
         };
     } catch (error) {
         console.error("Error fetching move data:", error);
+    }
+}
+
+// Functie om de schade te berekenen
+async function calculateDamage(attacker, defender, move) {
+    const moveInfo = await GetMoveInfo(move);
+    const moveType = moveInfo.type;
+    const movePower = moveInfo.power || 0;
+    const moveAccuracy = moveInfo.accuracy || 100;
+    const movePriority = moveInfo.priority || 0;
+
+    // Bereken de basis schade
+    const baseDamage = ((2 * attacker.level / 5 + 2) * movePower * attacker.attack / defender.defense) / 50 + 2;
+
+    // Bereken de type-effectiviteit
+    const typeEffectiveness = defender.weakness.find(weakness => weakness.type === moveType)?.multiplier || 1;
+
+    // Bereken de totale schade
+    const totalDamage = baseDamage * typeEffectiveness;
+
+    return totalDamage;
+}
+
+// Functie om de volgorde van aanvallen te bepalen
+async function determineAttackOrder(pokemon, buddy) {
+    const pokemonSpeed = pokemon.speed;
+    const buddySpeed = buddy.speed;
+
+    const pokemonMovePriority = pokemon.chosenMove ? (await GetMoveInfo(pokemon.chosenMove)).priority : 0;
+    const buddyMovePriority = buddy.chosenMove ? (await GetMoveInfo(buddy.chosenMove)).priority : 0;
+
+    if (pokemonMovePriority > buddyMovePriority) {
+        return [pokemon, buddy];
+    } else if (pokemonMovePriority < buddyMovePriority) {
+        return [buddy, pokemon];
+    } else {
+        if (pokemonSpeed > buddySpeed) {
+            return [pokemon, buddy];
+        } else {
+            return [buddy, pokemon];
+        }
     }
 }
