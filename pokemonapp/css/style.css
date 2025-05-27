@@ -31,11 +31,15 @@ body, h1, h2, p, a, img, div, footer, header, main, nav {
 }
 /* main aanpassen voor catch */
 .catch-main{
-   
-    width: 350px;
+   background-color:#0f0f0f8f;
+    width: 400px;
     text-align: center;
     height: 300px;
-    
+    color:black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 /* Instellen van lettertype en achtergrondkleur */
 body {
@@ -87,6 +91,7 @@ main {
     width: 90%;
     max-width: 1200px;
     text-align: center;
+    border-radius: 10px;
 }
 
 main a {
@@ -270,10 +275,10 @@ padding-top: 60px;
     border-radius: 6px;
     font-weight: 400;
     color: var(--color);
-    /* margin-top: 15px; */
+    
 }
 .aanmeldformulier button::before, .inlogformulier button::before{
-    content:"";
+    
     position: absolute;
     z-index: -1;
     background: whitesmoke;
@@ -589,7 +594,8 @@ div.niet-gevangen {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 10px;
     margin: 20px auto;
-    max-width: 400px;
+    max-width: 450px;
+
 }
 
 #current-buddy-info img {
@@ -845,7 +851,7 @@ div.niet-gevangen {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 43%;
+    gap: 41%;
     margin-top: 12.5%;
 }
 
@@ -854,7 +860,7 @@ div.niet-gevangen {
     font-size: 3rem;
     font-weight: bold;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    color: #333;
+    color: gold;
     font-style: italic;
     margin-bottom: 20px;
     text-align: center;
