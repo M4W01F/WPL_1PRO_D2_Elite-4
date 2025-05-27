@@ -95,14 +95,6 @@ function pokemonDetails(pokemon) {
     const actionsContainer = document.getElementById('pokemon-acties');
     actionsContainer.innerHTML = ''; // Verwijderd vorige knoppen
 
-    // Maakt "Vergelijken" knop
-    const compareButton = document.createElement('button');
-    compareButton.textContent = 'Vergelijken';
-    compareButton.onclick = () => {
-        
-    };
-    actionsContainer.appendChild(compareButton);
-
     // Maakt "buddy maken" knop
     const buddyButton = document.createElement('button');
     buddyButton.textContent = 'Buddy maken';
