@@ -110,7 +110,7 @@ function pokemonDetails(pokemon, pokemonClass) {
         window.location.href = `batteler.html?${urlParams}`;
     };
     actionsContainer.appendChild(battleButton);
-
+/*  gaan we niet implimenteren
     // Maakt "Vergelijken" knop
     const compareButton = document.createElement('button');
     compareButton.textContent = 'Vergelijken';
@@ -118,7 +118,7 @@ function pokemonDetails(pokemon, pokemonClass) {
         
     };
     actionsContainer.appendChild(compareButton);
-
+*/
     // Maakt "Catch" knop
     const catchButton = document.createElement('button');
     catchButton.textContent = 'Catch';
