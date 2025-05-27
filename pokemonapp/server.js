@@ -1,26 +1,15 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-// Route naar index.html verander naar ejs na verandering
-/*
+
+app.use(express.static(__dirname, { index: false }));
+
 app.get('/', (req, res) => {
-    res.render('index'); Renders index.ejs na aanmaak
-});
-*/
-// Serve static files
-app.use(express.static(__dirname));
-
-// Routes for different pages
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'LandingPagina.html'));
 });
 
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'about.html'));
-});
-
-app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contact.html'));
+app.get('/index.html', (req, res) => {
+    res.status(403).send('Access Denied');
 });
 
 // Start server
