@@ -926,7 +926,7 @@ div.niet-gevangen {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 58%;
+  gap: 22.5%;
   margin-top: 12.5%;
 }
 
@@ -949,25 +949,22 @@ div.niet-gevangen {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: larger;
   width: 250px;
-  height: 300px;
+  height: 250px;
   padding: 10px;
   text-align: center;
   border-radius: 10px;
-  background-color: transparent;
+  background-color: none;
   cursor: pointer;
   transition: transform 0.2s ease;
-  border: 2px solid gold;
 }
-
 .starter-pokemon:hover {
   transform: scale(1.1);
 }
-
 .starter-pokemon img {
   display: block;
   margin: 0 auto;
-  width: 250px;
-  height: 250px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
 }
 
