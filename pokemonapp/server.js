@@ -7,7 +7,7 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static(__dirname, { index: false }));
+app.use(express.static(__dirname, "public"));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function connectDB() {
