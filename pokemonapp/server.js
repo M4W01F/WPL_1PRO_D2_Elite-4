@@ -148,6 +148,27 @@ app.get("/api/checkLogin", (req, res) => {
     res.json({ loggedIn: !!userEmail, email: userEmail });
 });
 
+app.post("/api/updateUser", async (req, res) => {
+    const db = await connectDB();
+    const { email, collection } = req.body;
+
+    if (!email || !collection) {
+        return res.status(400).json({ error: "❌ Email en collectie zijn verplicht!" });
+    }
+
+    try {
+        await db.collection("users").updateOne(
+            { email: email.trim() },
+            { $set: { collection: collection } }
+        );
+
+        res.status(200).json({ message: "✅ Gebruiker succesvol bijgewerkt!" });
+    } catch (error) {
+        console.error("❌ Fout bij updaten van gebruiker:", error);
+        res.status(500).json({ error: "❌ Fout bij updaten van gebruiker." });
+    }
+});
+
 // **Start server**
 app.listen(POORT, () => {
     console.log(`🚀 Server draait op poort ${POORT}`);
