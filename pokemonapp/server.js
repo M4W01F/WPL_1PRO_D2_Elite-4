@@ -8,10 +8,10 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const POORT = process.env.PORT || 3000;
 const corsOptions = {
-    origin: "https://wpl-1pro-d2-elite-4.onrender.com",
+    origin: ["https://wpl-1pro-d2-elite-4.onrender.com", "https://elite4-app.onrender.com"],
     credentials: true,
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"] 
+    allowedHeaders: ["Content-Type"]
 };
 
 
