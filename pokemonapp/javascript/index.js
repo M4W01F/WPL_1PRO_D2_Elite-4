@@ -1,27 +1,37 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🔍 Pagina geladen: index.js gestart!");
+
     let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+    console.log("📌 Gebruiker in localStorage:", user);
 
     // ✅ Haal de meest actuele collectie uit de database
     if (user.email) {
+        console.log("🌐 Gebruiker heeft een e-mail, ophalen uit database:", user.email);
         const dbUser = await fetchGebruikerUitDatabase(user.email);
         user.collection = dbUser.collection || [];
         localStorage.setItem("loggedInUser", JSON.stringify(user));
+    } else {
+        console.warn("⚠️ Geen ingelogde gebruiker gevonden! Toon niet-ingelogged sectie.");
     }
 
-    console.log("🔍 Gebruiker na database check:", user);
-    console.log("✅ Collectie lengte:", user.collection.length);
+    console.log("✅ Collectie na database check:", user.collection);
+    console.log("📌 Collectie lengte:", user.collection.length);
 
     document.getElementById("niet-ingelogged").style.display = user.collection.length === 0 ? "block" : "none";
     document.getElementById("well-ingelogged").style.display = user.collection.length > 0 ? "block" : "none";
 
     if (user.collection.length === 0) {
+        console.log("🟡 Collectie is leeg, genereer starter-Pokémon!");
         genereerStarterPokemon();
+    } else {
+        console.log("✅ Gebruiker heeft Pokémon in collectie, start normale weergave.");
     }
 });
 
-// ✅ Haal gebruiker uit database
+// ✅ Haal gebruiker uit database en log fouten
 async function fetchGebruikerUitDatabase(email) {
     try {
+        console.log(`🌐 Fetch gebruiker uit database voor email: ${email}`);
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -30,18 +40,19 @@ async function fetchGebruikerUitDatabase(email) {
         });
 
         if (!response.ok) {
-            throw new Error(`❌ Server fout: ${response.status}`);
+            throw new Error(`❌ Server fout bij ophalen gebruiker: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log("✅ Gebruiker succesvol opgehaald uit database:", data.user);
         return data.user || {};
     } catch (error) {
-        console.error("❌ Fout bij ophalen van gebruiker:", error.message);
+        console.error("❌ Fout bij ophalen van gebruiker uit database:", error.message);
         return {};
     }
 }
 
-// ✅ Genereer de 3 starter-Pokémon
+// ✅ Genereer de starter-Pokémon opties
 async function genereerStarterPokemon() {
     const pokemonContainer = document.getElementById("pokemon-container");
     const popup = document.getElementById("popup");
@@ -49,34 +60,16 @@ async function genereerStarterPokemon() {
     const popupYes = document.getElementById("popup-yes");
     const popupNo = document.getElementById("popup-no");
 
-    if (!pokemonContainer) {
-        console.error("❌ 'pokemon-container' bestaat niet in de DOM.");
-        return;
-    }
-
-    console.log("🔍 Starter Pokémon worden gegenereerd...");
-
     const starterIds = [1, 4, 7]; // Bulbasaur, Charmander, Squirtle
-
     for (const id of starterIds) {
-        try {
-            console.log(`🌐 Ophalen van Pokémon met ID: ${id}`);
-            const pokemon = await haalPokemonGegevensOp(id);
-            
-            if (!pokemon) {
-                console.error(`❌ Geen gegevens gevonden voor Pokémon ID: ${id}`);
-                continue;
-            }
-
-            console.log(`✅ Pokémon gevonden: ${pokemon.name} (ID: ${pokemon.id})`);
-            
+        const pokemon = await haalPokemonGegevensOp(id);
+        if (pokemon) {
             const div = document.createElement("div");
             div.className = "starter-pokemon";
             div.innerHTML = `
                 <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 250px; height: 250px;">
                 <p><strong>${pokemon.name}</strong></p>
             `;
-            
             div.onclick = () => {
                 console.log(`🟡 Gebruiker klikt op ${pokemon.name}`);
                 popup.style.display = "flex";
@@ -123,57 +116,21 @@ async function genereerStarterPokemon() {
                     popup.style.display = "none";
                 };
             };
-            
             pokemonContainer.appendChild(div);
-        } catch (error) {
-            console.error(`❌ Fout bij ophalen van Pokémon ID ${id}:`, error);
         }
     }
 }
 
-// ✅ Haal Pokémon-statistieken op
-async function haalPokemonStats(pokemonID) {
+// ✅ Haal Pokémon-gegevens op
+async function haalPokemonGegevensOp(query) {
     try {
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
+        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
         if (!antwoord.ok) {
-            throw new Error(`Kon de Pokémon niet ophalen met ID: ${pokemonID}`);
+            throw new Error(`❌ Kan Pokémon niet ophalen met ID: ${query}`);
         }
-
-        const data = await antwoord.json();
-        return {
-            pokemon_name: data.name,
-            pokemon_id: data.id,
-            sprite: data.sprites.front_default,
-            hp: data.stats[0].base_stat,
-            attack: data.stats[1].base_stat,
-            defense: data.stats[2].base_stat,
-            special_attack: data.stats[3].base_stat,
-            special_defense: data.stats[4].base_stat,
-            speed: data.stats[5].base_stat
-        };
+        return await antwoord.json();
     } catch (error) {
-        console.error("❌ Fout bij ophalen van stats:", error);
-        return {};
-    }
-}
-
-// ✅ Update gebruiker in database
-async function updateUserInDatabase(email, collection) {
-    try {
-        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, collection }),
-            credentials: "include"
-        });
-
-        if (!response.ok) {
-            throw new Error(`❌ Server fout: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("✅ Gebruiker succesvol bijgewerkt:", data);
-    } catch (error) {
-        console.error("❌ Fout bij updaten van gebruiker:", error.message);
+        console.error("❌ Fout bij ophalen van Pokémon:", error);
+        return null;
     }
 }
