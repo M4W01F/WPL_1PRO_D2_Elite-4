@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: "/etc/secrets/.env" });
 const express = require("express");
 const path = require("path");
 const { MongoClient } = require("mongodb");
@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname, "public"), { index: false }));
 app.use("/javascript", express.static(path.join(__dirname, "javascript")));
 
 const client = new MongoClient(process.env.MONGO_URI);
+console.log("🔍 MONGO_URI geladen:", process.env.MONGO_URI);
 async function connectDB() {
     try {
         await client.connect();
