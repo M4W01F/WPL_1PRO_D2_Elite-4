@@ -3,15 +3,11 @@ const express = require("express");
 const path = require("path");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
 app.use(cors());
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public"))); // Statische bestanden serveren
+app.use(express.static(__dirname, { index: false }));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function connectDB() {
@@ -19,12 +15,12 @@ async function connectDB() {
     return client.db("Elite_4");
 }
 
-// **Hoofdpagina**
+// **Route: Hoofdpagina**
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "LandingPagina.html"));
+    res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
-// **Blokkeer directe toegang tot index.html**
+// **Route: Blokkeer directe toegang tot index.html**
 app.get("/index.html", (req, res) => {
     res.status(403).send("Access Denied");
 });
@@ -41,20 +37,22 @@ app.post("/api/register", async (req, res) => {
     try {
         await db.collection("users").insertOne({
             username: naam,
-            email: email.trim(),
+            email: email,
             password: wachtwoord,
             user_id: Math.floor(Math.random() * 10000).toString(),
             collection: [] // ✅ Lege collectie bij aanmaak
         });
 
-        res.cookie("user", email.trim(), { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
+        // **Stel een cookie in zodat gebruiker ingelogd blijft**
+        res.cookie("user", email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
         res.status(201).json({ message: "✅ Gebruiker succesvol geregistreerd en ingelogd!", email });
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij registratie." });
     }
 });
 
-// **API-endpoint om een gebruiker in te loggen (via e-mail of gebruikersnaam)**
+// **API-endpoint om een gebruiker in te loggen**
+// **API-endpoint om een gebruiker in te loggen**
 app.post("/api/login", async (req, res) => {
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
@@ -64,8 +62,10 @@ app.post("/api/login", async (req, res) => {
     }
 
     try {
+        // ✅ Trim e-mail (indien ingevoerd)
         emailOrUsername = emailOrUsername.trim();
 
+        // ✅ Zoek gebruiker op basis van E-mail **of** Gebruikersnaam
         const user = await db.collection("users").findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
             password: wachtwoord
@@ -75,20 +75,16 @@ app.post("/api/login", async (req, res) => {
             return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
         }
 
-        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
+        // **Stel een cookie in zodat gebruiker ingelogd blijft**
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // ✅ 24 uur geldig
         res.status(200).json({ message: "✅ Inloggen succesvol!", user });
+
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij inloggen." });
     }
 });
 
-// **API-endpoint om uit te loggen**
-app.post("/api/logout", (req, res) => {
-    res.clearCookie("user");
-    res.status(200).json({ message: "✅ Uitloggen succesvol!" });
-});
-
-// **API-endpoint om te controleren of een gebruiker ingelogd is**
+// **API-endpoint om te controleren of de gebruiker ingelogd is**
 app.get("/api/checkLogin", (req, res) => {
     const userEmail = req.cookies.user;
     if (userEmail) {
@@ -98,12 +94,7 @@ app.get("/api/checkLogin", (req, res) => {
     }
 });
 
-// **Wildcard route om alle niet-herkende requests naar `index.html` te sturen**
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 // **Start de server**
-app.listen(PORT, () => {
-    console.log(`🚀 Server draait op poort ${PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`🚀 Server draait op http://localhost:${process.env.PORT || 3000}`);
 });
