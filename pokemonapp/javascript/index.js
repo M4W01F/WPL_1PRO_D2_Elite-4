@@ -153,27 +153,52 @@ async function haalStarterMoves(pokemonID) {
         const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
         let levelUpMoves = [];
 
-        // ✅ Haal alle level-up moves op
-        data.moves.forEach(move => {
-            move.version_group_details.forEach(detail => {
+        // ✅ Zoek alle leerbare moves
+        for (const moveData of data.moves) {
+            for (const detail of moveData.version_group_details) {
                 if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
-                    levelUpMoves.push({ name: move.move.name, level: detail.level_learned_at });
+                    const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
+                    const moveInfo = await moveResponse.json();
+
+                    if (moveInfo.power > 0) {
+                        levelUpMoves.push({
+                            name: moveInfo.name,
+                            power: moveInfo.power,
+                            accuracy: moveInfo.accuracy,
+                            priority: moveInfo.priority,
+                            type: moveInfo.type.name,
+                            damage_class: moveInfo.damage_class.name,
+                            effect: moveInfo.effect_entries.length > 0 
+                                ? moveInfo.effect_entries[0].effect 
+                                : "No effect",
+                        });
+                    }
                 }
-            });
-        });
+            }
+        }
 
-        // ✅ Sorteer level-up moves en selecteer de laatste 4
-        levelUpMoves.sort((a, b) => b.level - a.level);
-        let selectedMoves = levelUpMoves.slice(0, 4).map(move => move.name);
+        // ✅ Sorteer level-up moves en kies de laatste 4
+        levelUpMoves.sort((a, b) => b.power - a.power);
+        let selectedMoves = levelUpMoves.slice(0, 4);
 
-        // ✅ Vul aan met moves van hetzelfde type als er minder dan 4 zijn
+        // ✅ Vul aan met type-moves als er minder dan 4 zijn
         if (selectedMoves.length < 4) {
             for (const moveData of data.moves) {
-                const moveDetails = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
-                const moveInfo = await moveDetails.json();
+                const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
+                const moveInfo = await moveResponse.json();
 
-                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name)) {
-                    selectedMoves.push(moveData.move.name);
+                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !selectedMoves.some(m => m.name === moveInfo.name)) {
+                    selectedMoves.push({
+                        name: moveInfo.name,
+                        power: moveInfo.power,
+                        accuracy: moveInfo.accuracy,
+                        priority: moveInfo.priority,
+                        type: moveInfo.type.name,
+                        damage_class: moveInfo.damage_class.name,
+                        effect: moveInfo.effect_entries.length > 0 
+                            ? moveInfo.effect_entries[0].effect 
+                            : "No effect",
+                    });
                 }
 
                 if (selectedMoves.length === 4) break;
