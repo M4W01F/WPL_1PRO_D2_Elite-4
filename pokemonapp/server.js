@@ -8,15 +8,17 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const POORT = process.env.PORT || 3000;
 const corsOptions = {
-    origin: "https://elite4-app.onrender.com", // Sta alleen Render toe
+    origin: "https://wpl-1pro-d2-elite-4.onrender.com",
     credentials: true,
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"] 
 };
 
+
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
-app.use(cors());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/javascript", express.static(path.join(__dirname, "javascript")));
