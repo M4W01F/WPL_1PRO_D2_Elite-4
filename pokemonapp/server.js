@@ -6,7 +6,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-const POORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
@@ -19,17 +19,17 @@ async function connectDB() {
     return client.db("Elite_4");
 }
 
-// **Redirect root (`/`) naar LandingPagina.html**
+// **Hoofdpagina**
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "LandingPagina.html"));
 });
 
 // **Blokkeer directe toegang tot index.html**
 app.get("/index.html", (req, res) => {
-    res.status(403).send("Toegang geweigerd"); // Voorkom directe toegang tot index.html
+    res.status(403).send("Access Denied");
 });
 
-// **Gebruiker registreren**
+// **API-endpoint om een gebruiker te registreren**
 app.post("/api/register", async (req, res) => {
     const db = await connectDB();
     const { naam, email, wachtwoord } = req.body;
@@ -39,68 +39,71 @@ app.post("/api/register", async (req, res) => {
     }
 
     try {
-        await db.collection("gebruikers").insertOne({
-            gebruikersnaam: naam,
-            email: email.trim(), // Trim spaties
-            wachtwoord: wachtwoord,
-            gebruiker_id: Math.floor(Math.random() * 10000).toString(),
-            collectie: [] // Lege collectie bij registratie
+        await db.collection("users").insertOne({
+            username: naam,
+            email: email.trim(),
+            password: wachtwoord,
+            user_id: Math.floor(Math.random() * 10000).toString(),
+            collection: [] // ✅ Lege collectie bij aanmaak
         });
 
-        res.cookie("gebruiker", email.trim(), { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
-        res.status(201).json({ bericht: "✅ Registratie geslaagd en ingelogd!", email });
+        res.cookie("user", email.trim(), { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
+        res.status(201).json({ message: "✅ Gebruiker succesvol geregistreerd en ingelogd!", email });
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij registratie." });
     }
 });
 
-// **Inloggen (met e-mail of gebruikersnaam)**
-app.post("/api/inloggen", async (req, res) => {
+// **API-endpoint om een gebruiker in te loggen (via e-mail of gebruikersnaam)**
+app.post("/api/login", async (req, res) => {
     const db = await connectDB();
-    let { emailOfGebruikersnaam, wachtwoord } = req.body;
+    let { emailOrUsername, wachtwoord } = req.body;
 
-    if (!emailOfGebruikersnaam || !wachtwoord) {
+    if (!emailOrUsername || !wachtwoord) {
         return res.status(400).json({ error: "❌ Alle velden zijn verplicht!" });
     }
 
     try {
-        emailOfGebruikersnaam = emailOfGebruikersnaam.trim();
+        emailOrUsername = emailOrUsername.trim();
 
-        const gebruiker = await db.collection("gebruikers").findOne({
-            $or: [{ email: emailOfGebruikersnaam }, { gebruikersnaam: emailOfGebruikersnaam }],
-            wachtwoord: wachtwoord
+        const user = await db.collection("users").findOne({
+            $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+            password: wachtwoord
         });
 
-        if (!gebruiker) {
+        if (!user) {
             return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
         }
 
-        res.cookie("gebruiker", gebruiker.email, { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
-        res.status(200).json({ bericht: "✅ Inloggen geslaagd!", gebruiker });
-
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
+        res.status(200).json({ message: "✅ Inloggen succesvol!", user });
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij inloggen." });
     }
 });
 
-// **Uitloggen**
-app.post("/api/uitloggen", (req, res) => {
-    res.clearCookie("gebruiker"); // Verwijder cookie
-    res.status(200).json({ bericht: "✅ Uitloggen geslaagd!" });
+// **API-endpoint om uit te loggen**
+app.post("/api/logout", (req, res) => {
+    res.clearCookie("user");
+    res.status(200).json({ message: "✅ Uitloggen succesvol!" });
 });
 
-// **Controleer inlogstatus**
-app.get("/api/checkInloggen", (req, res) => {
-    const gebruikerEmail = req.cookies.gebruiker;
-    res.json({ ingelogd: !!gebruikerEmail, email: gebruikerEmail });
+// **API-endpoint om te controleren of een gebruiker ingelogd is**
+app.get("/api/checkLogin", (req, res) => {
+    const userEmail = req.cookies.user;
+    if (userEmail) {
+        res.json({ loggedIn: true, email: userEmail });
+    } else {
+        res.json({ loggedIn: false });
+    }
 });
 
-// **Afhandelen van 404 (redirect naar LandingPagina)**
+// **Wildcard route om alle niet-herkende requests naar `index.html` te sturen**
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "LandingPagina.html"));
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // **Start de server**
-app.listen(POORT, () => {
-    console.log(`Server draait op poort ${POORT}`);
+app.listen(PORT, () => {
+    console.log(`🚀 Server draait op poort ${PORT}`);
 });
