@@ -11,8 +11,9 @@ const POORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public"), { index: false }));
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/javascript", express.static(path.join(__dirname, "javascript")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function testDB() {
