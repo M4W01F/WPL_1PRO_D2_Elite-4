@@ -16,17 +16,27 @@ app.use("/javascript", express.static(path.join(__dirname, "javascript")));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function testDB() {
-    const db = await connectDB();
-    const users = await db.collection("users").find().toArray();
-    console.log("🔍 Gebruikers in database:", users);
+    try {
+        const db = await connectDB();
+        if (!db) {
+            console.error("❌ Database niet geladen!");
+            return;
+        }
+        const users = await db.collection("users").find().toArray();
+        console.log("🔍 Gebruikers in database:", users);
+    } catch (error) {
+        console.error("❌ Fout bij ophalen van gebruikers:", error);
+    }
 }
 testDB();
 async function connectDB() {
     try {
         await client.connect();
+        console.log("✅ Verbonden met MongoDB!");
         return client.db("Elite_4");
     } catch (error) {
         console.error("❌ Fout bij verbinden met MongoDB:", error);
+        return null; // Voorkom dat de server crasht
     }
 }
 
