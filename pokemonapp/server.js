@@ -15,7 +15,12 @@ app.use(express.static(path.join(__dirname, "public"), { index: false }));
 app.use("/javascript", express.static(path.join(__dirname, "javascript")));
 
 const client = new MongoClient(process.env.MONGO_URI);
-console.log("🔍 MONGO_URI geladen:", process.env.MONGO_URI);
+async function testDB() {
+    const db = await connectDB();
+    const users = await db.collection("users").find().toArray();
+    console.log("🔍 Gebruikers in database:", users);
+}
+testDB();
 async function connectDB() {
     try {
         await client.connect();
