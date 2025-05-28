@@ -51,6 +51,39 @@ app.post("/api/register", async (req, res) => {
     }
 });
 
+// **API-endpoint om een gebruiker in te loggen**
+// **API-endpoint om een gebruiker in te loggen**
+app.post("/api/login", async (req, res) => {
+    const db = await connectDB();
+    let { emailOrUsername, wachtwoord } = req.body;
+
+    if (!emailOrUsername || !wachtwoord) {
+        return res.status(400).json({ error: "❌ Alle velden zijn verplicht!" });
+    }
+
+    try {
+        // ✅ Trim e-mail (indien ingevoerd)
+        emailOrUsername = emailOrUsername.trim();
+
+        // ✅ Zoek gebruiker op basis van E-mail **of** Gebruikersnaam
+        const user = await db.collection("users").findOne({
+            $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+            password: wachtwoord
+        });
+
+        if (!user) {
+            return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
+        }
+
+        // **Stel een cookie in zodat gebruiker ingelogd blijft**
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // ✅ 24 uur geldig
+        res.status(200).json({ message: "✅ Inloggen succesvol!", user });
+
+    } catch (error) {
+        res.status(500).json({ error: "❌ Fout bij inloggen." });
+    }
+});
+
 // **API-endpoint om te controleren of de gebruiker ingelogd is**
 app.get("/api/checkLogin", (req, res) => {
     const userEmail = req.cookies.user;
