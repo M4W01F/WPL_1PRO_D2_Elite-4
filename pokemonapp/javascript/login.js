@@ -1,3 +1,17 @@
+console.log("🌐 Test CORS: Probeer een OPTIONS-verzoek!");
+
+fetch("https://elite4-app.onrender.com/api/login", {
+    method: "OPTIONS",
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+.then(response => {
+    console.log("✅ CORS-response ontvangen:", response.headers);
+})
+.catch(error => {
+    console.error("❌ CORS-fout:", error.message);
+});
 document.querySelector("form").addEventListener("submit", async (event) => {
     event.preventDefault();
 
