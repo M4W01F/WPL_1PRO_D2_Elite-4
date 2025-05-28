@@ -37,6 +37,10 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
+app.use((req, res, next) => {
+    res.status(404).sendFile(path.join(__dirname, "LandingPagina.html"));
+});
+
 // ✅ Voeg routes toe voor elke HTML-pagina
 app.get("/:page", (req, res) => {
     const paginaPad = path.join(__dirname, req.params.page);
