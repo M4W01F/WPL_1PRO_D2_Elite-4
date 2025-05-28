@@ -805,8 +805,16 @@ div.niet-gevangen {
   display: flex;
   transition: transform 0.5s ease-in-out;
 }
-
+.page-title{
+    text-align: center;
+    margin-top: 10px;
+    color: gold;
+    font-style: italic;
+    text-decoration: underline goldenrod;
+    
+}
 .projecten {
+   
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -848,21 +856,21 @@ div.niet-gevangen {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
+  background: red;
   color: #fff;
   border: none;
   cursor: pointer;
   padding: 10px;
-  font-size: 18px;
+  font-size: 20px;
   z-index: 1;
 }
 
 .carousel-button.prev {
-  left: 10px;
+  left: 20px;
 }
 
 .carousel-button.next {
-  right: 10px;
+  right: 20px;
 }
 @media (max-width: 600px) {
   body #Landingpagina {
