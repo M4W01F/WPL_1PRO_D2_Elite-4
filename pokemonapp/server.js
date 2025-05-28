@@ -28,73 +28,41 @@ async function connectDB() {
     }
 }
 
-// **Blokkeer directe toegang tot `index.html`**
-app.get("/index.html", (req, res) => {
-    res.status(403).send("❌ Toegang geweigerd");
-});
-
+// ✅ Redirect naar LandingPagina.html als root wordt bezocht
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
-app.use((req, res, next) => {
-    res.status(404).sendFile(path.join(__dirname, "LandingPagina.html"));
+// ✅ Statische bestanden goed instellen
+const beveiligdePaginas = [
+    "index.html",
+    "batteler.html",
+    "buddy.html",
+    "catch.html",
+    "collectie.html",
+    "pokedex.html",
+    "vergelijken.html",
+    "whothapoke.html"
+];
+
+// ✅ Logica voor beveiligde pagina’s: Redirect naar inlogpagina als niet-ingelogd
+beveiligdePaginas.forEach((pagina) => {
+    app.get(`/${pagina}`, (req, res) => {
+        if (!req.cookies.user) {
+            return res.redirect("/inlog.html");
+        }
+        res.sendFile(path.join(__dirname, pagina));
+    });
 });
 
-// ✅ Voeg routes toe voor elke HTML-pagina
-app.get("/:page", (req, res) => {
-    const paginaPad = path.join(__dirname, req.params.page);
-    
-    if (!fs.existsSync(paginaPad)) {
-        return res.redirect("/");
-    }
-
-    res.sendFile(paginaPad);
-});
-
+// ✅ Open toegang tot `inlog.html` en `Aanmelden.html`
 app.get("/inlog.html", (req, res) => {
     res.sendFile(path.join(__dirname, "inlog.html"));
 });
 
-app.get("/aanmelden.html", (req, res) => {
+app.get("/Aanmelden.html", (req, res) => {
     res.sendFile(path.join(__dirname, "Aanmelden.html"));
 });
-
-app.get("/batteler.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "batteler.html"));
-});
-
-app.get("/buddy.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "buddy.html"));
-});
-
-app.get("/catch.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "catch.html"));
-});
-
-app.get("/collectie.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "collectie.html"));
-});
-
-app.get("/pokedex.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "pokedex.html"));
-});
-
-app.get("/vergelijken.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "vergelijken.html"));
-});
-
-app.get("/whothapoke.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "whothapoke.html"));
-});
-
-app.get("/index.html", (req, res) => {
-    if (!req.cookies.user) {
-        return res.redirect("/inlog.html");
-    }
-    res.sendFile(path.join(__dirname, "index.html"));
-});
-
 
 // **Registratie API**
 app.post("/api/register", async (req, res) => {
