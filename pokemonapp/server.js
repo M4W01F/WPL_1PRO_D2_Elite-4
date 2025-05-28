@@ -62,10 +62,10 @@ app.post("/api/login", async (req, res) => {
     }
 
     try {
-        // ✅ Trim e-mail (indien ingevoerd)
+        // Trim e-mail (indien ingevoerd)
         emailOrUsername = emailOrUsername.trim();
 
-        // ✅ Zoek gebruiker op basis van E-mail **of** Gebruikersnaam
+        // Zoek gebruiker op basis van E-mail **of** Gebruikersnaam
         const user = await db.collection("users").findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
             password: wachtwoord
@@ -76,7 +76,7 @@ app.post("/api/login", async (req, res) => {
         }
 
         // **Stel een cookie in zodat gebruiker ingelogd blijft**
-        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // ✅ 24 uur geldig
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
         res.status(200).json({ message: "✅ Inloggen succesvol!", user });
 
     } catch (error) {
