@@ -151,17 +151,17 @@ async function haalStarterMoves(pokemonID) {
 
         const data = await antwoord.json();
         const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
-        let levelUpMoves = [];
+        let moveSet = new Map(); // ✅ Gebruik een Map om duplicaten te voorkomen
 
-        // ✅ Zoek alle leerbare moves
+        // ✅ Zoek alle unieke level-up moves met power > 0
         for (const moveData of data.moves) {
             for (const detail of moveData.version_group_details) {
                 if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
                     const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
                     const moveInfo = await moveResponse.json();
 
-                    if (moveInfo.power > 0) {
-                        levelUpMoves.push({
+                    if (moveInfo.power > 0 && !moveSet.has(moveInfo.name)) {
+                        moveSet.set(moveInfo.name, {
                             name: moveInfo.name,
                             power: moveInfo.power,
                             accuracy: moveInfo.accuracy,
@@ -177,18 +177,16 @@ async function haalStarterMoves(pokemonID) {
             }
         }
 
-        // ✅ Sorteer level-up moves en kies de laatste 4
-        levelUpMoves.sort((a, b) => b.power - a.power);
-        let selectedMoves = levelUpMoves.slice(0, 4);
+        let selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Converteer Map naar Array
 
-        // ✅ Vul aan met type-moves als er minder dan 4 zijn
+        // ✅ Vul aan met type-moves als er minder dan 4 unieke moves zijn
         if (selectedMoves.length < 4) {
             for (const moveData of data.moves) {
                 const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
                 const moveInfo = await moveResponse.json();
 
-                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !selectedMoves.some(m => m.name === moveInfo.name)) {
-                    selectedMoves.push({
+                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !moveSet.has(moveInfo.name)) {
+                    moveSet.set(moveInfo.name, {
                         name: moveInfo.name,
                         power: moveInfo.power,
                         accuracy: moveInfo.accuracy,
@@ -201,11 +199,13 @@ async function haalStarterMoves(pokemonID) {
                     });
                 }
 
-                if (selectedMoves.length === 4) break;
+                if (moveSet.size === 4) break;
             }
+
+            selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Zorgt ervoor dat we precies 4 moves hebben
         }
 
-        console.log("📌 Moves geselecteerd:", selectedMoves);
+        console.log("📌 Unieke moves geselecteerd:", selectedMoves);
         return selectedMoves;
     } catch (error) {
         console.error(`❌ Fout bij ophalen van moves:`, error);
