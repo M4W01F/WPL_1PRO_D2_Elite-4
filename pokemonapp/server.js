@@ -42,11 +42,6 @@ async function connectDB() {
     }
 }
 
-// **Hoofdpagina → Redirect naar `LandingPagina.html`**
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "LandingPagina.html"));
-});
-
 // **Blokkeer directe toegang tot `index.html`**
 app.get("/index.html", (req, res) => {
     res.status(403).send("❌ Toegang geweigerd");
@@ -54,6 +49,17 @@ app.get("/index.html", (req, res) => {
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
+});
+
+// ✅ Voeg routes toe voor elke HTML-pagina
+app.get("/:page", (req, res) => {
+    const paginaPad = path.join(__dirname, req.params.page);
+    
+    if (!fs.existsSync(paginaPad)) {
+        return res.redirect("/"); // 🚀 Stuur onbekende URL’s terug naar LandingPagina.html
+    }
+
+    res.sendFile(paginaPad);
 });
 
 app.get("/inlog.html", (req, res) => {
