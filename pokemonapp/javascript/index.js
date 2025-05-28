@@ -60,7 +60,7 @@ async function genereerStarterPokemon() {
     const popupYes = document.getElementById("popup-yes");
     const popupNo = document.getElementById("popup-no");
 
-    const starterIds = [1, 4, 7]; // Bulbasaur, Charmander, Squirtle
+    const starterIds = [1, 7, 4];
     for (const id of starterIds) {
         const pokemon = await haalPokemonGegevensOp(id);
         if (pokemon) {
