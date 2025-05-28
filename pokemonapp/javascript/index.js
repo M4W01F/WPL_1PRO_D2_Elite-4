@@ -209,3 +209,21 @@ async function updateUserInDatabase(email, collection) {
         console.error("❌ Fout bij updaten van gebruiker:", error.message);
     }
 }
+
+async function haalPokemonGegevensOp(pokemonID) {
+    try {
+        console.log(`🌐 Haal gegevens op voor Pokémon ID: ${pokemonID}`);
+        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
+
+        if (!antwoord.ok) {
+            throw new Error(`❌ API-response niet OK voor ID: ${pokemonID} - Status: ${antwoord.status}`);
+        }
+
+        const data = await antwoord.json();
+        console.log(`✅ Pokémon ${data.name} succesvol opgehaald!`);
+        return data;
+    } catch (error) {
+        console.error(`❌ Fout bij ophalen van Pokémon:`, error);
+        return null;
+    }
+}
