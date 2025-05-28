@@ -27,7 +27,7 @@ app.get("/index.html", (req, res) => {
 });
 
 // **API-endpoint om een gebruiker te registreren**
-app.post("/api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
     const db = await connectDB();
     const { naam, email, wachtwoord } = req.body;
 
@@ -54,7 +54,7 @@ app.post("/api/register", async (req, res) => {
 
 // **API-endpoint om een gebruiker in te loggen**
 // **API-endpoint om een gebruiker in te loggen**
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
 
@@ -86,7 +86,7 @@ if (!emailOrUsername.trim() || !wachtwoord) {
 });
 
 // **API-endpoint om te controleren of de gebruiker ingelogd is**
-app.get("/api/checkLogin", (req, res) => {
+app.get("/checkLogin", (req, res) => {
     const userEmail = req.cookies.user;
     if (userEmail) {
         res.json({ loggedIn: true, email: userEmail });
@@ -95,6 +95,9 @@ app.get("/api/checkLogin", (req, res) => {
     }
 });
 
+app.get("/aanmelden.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "aanmelden.html"), { root: __dirname });
+});
 // **Start de server**
 app.listen(process.env.PORT || 3000, () => {
     console.log(`🚀 Server draait op http://localhost:${process.env.PORT || 3000}`);

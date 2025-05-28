@@ -8,111 +8,14 @@
     <link rel="stylesheet" href="./css/reset.css" />
     <link rel="stylesheet" href="./css/style.css" />
     <title>Vergelijken</title>
-    <style>
-body {
-  text-align: center;
-  color: white;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: auto;
-  padding: 20px;
-}
-
-.tables{
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.pokemon-card {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 300px;
-}
-
-.pokemon-card img {
-  width: 100px;
-  height: auto;
-  border-radius: 10%;
-}
-
-.stats-table {
-  width: 100%;
-  margin-bottom: 10%;
-  border-collapse: collapse;
-  
-}
-
-.stats-table,
-.stats-table th,
-.stats-table td {
-  border: 1px solid white;
-  padding: 8px;
-  color: black;
-}
-
-#comparison-container {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 150px;
-  color: white;
-}
-
-#comparisonTable{
-    width: 100%;
-    font-size: 14px;
-    border-collapse: collapse;
-    
-}
-
-#comparisonTable th, #comparisonTable td {
-    border: 1px solid white;
-    padding: 6px;
-    text-align: center;
-    color: white;
-}
-
-.type-badge{
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin-right: 5px;
-    color: white;
-}
-
-.comparison-card{
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 300px;
-    text-align: center;
-    margin: 0 10px;
-}
-
-@media (min-width: 768px) {
-  .vergelijken {
-    flex-wrap:nowrap ;
-  }
-}
-    </style>
 </head>
+
 <body>
     <nav>
         <div class="image-container">
             <a href="./index.html">
-                <img src="./images/project.png" alt="Logo"/>
-            </a>    
+                <img src="./images/project.png" alt="Logo" />
+            </a>
         </div>
     </nav>
 
@@ -122,7 +25,7 @@ main {
                 <h2>Pokemon 1</h2>
                 <input type="" id="pokemon1" placeholder="Type een Pokemon naam" onblur="fetchPokemon(1)" />
                 <img id="img1" src="" alt="Pokemon 1" />
-                 <hr />
+                <hr />
                 <table class="stats-table" id="stats1"></table>
                 <div id="types1"></div>
                 <div id="weaknesses1"></div>
@@ -133,9 +36,9 @@ main {
                 <table class="stats-table" id="comparisonTable"></table>
             </div>
 
-                <div class="pokemon-card">
+            <div class="pokemon-card">
                 <h2>Pokemon 2</h2>
-                <input type="" id="pokemon2" placeholder="Type een Pokemon naam" onblur="fetchPokemon(2)" />            
+                <input type="" id="pokemon2" placeholder="Type een Pokemon naam" onblur="fetchPokemon(2)" />
                 <img id="img2" src="" alt="Pokemon 2" />
                 <hr />
                 <table class="stats-table" id="stats2"></table>
@@ -145,7 +48,7 @@ main {
         </div>
 
         <table class="stats-table" id="comparisonTable"></table>
-    </div>
+        </div>
     </main>
 
     <footer>
@@ -153,4 +56,5 @@ main {
     </footer>
     <script src="./javascript/vergelijken.js"></script>
 </body>
+
 </html>
