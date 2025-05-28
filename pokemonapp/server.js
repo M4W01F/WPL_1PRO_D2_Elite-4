@@ -3,12 +3,16 @@ const express = require("express");
 const path = require("path");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const app = express();
+const POORT = process.env.PORT || 3000;
+
 app.use(express.json());
 app.use(cors());
-app.use(express.static(__dirname, { index: false }));
-app.use("/javascript", express.static(path.join(__dirname, "javascript")));
+app.use(cookieParser());
+app.use(express.static(__dirname, { index: false })); // Voorkom automatische `index.html` opening
+app.use("/javascript", express.static(path.join(__dirname, "javascript"))); // Serve JavaScript bestanden
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function connectDB() {
@@ -16,18 +20,18 @@ async function connectDB() {
     return client.db("Elite_4");
 }
 
-// **Route: Hoofdpagina**
+// **Hoofdpagina → Redirect naar `LandingPagina.html`**
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
-// **Route: Blokkeer directe toegang tot index.html**
+// **Blokkeer directe toegang tot `index.html`**
 app.get("/index.html", (req, res) => {
-    res.status(403).send("Access Denied");
+    res.status(403).send("❌ Toegang geweigerd");
 });
 
-// **API-endpoint om een gebruiker te registreren**
-app.post("/register", async (req, res) => {
+// **Registratie API**
+app.post("/api/register", async (req, res) => {
     const db = await connectDB();
     const { naam, email, wachtwoord } = req.body;
 
@@ -38,35 +42,31 @@ app.post("/register", async (req, res) => {
     try {
         await db.collection("users").insertOne({
             username: naam,
-            email: email,
+            email: email.trim(), // Trim spaties
             password: wachtwoord,
             user_id: Math.floor(Math.random() * 10000).toString(),
-            collection: [] // ✅ Lege collectie bij aanmaak
+            collection: [] // Lege collectie bij registratie
         });
 
-        // **Stel een cookie in zodat gebruiker ingelogd blijft**
-        res.cookie("user", email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
-        res.status(201).json({ message: "✅ Gebruiker succesvol geregistreerd en ingelogd!", email });
+        res.cookie("user", email.trim(), { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
+        res.status(201).json({ message: "✅ Registratie geslaagd!", email });
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij registratie." });
     }
 });
 
-// **API-endpoint om een gebruiker in te loggen**
-// **API-endpoint om een gebruiker in te loggen**
-app.post("/login", async (req, res) => {
+// **Login API**
+app.post("/api/login", async (req, res) => {
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
 
-if (!emailOrUsername.trim() || !wachtwoord) {
-    return res.status(400).json({ error: "❌ Vul alle velden correct in!" });
-}
+    if (!emailOrUsername.trim() || !wachtwoord.trim()) {
+        return res.status(400).json({ error: "❌ Vul alle velden correct in!" });
+    }
 
     try {
-        // Trim e-mail (indien ingevoerd)
         emailOrUsername = emailOrUsername.trim();
 
-        // Zoek gebruiker op basis van E-mail **of** Gebruikersnaam
         const user = await db.collection("users").findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
             password: wachtwoord
@@ -76,29 +76,32 @@ if (!emailOrUsername.trim() || !wachtwoord) {
             return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
         }
 
-        // **Stel een cookie in zodat gebruiker ingelogd blijft**
-        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // 24 uur geldig
-        res.status(200).json({ message: "✅ Inloggen succesvol!", user });
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
+        res.status(200).json({ message: "✅ Inloggen geslaagd!", user });
 
     } catch (error) {
         res.status(500).json({ error: "❌ Fout bij inloggen." });
     }
 });
 
-// **API-endpoint om te controleren of de gebruiker ingelogd is**
-app.get("/checkLogin", (req, res) => {
-    const userEmail = req.cookies.user;
-    if (userEmail) {
-        res.json({ loggedIn: true, email: userEmail });
-    } else {
-        res.json({ loggedIn: false });
-    }
+// **Uitloggen API**
+app.post("/api/logout", (req, res) => {
+    res.clearCookie("user"); // ✅ Verwijder cookie
+    res.status(200).json({ message: "✅ Uitloggen geslaagd!" });
 });
 
-app.get("/aanmelden.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "aanmelden.html"), { root: __dirname });
+// **Controleer loginstatus**
+app.get("/api/checkLogin", (req, res) => {
+    const userEmail = req.cookies.user;
+    res.json({ loggedIn: !!userEmail, email: userEmail });
 });
-// **Start de server**
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`🚀 Server draait op http://localhost:${process.env.PORT || 3000}`);
+
+// **Redirect alle onbekende routes naar `LandingPagina.html`**
+app.get("/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "LandingPagina.html"));
+});
+
+// **Start server**
+app.listen(POORT, () => {
+    console.log(`🚀 Server draait op poort ${POORT}`);
 });
