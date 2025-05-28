@@ -85,6 +85,11 @@ app.post("/api/register", async (req, res) => {
     }
 
     try {
+        const existingUser = await db.collection("users").findOne({ email: email.trim() });
+        if (existingUser) {
+            return res.status(409).json({ error: "❌ Email is al geregistreerd!" });
+        }
+
         const newUser = {
             username: naam,
             email: email.trim(),
