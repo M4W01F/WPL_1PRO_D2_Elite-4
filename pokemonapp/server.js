@@ -11,17 +11,21 @@ const POORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
-app.use(express.static(__dirname, { index: false })); // Voorkom automatische `index.html` opening
-app.use("/javascript", express.static(path.join(__dirname, "javascript"))); // Serve JavaScript bestanden
+app.use(express.static(path.join(__dirname, "public"), { index: false }));
+app.use("/javascript", express.static(path.join(__dirname, "javascript")));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function connectDB() {
-    await client.connect();
-    return client.db("Elite_4");
+    try {
+        await client.connect();
+        return client.db("Elite_4");
+    } catch (error) {
+        console.error("❌ Fout bij verbinden met MongoDB:", error);
+    }
 }
 
 // **Hoofdpagina → Redirect naar `LandingPagina.html`**
-app.get("/", (req, res) => {
+app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
@@ -94,11 +98,6 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/checkLogin", (req, res) => {
     const userEmail = req.cookies.user;
     res.json({ loggedIn: !!userEmail, email: userEmail });
-});
-
-// **Redirect alle onbekende routes naar `LandingPagina.html`**
-app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
 // **Start server**
