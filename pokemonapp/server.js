@@ -148,6 +148,28 @@ app.get("/api/checkLogin", (req, res) => {
     res.json({ loggedIn: !!userEmail, email: userEmail });
 });
 
+app.post("/api/getUser", async (req, res) => {
+    const db = await connectDB();
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: "❌ Email is verplicht!" });
+    }
+
+    try {
+        const user = await db.collection("users").findOne({ email: email.trim() });
+
+        if (!user) {
+            return res.status(404).json({ error: "❌ Gebruiker niet gevonden!" });
+        }
+
+        res.status(200).json({ user });
+    } catch (error) {
+        console.error("❌ Fout bij ophalen van gebruiker:", error);
+        res.status(500).json({ error: "❌ Fout bij ophalen van gebruiker." });
+    }
+});
+
 app.post("/api/updateUser", async (req, res) => {
     const db = await connectDB();
     const { email, collection } = req.body;

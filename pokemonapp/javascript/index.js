@@ -1,27 +1,54 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+
+    // ✅ Haal de meest actuele collectie uit de database
+    if (user.email) {
+        const dbUser = await fetchGebruikerUitDatabase(user.email);
+        user.collection = dbUser.collection || [];
+        localStorage.setItem("loggedInUser", JSON.stringify(user));
+    }
+
+    console.log("🔍 Gebruiker na database check:", user);
+    console.log("✅ Collectie lengte:", user.collection.length);
+
+    document.getElementById("niet-ingelogged").style.display = user.collection.length === 0 ? "block" : "none";
+    document.getElementById("well-ingelogged").style.display = user.collection.length > 0 ? "block" : "none";
+
+    if (user.collection.length === 0) {
+        genereerStarterPokemon();
+    }
+});
+
+// ✅ Haal gebruiker uit database
+async function fetchGebruikerUitDatabase(email) {
+    try {
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Server fout: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.user || {};
+    } catch (error) {
+        console.error("❌ Fout bij ophalen van gebruiker:", error.message);
+        return {};
+    }
+}
+
+// ✅ Genereer de 3 starter-Pokémon
+async function genereerStarterPokemon() {
     const pokemonContainer = document.getElementById("pokemon-container");
     const popup = document.getElementById("popup");
     const popupText = document.getElementById("popup-text");
     const popupYes = document.getElementById("popup-yes");
     const popupNo = document.getElementById("popup-no");
 
-    // ✅ Haal gebruiker op uit localStorage
-    const user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-    const collectieLeeg = !user.collection || user.collection.length === 0;
-
-    // ✅ Toon de juiste sectie
-    document.getElementById("niet-ingelogged").style.display = collectieLeeg ? "block" : "none";
-    document.getElementById("well-ingelogged").style.display = collectieLeeg ? "none" : "block";
-
-    if (pokemonContainer && collectieLeeg) {
-        genereerStarterPokemon(pokemonContainer, popup, popupText, popupYes, popupNo);
-    } else {
-        console.error("❌ De container 'pokemon-container' bestaat niet in de DOM.");
-    }
-});
-
-// ✅ Genereer de 3 starter-Pokémon opties
-async function genereerStarterPokemon(container, popup, popupText, popupYes, popupNo) {
     const starterIds = [1, 4, 7]; // Bulbasaur, Charmander, Squirtle
     for (const id of starterIds) {
         const pokemon = await haalPokemonGegevensOp(id);
@@ -35,7 +62,7 @@ async function genereerStarterPokemon(container, popup, popupText, popupYes, pop
             div.onclick = () => {
                 popup.style.display = "flex";
                 popupText.innerHTML = `Wilt u ${pokemon.name} als uw starter Pokémon kiezen?<br>
-                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px; margin-top: 10px;">`;
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">`;
 
                 popupYes.onclick = async () => {
                     popup.style.display = "none";
@@ -46,7 +73,7 @@ async function genereerStarterPokemon(container, popup, popupText, popupYes, pop
                     const moves = await haalStarterMoves(pokemon.id);
                     const stats = await haalPokemonStats(pokemon.id);
 
-                    const user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+                    let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
                     user.collection = user.collection || [];
                     user.collection.push({
                         pokemon_name: pokemon.name,
@@ -69,67 +96,8 @@ async function genereerStarterPokemon(container, popup, popupText, popupYes, pop
                     popup.style.display = "none";
                 };
             };
-            container.appendChild(div);
+            pokemonContainer.appendChild(div);
         }
-    }
-}
-
-// ✅ Haal Pokémon-data op
-async function haalPokemonGegevensOp(query) {
-    try {
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
-        if (antwoord.ok) {
-            return await antwoord.json();
-        } else {
-            console.error(`Kon de Pokémon niet ophalen met ID: ${query}.`);
-            return null;
-        }
-    } catch (fout) {
-        console.error(`Fout bij het ophalen van Pokémon-gegevens:`, fout);
-        return null;
-    }
-}
-
-// ✅ Haal moves op
-async function haalStarterMoves(pokemonID) {
-    try {
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
-        if (!antwoord.ok) {
-            throw new Error(`Kon de Pokémon niet ophalen met ID: ${pokemonID}`);
-        }
-
-        const data = await antwoord.json();
-        let levelUpMoves = [];
-        let hmTmMoves = [];
-
-        data.moves.forEach(move => {
-            move.version_group_details.forEach(detail => {
-                if (detail.move_learn_method.name === "level-up") {
-                    levelUpMoves.push({ name: move.move.name, level: detail.level_learned_at });
-                } else if (detail.move_learn_method.name === "machine") {
-                    hmTmMoves.push(move.move.name);
-                }
-            });
-        });
-
-        levelUpMoves.sort((a, b) => b.level - a.level);
-        let selectedMoves = levelUpMoves.slice(0, 4).map(move => move.name);
-
-        if (selectedMoves.length < 4) {
-            for (const moveName of hmTmMoves) {
-                const moveDetails = await fetch(`https://pokeapi.co/api/v2/move/${moveName}`);
-                const moveData = await moveDetails.json();
-                if (moveData.power > 0) {
-                    selectedMoves.push(moveName);
-                }
-                if (selectedMoves.length === 4) break;
-            }
-        }
-
-        return selectedMoves;
-    } catch (error) {
-        console.error("❌ Fout bij het ophalen van moves:", error);
-        return [];
     }
 }
 
@@ -151,7 +119,7 @@ async function haalPokemonStats(pokemonID) {
             speed: data.stats[5].base_stat
         };
     } catch (error) {
-        console.error("❌ Fout bij het ophalen van stats:", error);
+        console.error("❌ Fout bij ophalen van stats:", error);
         return {};
     }
 }
@@ -161,9 +129,7 @@ async function updateUserInDatabase(email, collection) {
     try {
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, collection }),
             credentials: "include"
         });
