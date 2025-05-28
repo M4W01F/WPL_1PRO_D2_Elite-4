@@ -7,7 +7,8 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static(__dirname, "public"));
+app.use(express.static(__dirname));
+app.use("/javascript", express.static(path.join(__dirname, "javascript")));
 
 const client = new MongoClient(process.env.MONGO_URI);
 async function connectDB() {
@@ -17,7 +18,7 @@ async function connectDB() {
 
 // **Route: Hoofdpagina**
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname,"public" ,"LandingPagina.html"));
+    res.sendFile(path.join(__dirname,"LandingPagina.html"));
 });
 
 // **Route: Blokkeer directe toegang tot index.html**
