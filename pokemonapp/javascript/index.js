@@ -80,40 +80,53 @@ async function genereerStarterPokemon() {
                 popupText.innerHTML = `Wilt u ${pokemon.name} als uw starter Pokémon kiezen?<br>
                 <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">`;
 
-                popupYes.onclick = async () => {
-                    console.log(`🟢 Gebruiker kiest ${pokemon.name} als starter!`);
-                    popup.style.display = "none";
-                    document.getElementById("niet-ingelogged").style.display = "none";
-                    document.getElementById("well-ingelogged").style.display = "block";
+               popupYes.onclick = async () => {
+                console.log(`🟢 Gebruiker kiest ${pokemon.name} als starter!`);
+                popup.style.display = "none";
+                document.getElementById("niet-ingelogged").style.display = "none";
+                document.getElementById("well-ingelogged").style.display = "block";
 
-                    // ✅ Haal moves en stats op
-                    const moves = await haalStarterMoves(pokemon.id);
-                    const stats = await haalPokemonStats(pokemon.id);
+                // ✅ Haal moves en stats op
+                const moves = await haalStarterMoves(pokemon.id);
+                const stats = await haalPokemonStats(pokemon.id);
 
-                    console.log("📌 Moves geselecteerd:", moves);
-                    console.log("📌 Stats opgehaald:", stats);
+                console.log("📌 Moves geselecteerd:", moves);
+                console.log("📌 Stats opgehaald:", stats);
 
-                    // ✅ Voeg starter toe aan gebruiker
-                    let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-                    user.collection = user.collection || [];
-                    user.collection.push({
-                        pokemon_name: pokemon.name,
-                        pokemon_id: pokemon.id,
-                        sprite: pokemon.sprites.front_default,
-                        level: 5,
-                        wins: 0,
-                        loses: 0,
-                        stats: stats,
-                        isBuddy: true,
-                        moves: moves
-                    });
+                // ✅ Base stats verhogen per level
+                let level = 5;
+                let { hp, attack, defense, speed, special_attack, special_defense } = stats;
 
-                    localStorage.setItem("loggedInUser", JSON.stringify(user));
-                    console.log("✅ Starter opgeslagen in localStorage:", user.collection);
+                for (let i = 1; i <= level; i++) {
+                    hp += Math.round(hp / 50);
+                    attack += Math.round(attack / 50);
+                    defense += Math.round(defense / 50);
+                    speed += Math.round(speed / 50);
+                    special_attack += Math.round(special_attack / 50);
+                    special_defense += Math.round(special_defense / 50);
+                }
 
-                    // ✅ Update gebruiker in database
-                    await updateUserInDatabase(user.email, user.collection);
-                };
+                // ✅ Voeg starter toe aan gebruiker
+                let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+                user.collection = user.collection || [];
+                user.collection.push({
+                    pokemon_name: pokemon.name,
+                    pokemon_id: pokemon.id,
+                    sprite: pokemon.sprites.front_default,
+                    level: 5,
+                    wins: 0,
+                    loses: 0,
+                    stats: { hp, attack, defense, special_attack, special_defense, speed },
+                    isBuddy: true,
+                    moves: moves
+                });
+
+                localStorage.setItem("loggedInUser", JSON.stringify(user));
+                console.log("✅ Starter Pokémon opgeslagen in localStorage:", user.collection);
+
+                // ✅ Update gebruiker in database
+                await updateUserInDatabase(user.email, user.collection);
+            };
 
                 popupNo.onclick = () => {
                     console.log("🔴 Gebruiker weigert starter Pokémon");
@@ -137,7 +150,7 @@ async function haalStarterMoves(pokemonID) {
         }
 
         const data = await antwoord.json();
-        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal alle typen van de Pokémon op
+        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
         let levelUpMoves = [];
 
         // ✅ Haal alle level-up moves op
@@ -149,11 +162,11 @@ async function haalStarterMoves(pokemonID) {
             });
         });
 
-        // ✅ Sorteer level-up moves op level en kies de beste
-        levelUpMoves.sort((a, b) => a.level - b.level);
+        // ✅ Sorteer level-up moves en selecteer de laatste 4
+        levelUpMoves.sort((a, b) => b.level - a.level);
         let selectedMoves = levelUpMoves.slice(0, 4).map(move => move.name);
 
-        // ✅ Als er niet genoeg level-up moves zijn, haal moves met power > 0 en juiste type
+        // ✅ Vul aan met moves van hetzelfde type als er minder dan 4 zijn
         if (selectedMoves.length < 4) {
             for (const moveData of data.moves) {
                 const moveDetails = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
@@ -172,5 +185,27 @@ async function haalStarterMoves(pokemonID) {
     } catch (error) {
         console.error(`❌ Fout bij ophalen van moves:`, error);
         return [];
+    }
+}
+
+async function updateUserInDatabase(email, collection) {
+    try {
+        console.log("🌐 Updaten gebruiker in database met starter Pokémon...");
+        
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Server fout: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ Gebruiker succesvol bijgewerkt:", data);
+    } catch (error) {
+        console.error("❌ Fout bij updaten van gebruiker:", error.message);
     }
 }
