@@ -21,10 +21,8 @@ document.querySelector("form").addEventListener("submit", async (event) => {
 
     try {
         // ✅ Dynamische URL (werkt lokaal en op Render)
-        const baseUrl = window.location.origin.includes("localhost") 
-            ? "http://localhost:3000" 
-            : "https://elite4-app.onrender.com";
-
+        const baseUrl = "https://wpl-1pro-d2-elite-4.onrender.com";
+        
         console.log("🔍 Login-verzoek naar:", baseUrl + "/api/login");
 
         // ✅ Verstuur login-verzoek naar de server met extra headers

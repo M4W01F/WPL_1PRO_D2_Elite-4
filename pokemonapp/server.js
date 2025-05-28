@@ -106,33 +106,25 @@ app.post("/api/register", async (req, res) => {
 
 // **Login API**
 app.post("/api/login", async (req, res) => {
-    console.log("🔍 Login-request ontvangen:", req.body);
-
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
 
-    if (!emailOrUsername.trim() || !wachtwoord.trim()) {
+    if (!emailOrUsername || !wachtwoord) {
         return res.status(400).json({ error: "❌ Vul alle velden correct in!" });
     }
 
     try {
-        emailOrUsername = emailOrUsername.trim();
-
-        console.log("📌 Zoeken naar gebruiker:", emailOrUsername);
         const user = await db.collection("users").findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
             password: wachtwoord
         });
 
         if (!user) {
-            console.log("❌ Geen gebruiker gevonden!");
             return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
         }
 
-        console.log("✅ Inloggen geslaagd! Gebruiker:", user);
         res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 });
         res.status(200).json({ message: "✅ Inloggen geslaagd!", user });
-
     } catch (error) {
         console.error("❌ Fout bij inloggen:", error);
         res.status(500).json({ error: "❌ Fout bij inloggen." });
