@@ -949,22 +949,25 @@ div.niet-gevangen {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: larger;
   width: 250px;
-  height: 250px;
+  height: 300px;
   padding: 10px;
   text-align: center;
   border-radius: 10px;
-  background-color: none;
+  background-color: transparent;
   cursor: pointer;
   transition: transform 0.2s ease;
+  border: 2px solid gold;
 }
+
 .starter-pokemon:hover {
   transform: scale(1.1);
 }
+
 .starter-pokemon img {
   display: block;
   margin: 0 auto;
-  width: 100px;
-  height: 100px;
+  width: 250px;
+  height: 250px;
   object-fit: contain;
 }
 
