@@ -1128,18 +1128,18 @@ footer a:hover {
 
 /* Who's That pokemon */
 .whosthatpokemon-page {
-    background-image: url(./images/xpRS9.gif);
+    background-image: url(../images/achtergrond.jpg);
     background-size: 80%; 
     background-position: center; 
     background-repeat: no-repeat; 
-    height: 100vh; 
+    height: 50%; 
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 10px;
     font-family: Arial, sans-serif;
     text-align: center;
-    padding: 10px; /* added padding so content doesn't touch edges on small screens */
+    padding: 10px; 
     box-sizing: border-box;
 }
 
@@ -1149,7 +1149,7 @@ footer a:hover {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 500px;
-    max-width: 100%; /* allow shrinking on smaller screens */
+    max-width: 100%; 
     margin: auto;
 }
 
@@ -1191,7 +1191,7 @@ footer a:hover {
     font-size: 1.2em;
 }
 
-/* Responsive adjustments */
+/* Responsive*/
 @media (max-width: 600px) {
     .whosthatpokemon-page .game-container {
         width: 100%;
