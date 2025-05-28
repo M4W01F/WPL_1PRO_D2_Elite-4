@@ -73,6 +73,8 @@ app.get("/Aanmelden.html", (req, res) => {
 
 // **Registratie API**
 app.post("/api/register", async (req, res) => {
+    console.log("🔍 Registratie-request ontvangen:", req.body);
+
     const db = await connectDB();
     const { naam, email, wachtwoord } = req.body;
 
@@ -81,23 +83,29 @@ app.post("/api/register", async (req, res) => {
     }
 
     try {
-        await db.collection("users").insertOne({
+        const newUser = {
             username: naam,
-            email: email.trim(), // Trim spaties
+            email: email.trim(),
             password: wachtwoord,
             user_id: Math.floor(Math.random() * 10000).toString(),
-            collection: [] // Lege collectie bij registratie
-        });
+            collection: []
+        };
 
-        res.cookie("user", email.trim(), { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
+        console.log("📌 Gebruiker wordt opgeslagen:", newUser);
+        await db.collection("users").insertOne(newUser);
+
+        res.cookie("user", email.trim(), { httpOnly: true, maxAge: 86400000 });
         res.status(201).json({ message: "✅ Registratie geslaagd!", email });
     } catch (error) {
+        console.error("❌ Fout bij registratie:", error);
         res.status(500).json({ error: "❌ Fout bij registratie." });
     }
 });
 
 // **Login API**
 app.post("/api/login", async (req, res) => {
+    console.log("🔍 Login-request ontvangen:", req.body);
+
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
 
@@ -108,19 +116,23 @@ app.post("/api/login", async (req, res) => {
     try {
         emailOrUsername = emailOrUsername.trim();
 
+        console.log("📌 Zoeken naar gebruiker:", emailOrUsername);
         const user = await db.collection("users").findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
             password: wachtwoord
         });
 
         if (!user) {
+            console.log("❌ Geen gebruiker gevonden!");
             return res.status(401).json({ error: "❌ Ongeldige inloggegevens!" });
         }
 
-        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 }); // Blijf ingelogd (24 uur)
+        console.log("✅ Inloggen geslaagd! Gebruiker:", user);
+        res.cookie("user", user.email, { httpOnly: true, maxAge: 86400000 });
         res.status(200).json({ message: "✅ Inloggen geslaagd!", user });
 
     } catch (error) {
+        console.error("❌ Fout bij inloggen:", error);
         res.status(500).json({ error: "❌ Fout bij inloggen." });
     }
 });
