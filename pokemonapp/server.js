@@ -96,7 +96,7 @@ app.get("/api/checkInloggen", (req, res) => {
 });
 
 // **Afhandelen van 404 (redirect naar LandingPagina)**
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "LandingPagina.html"));
 });
 
