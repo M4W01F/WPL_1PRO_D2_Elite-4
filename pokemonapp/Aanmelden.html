@@ -1,52 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aanmelden</title>
-    <link rel="icon" type="image/png" href="./images/favicon.png">
-    <link rel="stylesheet" href="./css/reset.css">
-    <link rel="stylesheet" href="./css/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registreren</title>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/aanmelden.css" />
+    <link rel="icon" type="image/png" href="./images/favicon.png" />
 </head>
-<nav>
-    <div class="image-container">
-        <a href="./index.html">
-            <img src="./images/project.png" alt="Project Image">
-        </a>
-    </div>
-</nav>
-<body>
-    <section class="aanmeldformulier">
-        <h1> Aanmelden</h1>
-        <form action="">
-            <div class="naam_aanmeldpagina">
-            <label for="firstname-input">
-            <img src="images/person_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg">
-            </label>
-            <input required type="text" name="naam" id="naam-input" placeholder="naam">
+
+<body id="register-page">
+
+    <nav>
+        <div class="image-container">
+            <a href="#">
+                <img src="./images/project.png" alt="Project Image">
+            </a>
         </div>
-        <div class="mail_aanmeldpagina">
-            <label for="email-input">
-            <img src="images/mail_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg">
-            </label>
-            <input required type="text" name="email" id="email-input" placeholder="email">
-        </div>
-        <div class="wachtwoord_aanmeldpagina">
-            <label for="wachtwoord">
-                <img src="images/lock_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg" alt="">
-            </label>
-            <input  required type="text" name="wachtwoord" id="wachtwoord" placeholder="wachtwoord">
-        </div>
-        <div class="wachtwoord_aanmeldpagina">
-            <label for="wachtwoord_herhaling-input">
-                <img src="images/lock_24dp_E3E3E3_FILL1_wght400_GRAD0_opsz24.svg" alt="">
-            </label>
-            <input required type="text" name="Herhaal wachtwoord" id="wachtwoord_herhaling-input" placeholder="Herhaal wachtwoord">
-        </div>
-        <button type="submit">Aanmelden</button>
-    </form>
-        <p>Heb je al een Account? <a href="inlog.html"> login</a></p>
-    </section>
-    
+    </nav>
+
+    <main class="register-container">
+        <h1>Register</h1>
+        <form action="/verwerk_registratie" method="POST" class="register-form">
+            <label for="username">Gebruikersnaam</label>
+            <input type="text" id="username" name="username" required />
+
+            <label for="email">E-mailadres</label>
+            <input type="email" id="email" name="email" required />
+
+            <label for="password">Wachtwoord</label>
+            <input type="password" id="password" name="password" required />
+
+            <label for="confirm-password">Bevestig wachtwoord</label>
+            <input type="password" id="confirm-password" name="confirm-password" required />
+
+            <button type="submit">Registreren</button>
+        </form>
+        <p>Heb je al een account? <a href="inlog.html">Log in</a></p>
+    </main>
 </body>
+
 </html>

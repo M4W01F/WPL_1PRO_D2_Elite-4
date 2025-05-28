@@ -1,3 +1,5 @@
+const allPokemonData = [];
+
 async function fetchPokemonData(pokemonId) {
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`);
@@ -25,6 +27,8 @@ async function displayPokemonList() {
     for (let pokemonId = 1; pokemonId <= 1025; pokemonId++) {
         const pokemonData = await fetchPokemonData(pokemonId);
         if (pokemonData) {
+            allPokemonData.push(pokemonData); // ✅ Save for search filtering
+
             const pokemonClass = pokemonId <= 12 ? 'collectie' : 'niet-gevangen';
 
             const listItem = document.createElement('div');
@@ -37,17 +41,18 @@ async function displayPokemonList() {
             ${pokemonData.types.split(', ').map(type => `
                 <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
             `).join('')}
-            `;        
+            `;
             listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
             pokemonList.appendChild(listItem);
         }
     }
 }
 
+
 function pokemonDetails(pokemon, pokemonClass) {
     document.getElementById('pokemon-id').textContent = pokemon.id;
     document.getElementById('pokemon-naam').textContent = pokemon.name;
-    
+
     const pokemonTypeElement = document.getElementById('pokemon-type');
     pokemonTypeElement.innerHTML = ''; // Verwijder eerdere inhoud
     pokemon.types.split(', ').forEach(type => {
@@ -115,7 +120,7 @@ function pokemonDetails(pokemon, pokemonClass) {
     const compareButton = document.createElement('button');
     compareButton.textContent = 'Vergelijken';
     compareButton.onclick = () => {
-        
+
     };
     actionsContainer.appendChild(compareButton);
 
@@ -158,4 +163,31 @@ function getTypeColor(type) {
     };
     return typeColors[type] || "#d3d3d3"; // Default kleur voor onbekende types
 }
+
 document.addEventListener('DOMContentLoaded', displayPokemonList);
+document.getElementById('search-input').addEventListener('input', function () {
+    const searchTerm = this.value.toLowerCase();
+    const filtered = allPokemonData.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+    const pokemonList = document.getElementById('pokemon-list');
+    pokemonList.innerHTML = ''; // Clear previous list
+
+    for (const pokemonData of filtered) {
+        const pokemonClass = pokemonData.id <= 12 ? 'collectie' : 'niet-gevangen';
+
+        const listItem = document.createElement('div');
+        listItem.className = pokemonClass;
+        listItem.innerHTML = `
+        ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ''}
+        <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
+        <strong>${pokemonData.id}</strong>
+        <strong>${pokemonData.name}</strong>
+        ${pokemonData.types.split(', ').map(type => `
+            <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+        `).join('')}
+        `;
+        listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
+        pokemonList.appendChild(listItem);
+    }
+});
+

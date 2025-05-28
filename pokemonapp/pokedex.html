@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,9 @@
     <link rel="icon" type="image/png" href="./images/favicon.png">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
-    <script src="./javascript/pokedex.js"></script>
+
 </head>
+
 <body class="pokedex-img">
     <nav>
         <div class="image-container">
@@ -20,6 +22,7 @@
     <main>
         <aside>
             <!-- Als een pokemon geselecteerd wordt, genereert het de stats en informatie van deze pokemon op en ook de optie om dit als je buddy te maken -->
+            <input type="text" id="search-input" placeholder="Zoek Pokémon op naam..." />
 
             <div id="pokemon-details" hidden>
                 <img id="pokemon-sprite" src="" alt="pokemon sprite">
@@ -37,6 +40,8 @@
     <footer>
         <!-- Een knop om terug te gaan naar index.html -->
         <a href="./index.html">Terug naar Hoofdmenu</a>
+        <script src="./javascript/pokedex.js"></script>
     </footer>
 </body>
+
 </html>
