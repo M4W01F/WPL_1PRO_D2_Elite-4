@@ -227,3 +227,30 @@ async function haalPokemonGegevensOp(pokemonID) {
         return null;
     }
 }
+
+async function haalPokemonStats(pokemonID) {
+    try {
+        console.log(`🌐 Haal statistieken op voor Pokémon ID: ${pokemonID}`);
+        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
+
+        if (!antwoord.ok) {
+            throw new Error(`❌ Kan statistieken niet ophalen voor ID: ${pokemonID} - Status: ${antwoord.status}`);
+        }
+
+        const data = await antwoord.json();
+        let stats = {
+            hp: data.stats[0].base_stat,
+            attack: data.stats[1].base_stat,
+            defense: data.stats[2].base_stat,
+            special_attack: data.stats[3].base_stat,
+            special_defense: data.stats[4].base_stat,
+            speed: data.stats[5].base_stat
+        };
+
+        console.log("📌 Basisstatistieken opgehaald:", stats);
+        return stats;
+    } catch (error) {
+        console.error(`❌ Fout bij ophalen van statistieken:`, error);
+        return {};
+    }
+}
