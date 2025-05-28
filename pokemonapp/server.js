@@ -17,20 +17,6 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/css", express.static(path.join(__dirname, "css")));
 
 const client = new MongoClient(process.env.MONGO_URI);
-async function testDB() {
-    try {
-        const db = await connectDB();
-        if (!db) {
-            console.error("❌ Database niet geladen!");
-            return;
-        }
-        const users = await db.collection("users").find().toArray();
-        console.log("🔍 Gebruikers in database:", users);
-    } catch (error) {
-        console.error("❌ Fout bij ophalen van gebruikers:", error);
-    }
-}
-testDB();
 async function connectDB() {
     try {
         await client.connect();
@@ -56,7 +42,7 @@ app.get("/:page", (req, res) => {
     const paginaPad = path.join(__dirname, req.params.page);
     
     if (!fs.existsSync(paginaPad)) {
-        return res.redirect("/"); // 🚀 Stuur onbekende URL’s terug naar LandingPagina.html
+        return res.redirect("/");
     }
 
     res.sendFile(paginaPad);
