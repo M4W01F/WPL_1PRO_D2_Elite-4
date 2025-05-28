@@ -17,7 +17,7 @@ async function connectDB() {
 
 // **Route: Hoofdpagina**
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "LandingPagina.html"));
+    res.sendFile(path.join(__dirname,"public" ,"LandingPagina.html"));
 });
 
 // **Route: Blokkeer directe toegang tot index.html**
@@ -57,9 +57,9 @@ app.post("/api/login", async (req, res) => {
     const db = await connectDB();
     let { emailOrUsername, wachtwoord } = req.body;
 
-    if (!emailOrUsername || !wachtwoord) {
-        return res.status(400).json({ error: "❌ Alle velden zijn verplicht!" });
-    }
+if (!emailOrUsername.trim() || !wachtwoord) {
+    return res.status(400).json({ error: "❌ Vul alle velden correct in!" });
+}
 
     try {
         // Trim e-mail (indien ingevoerd)
