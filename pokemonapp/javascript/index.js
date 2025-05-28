@@ -127,20 +127,50 @@ async function genereerStarterPokemon() {
 }
 
 // ✅ Haal Pokémon-gegevens op
-async function haalPokemonGegevensOp(query) {
+async function haalStarterMoves(pokemonID) {
     try {
-        console.log(`🌐 Fetching Pokémon data for ID: ${query}`);
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+        console.log(`🌐 Haal moves op voor Pokémon ID: ${pokemonID}`);
+        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
 
         if (!antwoord.ok) {
-            throw new Error(`❌ API-response niet OK voor ID: ${query} - Status: ${antwoord.status}`);
+            throw new Error(`❌ Kan moves niet ophalen voor ID: ${pokemonID} - Status: ${antwoord.status}`);
         }
 
         const data = await antwoord.json();
-        console.log(`✅ Pokémon ${data.name} succesvol opgehaald!`);
-        return data;
+        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal alle typen van de Pokémon op
+        let levelUpMoves = [];
+
+        // ✅ Haal alle level-up moves op
+        data.moves.forEach(move => {
+            move.version_group_details.forEach(detail => {
+                if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
+                    levelUpMoves.push({ name: move.move.name, level: detail.level_learned_at });
+                }
+            });
+        });
+
+        // ✅ Sorteer level-up moves op level en kies de beste
+        levelUpMoves.sort((a, b) => a.level - b.level);
+        let selectedMoves = levelUpMoves.slice(0, 4).map(move => move.name);
+
+        // ✅ Als er niet genoeg level-up moves zijn, haal moves met power > 0 en juiste type
+        if (selectedMoves.length < 4) {
+            for (const moveData of data.moves) {
+                const moveDetails = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
+                const moveInfo = await moveDetails.json();
+
+                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name)) {
+                    selectedMoves.push(moveData.move.name);
+                }
+
+                if (selectedMoves.length === 4) break;
+            }
+        }
+
+        console.log("📌 Moves geselecteerd:", selectedMoves);
+        return selectedMoves;
     } catch (error) {
-        console.error(`❌ Fout bij ophalen van Pokémon:`, error);
-        return null;
+        console.error(`❌ Fout bij ophalen van moves:`, error);
+        return [];
     }
 }
