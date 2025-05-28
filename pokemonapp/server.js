@@ -7,6 +7,13 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 const POORT = process.env.PORT || 3000;
+const corsOptions = {
+    origin: "https://elite4-app.onrender.com", // Sta alleen Render toe
+    credentials: true,
+    methods: ["GET", "POST"]
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cors());
@@ -28,12 +35,12 @@ async function connectDB() {
     }
 }
 
-// ✅ Redirect naar LandingPagina.html als root wordt bezocht
+// Redirect naar LandingPagina.html als root wordt bezocht
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "LandingPagina.html"));
 });
 
-// ✅ Statische bestanden goed instellen
+// Statische bestanden goed instellen
 const beveiligdePaginas = [
     "index.html",
     "batteler.html",
@@ -45,7 +52,7 @@ const beveiligdePaginas = [
     "whothapoke.html"
 ];
 
-// ✅ Logica voor beveiligde pagina’s: Redirect naar inlogpagina als niet-ingelogd
+// Logica voor beveiligde pagina’s: Redirect naar inlogpagina als niet-ingelogd
 beveiligdePaginas.forEach((pagina) => {
     app.get(`/${pagina}`, (req, res) => {
         if (!req.cookies.user) {
@@ -55,7 +62,7 @@ beveiligdePaginas.forEach((pagina) => {
     });
 });
 
-// ✅ Open toegang tot `inlog.html` en `Aanmelden.html`
+// Open toegang tot `inlog.html` en `Aanmelden.html`
 app.get("/inlog.html", (req, res) => {
     res.sendFile(path.join(__dirname, "inlog.html"));
 });
@@ -120,7 +127,7 @@ app.post("/api/login", async (req, res) => {
 
 // **Uitloggen API**
 app.post("/api/logout", (req, res) => {
-    res.clearCookie("user"); // ✅ Verwijder cookie
+    res.clearCookie("user"); // Verwijder cookie
     res.status(200).json({ message: "✅ Uitloggen geslaagd!" });
 });
 
