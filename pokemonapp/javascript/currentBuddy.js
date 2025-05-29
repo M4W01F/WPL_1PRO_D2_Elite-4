@@ -305,8 +305,9 @@ async function updateBuddyMoves(id, moves) {
         console.log("Beschikbare moves:", availableMoves);
 
         // Fetch move details voor elke move
-        const moveDataPromises = moves.map(async (moveName, index) => {
-            const moveInfo = await GetMoveInfo(moveName); // Fetch move details
+        const moveDataPromises = moves.map(async (move, index) => {
+            const moveName = typeof move === "object" ? move.name : move;
+            const moveInfo = await GetMoveInfo(moveName);
             const moveType = moveInfo.type;
             const moveColor = getTypeColor(moveType);
             const movePower = moveInfo.power || "N/A";
