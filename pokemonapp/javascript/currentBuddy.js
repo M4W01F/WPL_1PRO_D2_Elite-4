@@ -1,108 +1,49 @@
-// Laad het JSON-bestand, vind de buddy-Pokémon, en werk de voettekst-sprite bij
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        const filePath = "./test_data/UserData.json"; // Pad naar JSON-bestand
-        const response = await fetch(filePath); // Haal JSON-bestand op
-        jsonData = await response.json(); // Parse JSON-bestand
-        console.log("Loaded JSON data:", jsonData);
+        console.log("🔍 Pagina geladen: Fetching user data from the database...");
 
-        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.isBuddy === true); // Vind de buddy Pokémon
-        if (buddyPokemon) {
-            await getBuddyPokemonStats(jsonData); // Verwerk buddy-Pokémon-statistieken
-        } else {
-            console.error("Geen buddy Pokémon gevonden.");
+        // ✅ Haal gebruiker en collectie op uit de database
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        const user = await fetchGebruikerUitDatabase(email);
+
+        if (!user || !user.collection) {
+            console.error("❌ Geen gebruiker gevonden in database!");
+            return;
         }
+
+        // ✅ Zoek de buddy Pokémon in de collectie
+        const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
+
+        if (buddyPokemon) {
+            await getBuddyPokemonStats(user); // Verwerk buddy-statistieken met bestaande functie
+        } else {
+            console.error("❌ Geen buddy Pokémon gevonden.");
+        }
+
     } catch (error) {
-        console.error("Fout bij het laden van JSON of bijwerken van buddy sprite:", error);
+        console.error("❌ Fout bij ophalen van buddy Pokémon:", error);
     }
 });
 
-// Zet een cookie
-function setCookie(name, value, days) {
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-}
-
-// Haal een cookie op
-function getCookie(name) {
-    const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
-        const [key, val] = cookie.split('=');
-        acc[key] = decodeURIComponent(val);
-        return acc;
-    }, {});
-    return cookies[name];
-}
-
-// Controleer of een cookie leeg is
-function isCookieEmpty(name) {
-    const cookieValue = getCookie(name);
-    return !cookieValue || cookieValue === '';
-}
-
-async function initializeMovesFromJSON(id) {
+async function fetchGebruikerUitDatabase(email) {
     try {
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (cookieMoves && !isCookieEmpty(`buddy_${id}_moves`)) {
-            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
-            return JSON.parse(cookieMoves); // Gebruik moves uit cookies
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Server fout: ${response.status}`);
         }
 
-        console.log("Cookies zijn leeg. Moves worden geladen uit JSON.");
-
-        const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
-        const response = await fetch(filePath);
-        const jsonData = await response.json();
-
-        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
-        if (buddyPokemon) {
-            const moves = buddyPokemon.moves.map(move => move.name || "Onbekende Beweging");
-            console.log("Moves geladen uit JSON:", moves);
-
-            // Sla de moves op in cookies
-            setCookie(`buddy_${id}_moves`, JSON.stringify(moves), 7);
-            console.log("Moves succesvol opgeslagen in cookies:", moves);
-
-            return moves;
-        } else {
-            console.error("Geen buddy Pokémon gevonden in JSON.");
-            return [];
-        }
+        const data = await response.json();
+        console.log("✅ Gebruiker succesvol opgehaald uit database:", data.user);
+        return data.user || {};
     } catch (error) {
-        console.error("Fout bij het initialiseren van moves:", error);
-        return [];
-    }
-}
-
-// Laad de moves uit cookies
-async function loadMoves(id) {
-    try {
-        // Controleer of moves in de cookies bestaan
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (!cookieMoves || isCookieEmpty(`buddy_${id}_moves`)) {
-            console.log("Cookies zijn leeg, moves worden geladen uit JSON.");
-
-            // Laad JSON-gegevens
-            const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
-            const response = await fetch(filePath);
-            jsonData = await response.json();
-
-            // Vind de buddy Pokémon en stel cookies in
-            const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
-            if (buddyPokemon) {
-                setCookie(`buddy_${id}_moves`, JSON.stringify(buddyPokemon.moves), 7);
-                console.log("Moves opgeslagen in cookies:", buddyPokemon.moves);
-                return buddyPokemon.moves; // Retourneer de moves uit de JSON
-            } else {
-                console.error("Geen buddy Pokémon gevonden in JSON.");
-                return [];
-            }
-        } else {
-            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
-            return JSON.parse(cookieMoves); // Retourneer de moves uit de cookies
-        }
-    } catch (error) {
-        console.error("Fout bij het laden van moves:", error);
-        return [];
+        console.error("❌ Fout bij ophalen van gebruiker uit database:", error.message);
+        return {};
     }
 }
 
@@ -359,38 +300,7 @@ async function updateBuddyMoves(id, moves) {
     }
 }
 
-function updateMovesInCookies(moveIndex, id, newMove) {
-    try {
-        // Haal de huidige moves op uit cookies
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (cookieMoves) {
-            const moves = JSON.parse(cookieMoves);
-            console.log("Huidige moves:", moves);
-
-            // Controleer of de moves een string-array is
-            if (!Array.isArray(moves) || typeof moves[0] !== "string") {
-                console.error("Moves-array is niet correct geformatteerd. Initialisatie vereist.");
-                return;
-            }
-
-            // Werk de specifieke move bij
-            moves[moveIndex] = newMove;
-            console.log(`Move op index ${moveIndex} gewijzigd naar: ${newMove}`);
-
-            // Sla de bijgewerkte moves opnieuw op in cookies
-            setCookie(`buddy_${id}_moves`, JSON.stringify(moves), 7);
-            console.log("Bijgewerkte moves opgeslagen in cookies:", moves);
-
-            alert(`Move succesvol gewijzigd naar: ${newMove}`);
-        } else {
-            console.error("Moves niet gevonden in cookies. Kan niet bijwerken.");
-        }
-    } catch (error) {
-        console.error("Fout bij het bijwerken van moves in cookies:", error);
-    }
-}
-
-function handleMoveChange(moveIndex, id) {
+async function handleMoveChange(moveIndex, id) {
     try {
         const moveSelectElement = document.querySelectorAll('select')[moveIndex];
         const selectedMove = moveSelectElement.value;
@@ -400,24 +310,50 @@ function handleMoveChange(moveIndex, id) {
             return;
         }
 
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (!cookieMoves || cookieMoves === "undefined") {
-            console.error("Moves niet gevonden in cookies. Kan niet bijwerken.");
+        console.log(`🔄 Move wijzigen in database voor Pokémon ID: ${id}, move index: ${moveIndex}, nieuwe move: ${selectedMove}`);
+
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Kan gebruiker niet ophalen uit database: ${response.status}`);
+        }
+
+        const user = await response.json();
+        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === id);
+
+        if (!buddyPokemon) {
+            console.error("Geen buddy Pokémon gevonden in database!");
             return;
         }
 
-        const moves = JSON.parse(cookieMoves);
-        console.log("Huidige moves uit cookies:", moves);
+        buddyPokemon.moves[moveIndex] = selectedMove;
+        console.log(`✅ Move op index ${moveIndex} gewijzigd naar: ${selectedMove}`);
 
-        moves[moveIndex] = selectedMove; // Update de specifieke move
-        console.log(`Move op index ${moveIndex} gewijzigd naar: ${selectedMove}`);
+        const updateResponse = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: user.collection }),
+            credentials: "include"
+        });
 
-        setCookie(`buddy_${id}_moves`, JSON.stringify(moves), 7); // Sla de bijgewerkte moves opnieuw op
-        console.log("Bijgewerkte moves opgeslagen in cookies:", moves);
+        if (!updateResponse.ok) {
+            throw new Error(`❌ Fout bij updaten van moves in database: ${updateResponse.status}`);
+        }
 
-        updateBuddyMoves(id, moves); // Herlaad de moves in de DOM
+        console.log("Moves succesvol bijgewerkt in database!");
+
+        // ✅ Herlaad de moves in de DOM
+        updateBuddyMoves(id, buddyPokemon.moves);
+
     } catch (error) {
-        console.error("Fout bij het wijzigen van een move:", error);
+        console.error("❌ Fout bij wijzigen van een move:", error);
     }
 }
 

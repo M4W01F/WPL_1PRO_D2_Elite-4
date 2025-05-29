@@ -191,6 +191,37 @@ app.post("/api/updateUser", async (req, res) => {
     }
 });
 
+app.post("/api/updateBuddy", async (req, res) => {
+    try {
+        const db = await connectDB();
+        const { email, pokemon_id } = req.body;
+
+        if (!email || !pokemon_id) {
+            return res.status(400).json({ error: "❌ Email en Pokémon ID zijn verplicht!" });
+        }
+
+        console.log(`🔄 Updaten buddy Pokémon voor gebruiker: ${email}, nieuwe buddy ID: ${pokemon_id}`);
+
+        await db.collection("users").updateOne(
+            { email: email.trim() },
+            { $set: { "collection.$[elem].isBuddy": false } },
+            { arrayFilters: [{ "elem.isBuddy": true }] }
+        );
+
+        await db.collection("users").updateOne(
+            { email: email.trim(), "collection.pokemon_id": pokemon_id },
+            { $set: { "collection.$.isBuddy": true } }
+        );
+
+        res.status(200).json({ message: "✅ Buddy succesvol bijgewerkt!" });
+        console.log("🎉 Buddy Pokémon succesvol gewijzigd in database!");
+
+    } catch (error) {
+        console.error("❌ Fout bij updaten van buddy Pokémon:", error);
+        res.status(500).json({ error: "❌ Fout bij updaten van buddy Pokémon." });
+    }
+});
+
 // **Start server**
 app.listen(POORT, () => {
     console.log(`🚀 Server draait op poort ${POORT}`);
