@@ -157,3 +157,52 @@ document.getElementById("submit-bijnaam").addEventListener("click", async () => 
     await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, nickname);
     window.location.href = "./index.html";
 });
+
+async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname) {
+    try {
+        console.log("[DEBUG] - Pokémon toevoegen aan collectie:", pokemonData.name);
+
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+
+        // ✅ Haal bestaande gebruiker op
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+        const user = data.user;
+
+        // ✅ Maak een nieuw Pokémon-object
+        const nieuwePokemon = {
+            pokemon_name: pokemonData.name,
+            pokemon_id: pokemonData.id,
+            nickname: nickname || "",
+            sprite: pokemonData.sprites.front_default,
+            level: level,
+            wins: 0,
+            loses: 0,
+            stats: opponentStats,
+            isBuddy: false, // ✅ Pokémon wordt toegevoegd als geen Buddy
+            moves: await haalMoves(pokemonData.id)
+        };
+
+        // ✅ Voeg de Pokémon toe aan de collectie van de gebruiker
+        user.collection.push(nieuwePokemon);
+
+        // ✅ Update de database met de nieuwe collectie
+        const updateResponse = await fetch("/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: user.collection }),
+            credentials: "include"
+        });
+
+        console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de database.");
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
+    }
+}
