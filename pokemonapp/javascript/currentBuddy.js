@@ -42,10 +42,10 @@ async function fetchBuddyMoves(pokemonID) {
         }
 
         const user = await response.json();
-        console.log("✅ Gebruikersgegevens ontvangen:", user);
+        console.log("✅ Gebruikersgegevens ontvangen:", JSON.stringify(user, null, 2));
 
-        if (!user || !user.collection) {
-            console.error("❌ Geen collectie gevonden in database!");
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("❌ Geen geldige collectie gevonden in database!");
             return [];
         }
 
