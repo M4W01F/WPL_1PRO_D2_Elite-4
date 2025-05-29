@@ -1,5 +1,3 @@
-const nickname = "";
-
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         console.log("🔍 Pagina geladen: Fetching user data from the database...");
@@ -15,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // ✅ Zoek de buddy Pokémon in de collectie
         const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
-        nickname = buddyPokemon ? buddyPokemon.nickname || buddyPokemon.pokemon_name : "";
 
         if (buddyPokemon) {
             await getBuddyPokemonStats(user); // Verwerk buddy-statistieken met bestaande functie
@@ -187,6 +184,29 @@ async function getBuddyPokemonStats(data) {
 
 // Stel huidige buddy in en toon informatie
 async function setCurrentBuddy(pokemonId, level, wins, loses) {
+    const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+    const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        throw new Error(`Kan gebruiker niet ophalen uit database: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const user = data.user;
+    const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
+
+    if (!buddyPokemon) {
+        console.error("Geen buddy Pokémon gevonden in database!");
+        return;
+    }
+
+    nickname = buddyPokemon.nickname || buddyPokemon.pokemon_name;
+
     const pokemon = await fetchPokemonData(pokemonId);
     const species = await fetchSpeciesData(pokemonId);
     if (pokemon && species) {
