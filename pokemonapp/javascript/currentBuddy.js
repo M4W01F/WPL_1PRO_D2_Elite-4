@@ -194,7 +194,7 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
             <p><strong>Naam:</strong> ${pokemon.name}</p>
-            <p><strong>Bijnaam:</strong> Blaze</p>
+            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${buddyPokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${buddyPokemon.pokemon_id}')"></p>
             <p><strong>ID:</strong> ${pokemon.id}</p>
             <p><strong>Wins:</strong> ${wins}</p>
             <p><strong>Losses:</strong> ${loses}</p>
@@ -285,6 +285,53 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
                 })
             ).then(sprites => sprites.join(''))}
         `;
+    }
+}
+
+async function handleNicknameChange(pokemonId) {
+    try {
+        const newNickname = document.getElementById("nickname-input").value;
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Kan gebruiker niet ophalen uit database: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const user = data.user;
+        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === pokemonId);
+
+        if (!buddyPokemon) {
+            console.error("❌ Geen buddy Pokémon gevonden!");
+            return;
+        }
+
+        // ✅ Update nickname in collectie
+        buddyPokemon.nickname = newNickname;
+        console.log(`✅ Bijnaam succesvol gewijzigd naar: ${newNickname}`);
+
+        const updateResponse = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: user.collection }),
+            credentials: "include"
+        });
+
+        if (!updateResponse.ok) {
+            throw new Error(`❌ Fout bij updaten van nickname in database: ${updateResponse.status}`);
+        }
+
+        console.log("✅ Bijnaam succesvol opgeslagen in database!");
+
+    } catch (error) {
+        console.error("❌ Fout bij wijzigen van nickname:", error);
     }
 }
 
