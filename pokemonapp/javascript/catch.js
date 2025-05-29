@@ -126,7 +126,7 @@ document.getElementById("pokeball").addEventListener("click", async () => {
         const vangstGeslaagd = Math.random() * 100 < vangstKans;
 
         if (vangstGeslaagd) {
-            document.getElementById("popup").style.display = "block";
+            document.getElementById("popup").style.display = "flex";
         } else {
             if (aantalKansen === 0) {
                 window.location.href = "./index.html";
