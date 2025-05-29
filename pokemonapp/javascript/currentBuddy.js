@@ -194,7 +194,7 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
             <p><strong>Naam:</strong> ${pokemon.name}</p>
-            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${buddyPokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${buddyPokemon.pokemon_id}')"></p>
+            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${pokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${pokemon.pokemon_id}')"></p>
             <p><strong>ID:</strong> ${pokemon.id}</p>
             <p><strong>Wins:</strong> ${wins}</p>
             <p><strong>Losses:</strong> ${loses}</p>
@@ -293,6 +293,7 @@ async function handleNicknameChange(pokemonId) {
         const newNickname = document.getElementById("nickname-input").value;
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
+        // ✅ Fetch user data
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -306,17 +307,26 @@ async function handleNicknameChange(pokemonId) {
 
         const data = await response.json();
         const user = data.user;
-        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === pokemonId);
 
-        if (!buddyPokemon) {
-            console.error("❌ Geen buddy Pokémon gevonden!");
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("❌ Geen geldige collectie gevonden in database!");
             return;
         }
 
-        // ✅ Update nickname in collectie
-        buddyPokemon.nickname = newNickname;
+        // ✅ Zoek Pokémon met gegeven ID en update de nickname
+        const pokemon = user.collection.find(p => Number(p.pokemon_id) === Number(pokemonId));
+
+        if (!pokemon) {
+            console.error(`❌ Geen Pokémon gevonden met ID: ${pokemonId}`);
+            console.log("👉 Hier zijn alle ID's in de collectie:", user.collection.map(p => p.pokemon_id));
+            return;
+        }
+
+        pokemon.nickname = newNickname; // ✅ Update nickname direct
+
         console.log(`✅ Bijnaam succesvol gewijzigd naar: ${newNickname}`);
 
+        // ✅ Save changes to the database
         const updateResponse = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
