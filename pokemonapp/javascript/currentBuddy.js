@@ -25,6 +25,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+async function fetchBuddyMoves(pokemonID) {
+    try {
+        console.log(`🌐 Haal moves op voor buddy Pokémon ID: ${pokemonID}`);
+
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Kan moves niet ophalen uit database: ${response.status}`);
+        }
+
+        const user = await response.json();
+        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === pokemonID);
+
+        if (!buddyPokemon) {
+            console.error("❌ Geen buddy Pokémon gevonden in database!");
+            return [];
+        }
+
+        console.log("✅ Moves geladen uit database:", buddyPokemon.moves);
+        return buddyPokemon.moves;
+    } catch (error) {
+        console.error("❌ Fout bij ophalen van moves uit database:", error);
+        return [];
+    }
+}
+
 async function fetchGebruikerUitDatabase(email) {
     try {
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
@@ -115,7 +147,7 @@ async function getBuddyPokemonStats(data) {
             const loses = buddyPokemon.loses;
 
             // Controleer of moves al in cookies bestaan
-            const moves = await initializeMovesFromJSON(pokemonId); // Haal moves uit cookies of JSON
+            const moves = await fetchBuddyMoves(pokemonId); // Haal moves uit database
             console.log("Moves geladen:", moves);
 
             // Stel de buddy-statistieken samen
