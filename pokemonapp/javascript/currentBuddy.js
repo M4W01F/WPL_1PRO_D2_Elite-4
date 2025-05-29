@@ -38,19 +38,28 @@ async function fetchBuddyMoves(pokemonID) {
         });
 
         if (!response.ok) {
-            throw new Error(`❌ Kan moves niet ophalen uit database: ${response.status}`);
+            throw new Error(`❌ Kan gebruiker niet ophalen uit database: ${response.status}`);
         }
 
         const user = await response.json();
-        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === pokemonID);
+        console.log("✅ Gebruikersgegevens ontvangen:", user);
 
-        if (!buddyPokemon) {
-            console.error("❌ Geen buddy Pokémon gevonden in database!");
+        if (!user || !user.collection) {
+            console.error("❌ Geen collectie gevonden in database!");
             return [];
         }
 
-        console.log("✅ Moves geladen uit database:", buddyPokemon.moves);
-        return buddyPokemon.moves;
+        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === pokemonID);
+
+        if (!buddyPokemon) {
+            console.error("❌ Geen buddy Pokémon gevonden!");
+            return [];
+        }
+
+        // ✅ Extract only move names from move objects
+        const moveNames = buddyPokemon.moves.map(move => move.name);
+        console.log("✅ Moves geladen uit database:", moveNames);
+        return moveNames;
     } catch (error) {
         console.error("❌ Fout bij ophalen van moves uit database:", error);
         return [];
