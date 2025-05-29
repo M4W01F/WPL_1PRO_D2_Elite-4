@@ -60,15 +60,15 @@ async function genereerStarterPokemon() {
     const popupYes = document.getElementById("popup-yes");
     const popupNo = document.getElementById("popup-no");
 
-    const starterIds = [1, 7, 4]; // ✅ Correcte volgorde: Bulbasaur → Squirtle → Charmander
+    const starterIds = [1, 7, 4];
     for (const id of starterIds) {
         const pokemon = await haalPokemonGegevensOp(id);
         if (pokemon) {
             console.log(`✅ Pokémon geladen: ${pokemon.name}`);
 
             const div = document.createElement("div");
-            div.className = "starter-pokemon"; // ✅ Hier wordt de stijl toegepast
-            
+            div.className = "starter-pokemon";
+
             div.innerHTML = `
                 <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 250px; height: 250px;">
                 <p><strong>${pokemon.name}</strong></p>
@@ -80,53 +80,54 @@ async function genereerStarterPokemon() {
                 popupText.innerHTML = `Wilt u ${pokemon.name} als uw starter Pokémon kiezen?<br>
                 <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">`;
 
-               popupYes.onclick = async () => {
-                console.log(`🟢 Gebruiker kiest ${pokemon.name} als starter!`);
-                popup.style.display = "none";
-                document.getElementById("niet-ingelogged").style.display = "none";
-                document.getElementById("well-ingelogged").style.display = "block";
+                popupYes.onclick = async () => {
+                    console.log(`🟢 Gebruiker kiest ${pokemon.name} als starter!`);
+                    popup.style.display = "none";
+                    document.getElementById("niet-ingelogged").style.display = "none";
+                    document.getElementById("well-ingelogged").style.display = "block";
 
-                // ✅ Haal moves en stats op
-                const moves = await haalStarterMoves(pokemon.id);
-                const stats = await haalPokemonStats(pokemon.id);
+                    // ✅ Haal moves en stats op
+                    const moves = await haalStarterMoves(pokemon.id);
+                    const stats = await haalPokemonStats(pokemon.id);
 
-                console.log("📌 Moves geselecteerd:", moves);
-                console.log("📌 Stats opgehaald:", stats);
+                    console.log("📌 Moves geselecteerd:", moves);
+                    console.log("📌 Stats opgehaald:", stats);
 
-                // ✅ Base stats verhogen per level
-                let level = 5;
-                let { hp, attack, defense, speed, special_attack, special_defense } = stats;
+                    // ✅ Base stats verhogen per level
+                    let level = 5;
+                    let { hp, attack, defense, speed, special_attack, special_defense } = stats;
 
-                for (let i = 1; i <= level; i++) {
-                    hp += Math.round(hp / 50);
-                    attack += Math.round(attack / 50);
-                    defense += Math.round(defense / 50);
-                    speed += Math.round(speed / 50);
-                    special_attack += Math.round(special_attack / 50);
-                    special_defense += Math.round(special_defense / 50);
-                }
+                    for (let i = 1; i <= level; i++) {
+                        hp += Math.round(hp / 50);
+                        attack += Math.round(attack / 50);
+                        defense += Math.round(defense / 50);
+                        speed += Math.round(speed / 50);
+                        special_attack += Math.round(special_attack / 50);
+                        special_defense += Math.round(special_defense / 50);
+                    }
 
-                // ✅ Voeg starter toe aan gebruiker
-                let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-                user.collection = user.collection || [];
-                user.collection.push({
-                    pokemon_name: pokemon.name,
-                    pokemon_id: pokemon.id,
-                    sprite: pokemon.sprites.front_default,
-                    level: 5,
-                    wins: 0,
-                    loses: 0,
-                    stats: { hp, attack, defense, special_attack, special_defense, speed },
-                    isBuddy: true,
-                    moves: moves
-                });
+                    // ✅ Voeg starter toe aan gebruiker met lege bijnaam
+                    let user = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+                    user.collection = user.collection || [];
+                    user.collection.push({
+                        pokemon_name: pokemon.name,
+                        pokemon_id: pokemon.id,
+                        nickname: "",
+                        sprite: pokemon.sprites.front_default,
+                        level: 5,
+                        wins: 0,
+                        loses: 0,
+                        stats: { hp, attack, defense, special_attack, special_defense, speed },
+                        isBuddy: true,
+                        moves: moves
+                    });
 
-                localStorage.setItem("loggedInUser", JSON.stringify(user));
-                console.log("✅ Starter Pokémon opgeslagen in localStorage:", user.collection);
+                    localStorage.setItem("loggedInUser", JSON.stringify(user));
+                    console.log("✅ Starter Pokémon opgeslagen in localStorage:", user.collection);
 
-                // ✅ Update gebruiker in database
-                await updateUserInDatabase(user.email, user.collection);
-            };
+                    // ✅ Update gebruiker in database
+                    await updateUserInDatabase(user.email, user.collection);
+                };
 
                 popupNo.onclick = () => {
                     console.log("🔴 Gebruiker weigert starter Pokémon");
