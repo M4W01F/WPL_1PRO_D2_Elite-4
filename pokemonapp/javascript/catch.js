@@ -17,8 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Haal de stats van de huidige Buddy-Pokémon uit de collectie
 async function haalBuddyUitCollectie(email) {
     try {
-        console.log(`[DEBUG] - Start ophalen van Buddy-Pokémon voor gebruiker: ${email}`);
-
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -27,28 +25,21 @@ async function haalBuddyUitCollectie(email) {
         });
 
         if (!response.ok) {
-            throw new Error(`[ERROR] - Kan gebruiker niet ophalen. Status: ${response.status}`);
+            throw new Error(`Kan gebruiker niet ophalen. Status: ${response.status}`);
         }
 
         const data = await response.json();
         const user = data.user;
 
         if (!user || !user.collection || !Array.isArray(user.collection)) {
-            console.error("[ERROR] - Geen geldige collectie gevonden in database!");
+            console.error("Geen geldige collectie gevonden in database!");
             return null;
         }
 
-        const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
+        return user.collection.find(pokemon => pokemon.isBuddy === true) || null;
 
-        if (!buddyPokemon) {
-            console.error("[ERROR] - Geen buddy Pokémon gevonden.");
-            return null;
-        }
-
-        console.log("[DEBUG] - Buddy-Pokémon geladen:", buddyPokemon);
-        return buddyPokemon;
     } catch (error) {
-        console.error("[ERROR] - Fout bij ophalen van Buddy-Pokémon:", error);
+        console.error("Fout bij ophalen van Buddy-Pokémon:", error);
         return null;
     }
 }
@@ -57,6 +48,7 @@ async function haalBuddyUitCollectie(email) {
 let laatstGevangenPokemon = null;
 let laatstGevangenStats = null;
 let laatstGevangenLevel = null;
+let laatstGevangenBuddy = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
@@ -82,6 +74,7 @@ async function startCatch(pokemonName) {
             alert("Geen actieve Buddy-Pokémon gevonden.");
             return;
         }
+        laatstGevangenBuddy = buddyPokemon;
 
         // ✅ Dynamisch berekend level
         const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
@@ -106,163 +99,66 @@ async function startCatch(pokemonName) {
             opponentStats.special_defense += opponentStats.special_defense / 50;
         }
 
-        console.log("[DEBUG] - Tegenstander stats berekend:", opponentStats);
+        laatstGevangenPokemon = pokemonData;
+        laatstGevangenStats = opponentStats;
+        laatstGevangenLevel = pokemonLevel;
+
         console.log(`[DEBUG] - Final Pokémon Level: ${pokemonLevel}`);
+        console.log("[DEBUG] - Tegenstander stats berekend:", opponentStats);
 
         // ✅ Bereken vangkans op basis van Buddy stats
         const catchChance = Math.min(95, (100 - opponentStats.defense + buddyPokemon.stats.attack) % 100);
         console.log(`[DEBUG] - Vangkans berekend: ${catchChance}%`);
 
-        // ✅ Pokéball event listener voor vangmechanisme
-        document.getElementById("pokeball").addEventListener("click", async () => {
-            const kansen = document.getElementById("kansen");
-            let aantalKansen = parseInt(kansen.textContent);
-
-            if (aantalKansen > 0) {
-                aantalKansen--;
-
-                const vangstGeslaagd = Math.random() * 100 < catchChance;
-
-                if (vangstGeslaagd) {
-                    laatstGevangenPokemon = pokemonData;
-                    laatstGevangenStats = opponentStats;
-                    laatstGevangenLevel = pokemonLevel;
-
-                    document.getElementById("popup").style.display = "block";
-                } else {
-                    if (aantalKansen === 0) {
-                        alert("Geen kansen meer! Je wordt teruggeleid naar de hoofdpagina.");
-                        window.location.href = "./index.html";
-                    } else {
-                        alert("Niet gelukt! Probeer opnieuw.");
-                    }
-                }
-            }
-        });
-
-        console.log(`Start catching: ${pokemonData.name}`);
-
     } catch (error) {
-        console.error("[ERROR] - Fout bij vangproces:", error);
+        console.error("Fout bij vangproces:", error);
         alert(error.message);
     }
 }
 
-// ✅ Voeg Pokémon toe aan de collectie
-async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname) {
-    try {
-        console.log("[DEBUG] - Pokémon toevoegen aan collectie:", pokemonData.name);
+// ✅ Pokéball event listener
+document.getElementById("pokeball").addEventListener("click", async () => {
+    const kansen = document.getElementById("kansen");
+    let aantalKansen = parseInt(kansen.textContent);
 
-        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+    if (aantalKansen > 0) {
+        aantalKansen--;
 
-        const response = await fetch("/api/getUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-            credentials: "include"
-        });
+        // ✅ Bereken dynamische vangkans
+        const vangstKans = Math.min(95, (100 - laatstGevangenStats.defense + laatstGevangenBuddy.stats.attack) % 100);
+        const vangstGeslaagd = Math.random() * 100 < vangstKans;
 
-        const data = await response.json();
-        const user = data.user;
+        console.log(`[DEBUG] - Vangkans: ${vangstKans}% | Resultaat: ${vangstGeslaagd ? "SUCCES" : "MISLUKT"}`);
 
-        const nieuwePokemon = {
-            pokemon_name: pokemonData.name,
-            pokemon_id: pokemonData.id,
-            nickname: nickname || "",
-            sprite: pokemonData.sprites.front_default,
-            level: level,
-            wins: 0,
-            loses: 0,
-            stats: opponentStats,
-            isBuddy: false,
-            moves: await haalMoves(pokemonData.id)
-        };
-
-        user.collection.push(nieuwePokemon);
-
-        const updateResponse = await fetch("/api/updateUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, collection: user.collection }),
-            credentials: "include"
-        });
-
-        console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de databasecollectie.");
-
-    } catch (error) {
-        console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
-    }
-}
-
-async function haalMoves(pokemonID) {
-    try {
-        console.log(`🌐 Haal moves op voor Pokémon ID: ${pokemonID}`);
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
-
-        if (!antwoord.ok) {
-            throw new Error(`❌ Kan moves niet ophalen voor ID: ${pokemonID} - Status: ${antwoord.status}`);
-        }
-
-        const data = await antwoord.json();
-        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
-        let moveSet = new Map(); // ✅ Gebruik een Map om duplicaten te voorkomen
-
-        // ✅ Zoek alle unieke level-up moves met power > 0
-        for (const moveData of data.moves) {
-            for (const detail of moveData.version_group_details) {
-                if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
-                    const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
-                    const moveInfo = await moveResponse.json();
-
-                    if (moveInfo.power > 0 && !moveSet.has(moveInfo.name)) {
-                        moveSet.set(moveInfo.name, {
-                            name: moveInfo.name,
-                            power: moveInfo.power,
-                            accuracy: moveInfo.accuracy,
-                            priority: moveInfo.priority,
-                            type: moveInfo.type.name,
-                            damage_class: moveInfo.damage_class.name,
-                            effect: moveInfo.effect_entries.length > 0 
-                                ? moveInfo.effect_entries[0].effect 
-                                : "No effect",
-                        });
-                    }
-                }
+        if (vangstGeslaagd) {
+            document.getElementById("popup").style.display = "block";
+        } else {
+            if (aantalKansen === 0) {
+                window.location.href = "./index.html";
+            } else {
+                alert("Niet gelukt! Probeer opnieuw.");
             }
         }
-
-        let selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Converteer Map naar Array
-
-        // ✅ Vul aan met type-moves als er minder dan 4 unieke moves zijn
-        if (selectedMoves.length < 4) {
-            for (const moveData of data.moves) {
-                const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
-                const moveInfo = await moveResponse.json();
-
-                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !moveSet.has(moveInfo.name)) {
-                    moveSet.set(moveInfo.name, {
-                        name: moveInfo.name,
-                        power: moveInfo.power,
-                        accuracy: moveInfo.accuracy,
-                        priority: moveInfo.priority,
-                        type: moveInfo.type.name,
-                        damage_class: moveInfo.damage_class.name,
-                        effect: moveInfo.effect_entries.length > 0 
-                            ? moveInfo.effect_entries[0].effect 
-                            : "No effect",
-                    });
-                }
-
-                if (moveSet.size === 4) break;
-            }
-
-            selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Zorgt ervoor dat we precies 4 moves hebben
-        }
-
-        console.log("📌 Unieke moves geselecteerd:", selectedMoves);
-        return selectedMoves;
-    } catch (error) {
-        console.error(`❌ Fout bij ophalen van moves:`, error);
-        return [];
     }
-}
+});
+
+// ✅ Popup event listeners
+document.getElementById("popup-yes").addEventListener("click", () => {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("bijnaam-panel").style.display = "block";
+});
+
+document.getElementById("popup-no").addEventListener("click", async () => {
+    document.getElementById("popup").style.display = "none";
+    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, "");
+    window.location.href = "./index.html";
+});
+
+// ✅ Event Listener voor bijnaam
+document.getElementById("submit-bijnaam").addEventListener("click", async () => {
+    const nicknameInput = document.getElementById("pokemon-bijnaam").value.trim();
+    const nickname = nicknameInput !== "" ? nicknameInput : "";
+
+    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, nickname);
+    window.location.href = "./index.html";
+});
