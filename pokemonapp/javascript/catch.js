@@ -1,56 +1,19 @@
-// Haal Pokémon naam uit pokedex
+// Haal pokemon naam uit pokedex
 function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
-    return params.get("pokemonName");
+    return params.get('pokemonName');
 }
 
-// Event Listener om catch te starten vanuit de pokedex
-document.addEventListener("DOMContentLoaded", () => {
+// Event Listener om catch te starten out pokedex
+document.addEventListener('DOMContentLoaded', () => {
     const pokemonName = getPokemonNameFromURL();
     if (pokemonName) {
         startCatch(pokemonName);
     } else {
-        console.error("Pokémon name is missing from the URL.");
+        console.error('Pokémon name is missing from the URL.');
     }
 });
 
-// Haal de stats van de huidige Buddy-Pokémon uit de collectie
-async function haalBuddyUitCollectie(email) {
-    try {
-        const response = await fetch("/api/getUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-            credentials: "include"
-        });
-
-        if (!response.ok) {
-            throw new Error(`Kan gebruiker niet ophalen. Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const user = data.user;
-
-        if (!user || !user.collection || !Array.isArray(user.collection)) {
-            console.error("Geen geldige collectie gevonden in database!");
-            return null;
-        }
-
-        return user.collection.find(pokemon => pokemon.isBuddy === true) || null;
-
-    } catch (error) {
-        console.error("Fout bij ophalen van Buddy-Pokémon:", error);
-        return null;
-    }
-}
-
-// Globale variabelen voor laatst gevangen Pokémon
-let laatstGevangenPokemon = null;
-let laatstGevangenStats = null;
-let laatstGevangenLevel = null;
-let laatstGevangenBuddy = null;
-
-// Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
     const selectedPokemonName = document.getElementById("pokemon-selector").value.toLowerCase() || pokemonName;
 
@@ -80,23 +43,23 @@ async function startCatch(pokemonName) {
         const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
         const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
 
-        // ✅ Dynamisch berekende stats
+        // ✅ Dynamisch berekende stats + afronden met Math.round()
         let opponentStats = {
-            hp: pokemonData.stats[0].base_stat,
-            attack: pokemonData.stats[1].base_stat,
-            defense: pokemonData.stats[2].base_stat,
-            special_attack: pokemonData.stats[3].base_stat,
-            special_defense: pokemonData.stats[4].base_stat,
-            speed: pokemonData.stats[5].base_stat
+            hp: Math.round(pokemonData.stats[0].base_stat),
+            attack: Math.round(pokemonData.stats[1].base_stat),
+            defense: Math.round(pokemonData.stats[2].base_stat),
+            special_attack: Math.round(pokemonData.stats[3].base_stat),
+            special_defense: Math.round(pokemonData.stats[4].base_stat),
+            speed: Math.round(pokemonData.stats[5].base_stat)
         };
 
         for (let i = 1; i <= pokemonLevel; i++) {
-            opponentStats.hp += opponentStats.hp / 50;
-            opponentStats.attack += opponentStats.attack / 50;
-            opponentStats.defense += opponentStats.defense / 50;
-            opponentStats.speed += opponentStats.speed / 50;
-            opponentStats.special_attack += opponentStats.special_attack / 50;
-            opponentStats.special_defense += opponentStats.special_defense / 50;
+            opponentStats.hp = Math.round(opponentStats.hp + opponentStats.hp / 50);
+            opponentStats.attack = Math.round(opponentStats.attack + opponentStats.attack / 50);
+            opponentStats.defense = Math.round(opponentStats.defense + opponentStats.defense / 50);
+            opponentStats.speed = Math.round(opponentStats.speed + opponentStats.speed / 50);
+            opponentStats.special_attack = Math.round(opponentStats.special_attack + opponentStats.special_attack / 50);
+            opponentStats.special_defense = Math.round(opponentStats.special_defense + opponentStats.special_defense / 50);
         }
 
         laatstGevangenPokemon = pokemonData;
@@ -105,6 +68,17 @@ async function startCatch(pokemonName) {
 
         console.log(`[DEBUG] - Final Pokémon Level: ${pokemonLevel}`);
         console.log("[DEBUG] - Tegenstander stats berekend:", opponentStats);
+
+        // ✅ Update de Pokémon details dynamisch in de UI
+        document.getElementById("pokemon-naam").textContent = `Naam: ${pokemonData.name}`;
+        document.getElementById("pokemon-level").textContent = `Level: ${pokemonLevel}`;
+        document.getElementById("pokemon-image").innerHTML = `
+            <img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}" />
+        `;
+
+        // ✅ Verberg setup en toon catch-interface
+        document.getElementById("setup-container").style.display = "none";
+        document.getElementById("catch-interface").style.display = "block";
 
         // ✅ Bereken vangkans op basis van Buddy stats
         const catchChance = Math.min(95, (100 - opponentStats.defense + buddyPokemon.stats.attack) % 100);
@@ -116,49 +90,28 @@ async function startCatch(pokemonName) {
     }
 }
 
-// ✅ Pokéball event listener
-document.getElementById("pokeball").addEventListener("click", async () => {
-    const kansen = document.getElementById("kansen");
+// Pokeball click event
+document.getElementById('pokeball').addEventListener('click', () => {
+    const kansen = document.getElementById('kansen');
     let aantalKansen = parseInt(kansen.textContent);
 
     if (aantalKansen > 0) {
         aantalKansen--;
+        kansen.textContent = aantalKansen;
 
-        // ✅ Bereken dynamische vangkans
-        const vangstKans = Math.min(95, (100 - laatstGevangenStats.defense + laatstGevangenBuddy.stats.attack) % 100);
-        const vangstGeslaagd = Math.random() * 100 < vangstKans;
-
-        console.log(`[DEBUG] - Vangkans: ${vangstKans}% | Resultaat: ${vangstGeslaagd ? "SUCCES" : "MISLUKT"}`);
-
-        if (vangstGeslaagd) {
-            document.getElementById("popup").style.display = "block";
+        if (Math.random() > 0.5) { // Random success voorbeeeld
+            document.getElementById('pokeball').style.display = 'none';
+            document.getElementById('kansen').style.display = 'none';
+            document.getElementById('kans').style.display = 'none';
+            alert('Gevangen! Geef je Pokémon een bijnaam.');
+            document.getElementById('bijnaam-panel').style.display = 'block';
         } else {
             if (aantalKansen === 0) {
-                window.location.href = "./index.html";
+                alert('Geen kansen meer! Je wordt teruggeleid naar de hoofdpagina.');
+                window.location.href = './index.html';
             } else {
-                alert("Niet gelukt! Probeer opnieuw.");
+                alert('Niet gelukt! Probeer opnieuw.');
             }
         }
     }
-});
-
-// ✅ Popup event listeners
-document.getElementById("popup-yes").addEventListener("click", () => {
-    document.getElementById("popup").style.display = "none";
-    document.getElementById("bijnaam-panel").style.display = "block";
-});
-
-document.getElementById("popup-no").addEventListener("click", async () => {
-    document.getElementById("popup").style.display = "none";
-    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, "");
-    window.location.href = "./index.html";
-});
-
-// ✅ Event Listener voor bijnaam
-document.getElementById("submit-bijnaam").addEventListener("click", async () => {
-    const nicknameInput = document.getElementById("pokemon-bijnaam").value.trim();
-    const nickname = nicknameInput !== "" ? nicknameInput : "";
-
-    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, nickname);
-    window.location.href = "./index.html";
 });
