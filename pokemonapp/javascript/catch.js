@@ -115,3 +115,32 @@ document.getElementById('pokeball').addEventListener('click', () => {
         }
     }
 });
+
+async function haalBuddyUitCollectie(email) {
+    try {
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Kan gebruiker niet ophalen. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const user = data.user;
+
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("Geen geldige collectie gevonden in database!");
+            return null;
+        }
+
+        return user.collection.find(pokemon => pokemon.isBuddy === true) || null;
+
+    } catch (error) {
+        console.error("Fout bij ophalen van Buddy-Pokémon:", error);
+        return null;
+    }
+}
