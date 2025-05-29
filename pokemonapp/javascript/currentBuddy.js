@@ -194,7 +194,7 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
             <p><strong>Naam:</strong> ${pokemon.name}</p>
-            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${pokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${pokemon.id}')"></p>
+            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${pokemon.nickname !== undefined ? pokemon.nickname : pokemon.name}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${pokemon.id}')"></p>
             <p><strong>ID:</strong> ${pokemon.id}</p>
             <p><strong>Wins:</strong> ${wins}</p>
             <p><strong>Losses:</strong> ${loses}</p>
@@ -293,7 +293,6 @@ async function handleNicknameChange(pokemonId) {
         const newNickname = document.getElementById("nickname-input").value;
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // ✅ Fetch user data
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -302,31 +301,29 @@ async function handleNicknameChange(pokemonId) {
         });
 
         if (!response.ok) {
-            throw new Error(`❌ Kan gebruiker niet ophalen uit database: ${response.status}`);
+            throw new Error(`Kan gebruiker niet ophalen uit database: ${response.status}`);
         }
 
         const data = await response.json();
         const user = data.user;
 
         if (!user || !user.collection || !Array.isArray(user.collection)) {
-            console.error("❌ Geen geldige collectie gevonden in database!");
+            console.error("Geen geldige collectie gevonden in database!");
             return;
         }
 
-        // ✅ Zoek Pokémon met gegeven ID en update de nickname
         const pokemon = user.collection.find(p => Number(p.pokemon_id) === Number(pokemonId));
 
         if (!pokemon) {
-            console.error(`❌ Geen Pokémon gevonden met ID: ${pokemonId}`);
-            console.log("👉 Hier zijn alle ID's in de collectie:", user.collection.map(p => p.pokemon_id));
+            console.error(`Geen Pokémon gevonden met ID: ${pokemonId}`);
+            console.log("Hier zijn alle ID's in de collectie:", user.collection.map(p => p.pokemon_id));
             return;
         }
 
-        pokemon.nickname = newNickname; // ✅ Update nickname direct
+        pokemon.nickname = newNickname;
 
-        console.log(`✅ Bijnaam succesvol gewijzigd naar: ${newNickname}`);
+        console.log(`Bijnaam succesvol gewijzigd naar: ${newNickname}`);
 
-        // ✅ Save changes to the database
         const updateResponse = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -335,13 +332,13 @@ async function handleNicknameChange(pokemonId) {
         });
 
         if (!updateResponse.ok) {
-            throw new Error(`❌ Fout bij updaten van nickname in database: ${updateResponse.status}`);
+            throw new Error(`Fout bij updaten van nickname in database: ${updateResponse.status}`);
         }
 
-        console.log("✅ Bijnaam succesvol opgeslagen in database!");
+        console.log("Bijnaam succesvol opgeslagen in database!");
 
     } catch (error) {
-        console.error("❌ Fout bij wijzigen van nickname:", error);
+        console.error("Fout bij wijzigen van nickname:", error);
     }
 }
 
