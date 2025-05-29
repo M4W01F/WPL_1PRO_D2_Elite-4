@@ -1,16 +1,16 @@
-// Haal pokemon naam uit pokedex
+// Haal Pokémon naam uit pokedex
 function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('pokemonName');
+    return params.get("pokemonName");
 }
 
-// Event Listener om catch te starten out pokedex
-document.addEventListener('DOMContentLoaded', () => {
+// Event Listener om catch te starten vanuit de pokedex
+document.addEventListener("DOMContentLoaded", () => {
     const pokemonName = getPokemonNameFromURL();
     if (pokemonName) {
         startCatch(pokemonName);
     } else {
-        console.error('Pokémon name is missing from the URL.');
+        console.error("Pokémon name is missing from the URL.");
     }
 });
 
@@ -47,12 +47,16 @@ async function haalBuddyUitCollectie(email) {
 
         console.log("[DEBUG] - Buddy-Pokémon geladen:", buddyPokemon);
         return buddyPokemon;
-
     } catch (error) {
         console.error("[ERROR] - Fout bij ophalen van Buddy-Pokémon:", error);
         return null;
     }
 }
+
+// Globale variabelen voor laatst gevangen Pokémon
+let laatstGevangenPokemon = null;
+let laatstGevangenStats = null;
+let laatstGevangenLevel = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
@@ -114,10 +118,11 @@ async function startCatch(pokemonName) {
                 console.log(`[DEBUG] - Vangpoging: ${vangstGeslaagd ? "Geslaagd" : "Mislukt"}`);
 
                 if (vangstGeslaagd) {
-                    alert("Gevangen! Geef je Pokémon een bijnaam.");
-                    document.getElementById("bijnaam-panel").style.display = "block";
-
-                    await voegPokemonToeAanCollectie(pokemonData, opponentStats, buddyPokemon.level);
+                    // ✅ Pokémon is gevangen! Toon de popup
+                    laatstGevangenPokemon = pokemonData;
+                    laatstGevangenStats = opponentStats;
+                    laatstGevangenLevel = buddyPokemon.level;
+                    document.getElementById("popup").style.display = "block";
                 } else {
                     if (aantalKansen === 0) {
                         alert("Geen kansen meer! Je wordt teruggeleid naar de hoofdpagina.");
@@ -134,15 +139,34 @@ async function startCatch(pokemonName) {
         document.getElementById("catch-interface").style.display = "block";
 
         console.log(`Start catching: ${pokemonData.name}`);
-
     } catch (error) {
         console.error("[ERROR] - Fout bij vangproces:", error);
         alert(error.message);
     }
 }
 
-// Voeg Pokémon toe aan de collectie, maar zet isBuddy op false
-async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level) {
+// ✅ Popup event listeners
+document.getElementById("popup-yes").addEventListener("click", () => {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("bijnaam-panel").style.display = "block";
+    updateNicknameInput();
+});
+
+document.getElementById("popup-no").addEventListener("click", async () => {
+    document.getElementById("popup").style.display = "none";
+    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, "");
+});
+
+// ✅ Functie om de bijnaam correct in te vullen
+function updateNicknameInput() {
+    const nicknameInput = document.getElementById("nickname-input");
+    if (nicknameInput) {
+        nicknameInput.value = laatstGevangenPokemon.nickname || laatstGevangenPokemon.name;
+    }
+}
+
+// ✅ Voeg Pokémon toe aan de collectie
+async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname) {
     try {
         console.log("[DEBUG] - Pokémon toevoegen aan collectie:", pokemonData.name);
 
@@ -151,9 +175,9 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level) {
         const pokemon = {
             pokemon_name: pokemonData.name,
             pokemon_id: pokemonData.id,
-            nickname: document.getElementById("pokemon-bijnaam").value || "",
+            nickname: nickname || "",
             sprite: pokemonData.sprites.front_default,
-            level: level, // Gebruik level van buddy Pokémon
+            level: level,
             wins: 0,
             loses: 0,
             stats: opponentStats,
