@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function fetchBuddyMoves(pokemonID) {
     try {
-        console.log(`🌐 Haal moves op voor buddy Pokémon ID: ${pokemonID}`);
-
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
             method: "POST",
@@ -42,8 +40,7 @@ async function fetchBuddyMoves(pokemonID) {
         }
 
         const data = await response.json();  
-        const user = data.user; // ✅ Correct extraction  
-        console.log("✅ Gebruikersgegevens ontvangen:", JSON.stringify(user, null, 2));
+        const user = data.user; 
 
         if (!user || !user.collection || !Array.isArray(user.collection)) {
             console.error("❌ Geen geldige collectie gevonden in database!");
@@ -57,7 +54,6 @@ async function fetchBuddyMoves(pokemonID) {
             return [];
         }
 
-        // ✅ Extract only move names from move objects
         const moveNames = buddyPokemon.moves.map(move => move.name);
         console.log("✅ Moves geladen uit database:", moveNames);
         return moveNames;
@@ -367,7 +363,14 @@ async function handleMoveChange(moveIndex, id) {
             throw new Error(`Kan gebruiker niet ophalen uit database: ${response.status}`);
         }
 
-        const user = await response.json();
+        const data = await response.json();
+        const user = data.user;
+
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("❌ Geen geldige collectie gevonden in database!");
+            return;
+        }
+
         const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === id);
 
         if (!buddyPokemon) {
