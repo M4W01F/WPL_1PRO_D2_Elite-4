@@ -172,7 +172,28 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        const pokemon = {
+        // ✅ Haal bestaande gebruiker op
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`[ERROR] - Kan gebruiker niet ophalen. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const user = data.user;
+
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("[ERROR] - Geen geldige collectie gevonden in database!");
+            return;
+        }
+
+        // ✅ Nieuwe Pokémon object maken
+        const nieuwePokemon = {
             pokemon_name: pokemonData.name,
             pokemon_id: pokemonData.id,
             nickname: nickname || "",
@@ -185,20 +206,25 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             moves: await haalStarterMoves(pokemonData.id)
         };
 
-        console.log("[DEBUG] - Verstuur Pokémon data:", pokemon);
+        // ✅ Voeg de nieuwe Pokémon toe aan de bestaande collectie
+        user.collection.push(nieuwePokemon);
 
-        const response = await fetch("/api/addPokemonToCollection", {
+        console.log("[DEBUG] - Geüpdatete collectie:", user.collection);
+
+        // ✅ Update de gebruiker in de database met de nieuwe collectie
+        const updateResponse = await fetch("/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, collection: [pokemon] }),
+            body: JSON.stringify({ email, collection: user.collection }),
             credentials: "include"
         });
 
-        if (!response.ok) {
-            throw new Error(`[ERROR] - Kan Pokémon niet toevoegen. Status: ${response.status}`);
+        if (!updateResponse.ok) {
+            throw new Error(`[ERROR] - Kan gebruiker niet updaten. Status: ${updateResponse.status}`);
         }
 
-        console.log("[DEBUG] - Pokémon succesvol toegevoegd.");
+        console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de databasecollectie.");
+
     } catch (error) {
         console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
     }
