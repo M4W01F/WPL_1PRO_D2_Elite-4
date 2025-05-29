@@ -344,7 +344,7 @@ async function handleMoveChange(moveIndex, id) {
         const selectedMove = moveSelectElement.value;
 
         if (!selectedMove) {
-            console.error("Geen geselecteerde move. Kan niet bijwerken.");
+            console.error("❌ Geen geselecteerde move. Kan niet bijwerken.");
             return;
         }
 
@@ -352,6 +352,7 @@ async function handleMoveChange(moveIndex, id) {
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
+        // ✅ Haal de gebruiker op uit de database
         const response = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -360,27 +361,33 @@ async function handleMoveChange(moveIndex, id) {
         });
 
         if (!response.ok) {
-            throw new Error(`Kan gebruiker niet ophalen uit database: ${response.status}`);
+            throw new Error(`❌ Kan gebruiker niet ophalen uit database: ${response.status}`);
         }
 
         const data = await response.json();
         const user = data.user;
+
+        console.log("✅ Volledige collectie uit database:", JSON.stringify(user.collection, null, 2));
 
         if (!user || !user.collection || !Array.isArray(user.collection)) {
             console.error("❌ Geen geldige collectie gevonden in database!");
             return;
         }
 
-        const buddyPokemon = user.collection.find(pokemon => pokemon.pokemon_id === id);
+        // ✅ Zorg ervoor dat `pokemon_id` correct wordt vergeleken
+        const buddyPokemon = user.collection.find(pokemon => Number(pokemon.pokemon_id) === Number(id));
 
         if (!buddyPokemon) {
-            console.error("Geen buddy Pokémon gevonden in database!");
+            console.error(`❌ Geen buddy Pokémon gevonden met ID: ${id}`);
+            console.log("👉 Hier zijn alle ID's in de collectie:", user.collection.map(p => p.pokemon_id));
             return;
         }
 
-        buddyPokemon.moves[moveIndex] = selectedMove;
+        // ✅ Update de move binnen de Pokémon
+        buddyPokemon.moves[moveIndex].name = selectedMove;
         console.log(`✅ Move op index ${moveIndex} gewijzigd naar: ${selectedMove}`);
 
+        // ✅ Update de database met de gewijzigde collectie
         const updateResponse = await fetch("https://wpl-1pro-d2-elite-4.onrender.com/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -392,7 +399,7 @@ async function handleMoveChange(moveIndex, id) {
             throw new Error(`❌ Fout bij updaten van moves in database: ${updateResponse.status}`);
         }
 
-        console.log("Moves succesvol bijgewerkt in database!");
+        console.log("✅ Moves succesvol bijgewerkt in database!");
 
         // ✅ Herlaad de moves in de DOM
         updateBuddyMoves(id, buddyPokemon.moves);
