@@ -83,45 +83,51 @@ async function startCatch(pokemonName) {
             return;
         }
 
-        // ✅ Dynamisch berekende stats op basis van Buddy-Pokémon
+        // ✅ Dynamisch berekend level
+        const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
+        const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
+
+        // ✅ Dynamisch berekende stats
         let opponentStats = {
-            hp: pokemonData.stats[0].base_stat + buddyPokemon.stats.hp / 10,
-            attack: pokemonData.stats[1].base_stat + buddyPokemon.stats.attack / 10,
-            defense: pokemonData.stats[2].base_stat + buddyPokemon.stats.defense / 10,
-            special_attack: pokemonData.stats[3].base_stat + buddyPokemon.stats.special_attack / 10,
-            special_defense: pokemonData.stats[4].base_stat + buddyPokemon.stats.special_defense / 10,
-            speed: pokemonData.stats[5].base_stat + buddyPokemon.stats.speed / 10
+            hp: pokemonData.stats[0].base_stat,
+            attack: pokemonData.stats[1].base_stat,
+            defense: pokemonData.stats[2].base_stat,
+            special_attack: pokemonData.stats[3].base_stat,
+            special_defense: pokemonData.stats[4].base_stat,
+            speed: pokemonData.stats[5].base_stat
         };
 
+        for (let i = 1; i <= pokemonLevel; i++) {
+            opponentStats.hp += opponentStats.hp / 50;
+            opponentStats.attack += opponentStats.attack / 50;
+            opponentStats.defense += opponentStats.defense / 50;
+            opponentStats.speed += opponentStats.speed / 50;
+            opponentStats.special_attack += opponentStats.special_attack / 50;
+            opponentStats.special_defense += opponentStats.special_defense / 50;
+        }
+
         console.log("[DEBUG] - Tegenstander stats berekend:", opponentStats);
+        console.log(`[DEBUG] - Final Pokémon Level: ${pokemonLevel}`);
 
         // ✅ Bereken vangkans op basis van Buddy stats
         const catchChance = Math.min(95, (100 - opponentStats.defense + buddyPokemon.stats.attack) % 100);
         console.log(`[DEBUG] - Vangkans berekend: ${catchChance}%`);
 
-        // ✅ Update de interface
-        document.getElementById("pokemon-naam").textContent = `Naam: ${pokemonData.name}`;
-        document.getElementById("pokemon-level").textContent = `Level: ${buddyPokemon.level}`;
-        document.getElementById("pokemon-image").innerHTML = `<img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}">`;
-
         // ✅ Pokéball event listener voor vangmechanisme
         document.getElementById("pokeball").addEventListener("click", async () => {
-            console.log("[DEBUG] - Pokéball wordt gebruikt...");
             const kansen = document.getElementById("kansen");
             let aantalKansen = parseInt(kansen.textContent);
 
             if (aantalKansen > 0) {
                 aantalKansen--;
-                kansen.textContent = aantalKansen;
 
                 const vangstGeslaagd = Math.random() * 100 < catchChance;
-                console.log(`[DEBUG] - Vangpoging: ${vangstGeslaagd ? "Geslaagd" : "Mislukt"}`);
 
                 if (vangstGeslaagd) {
-                    // ✅ Pokémon is gevangen! Toon de popup
                     laatstGevangenPokemon = pokemonData;
                     laatstGevangenStats = opponentStats;
-                    laatstGevangenLevel = buddyPokemon.level;
+                    laatstGevangenLevel = pokemonLevel;
+
                     document.getElementById("popup").style.display = "block";
                 } else {
                     if (aantalKansen === 0) {
@@ -134,34 +140,11 @@ async function startCatch(pokemonName) {
             }
         });
 
-        // ✅ Toon de interface voor vangen
-        document.getElementById("setup-container").style.display = "none";
-        document.getElementById("catch-interface").style.display = "block";
-
         console.log(`Start catching: ${pokemonData.name}`);
+
     } catch (error) {
         console.error("[ERROR] - Fout bij vangproces:", error);
         alert(error.message);
-    }
-}
-
-// ✅ Popup event listeners
-document.getElementById("popup-yes").addEventListener("click", () => {
-    document.getElementById("popup").style.display = "none";
-    document.getElementById("bijnaam-panel").style.display = "block";
-    updateNicknameInput();
-});
-
-document.getElementById("popup-no").addEventListener("click", async () => {
-    document.getElementById("popup").style.display = "none";
-    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, "");
-});
-
-// ✅ Functie om de bijnaam correct in te vullen
-function updateNicknameInput() {
-    const nicknameInput = document.getElementById("nickname-input");
-    if (nicknameInput) {
-        nicknameInput.value = laatstGevangenPokemon.nickname || laatstGevangenPokemon.name;
     }
 }
 
@@ -172,7 +155,6 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // ✅ Haal bestaande gebruiker op
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -180,19 +162,9 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             credentials: "include"
         });
 
-        if (!response.ok) {
-            throw new Error(`[ERROR] - Kan gebruiker niet ophalen. Status: ${response.status}`);
-        }
-
         const data = await response.json();
         const user = data.user;
 
-        if (!user || !user.collection || !Array.isArray(user.collection)) {
-            console.error("[ERROR] - Geen geldige collectie gevonden in database!");
-            return;
-        }
-
-        // ✅ Nieuwe Pokémon object maken
         const nieuwePokemon = {
             pokemon_name: pokemonData.name,
             pokemon_id: pokemonData.id,
@@ -203,15 +175,11 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             loses: 0,
             stats: opponentStats,
             isBuddy: false,
-            moves: await haalStarterMoves(pokemonData.id)
+            moves: await haalMoves(pokemonData.id)
         };
 
-        // ✅ Voeg de nieuwe Pokémon toe aan de bestaande collectie
         user.collection.push(nieuwePokemon);
 
-        console.log("[DEBUG] - Geüpdatete collectie:", user.collection);
-
-        // ✅ Update de gebruiker in de database met de nieuwe collectie
         const updateResponse = await fetch("/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -219,13 +187,82 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             credentials: "include"
         });
 
-        if (!updateResponse.ok) {
-            throw new Error(`[ERROR] - Kan gebruiker niet updaten. Status: ${updateResponse.status}`);
-        }
-
         console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de databasecollectie.");
 
     } catch (error) {
         console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
+    }
+}
+
+async function haalMoves(pokemonID) {
+    try {
+        console.log(`🌐 Haal moves op voor Pokémon ID: ${pokemonID}`);
+        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
+
+        if (!antwoord.ok) {
+            throw new Error(`❌ Kan moves niet ophalen voor ID: ${pokemonID} - Status: ${antwoord.status}`);
+        }
+
+        const data = await antwoord.json();
+        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
+        let moveSet = new Map(); // ✅ Gebruik een Map om duplicaten te voorkomen
+
+        // ✅ Zoek alle unieke level-up moves met power > 0
+        for (const moveData of data.moves) {
+            for (const detail of moveData.version_group_details) {
+                if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
+                    const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
+                    const moveInfo = await moveResponse.json();
+
+                    if (moveInfo.power > 0 && !moveSet.has(moveInfo.name)) {
+                        moveSet.set(moveInfo.name, {
+                            name: moveInfo.name,
+                            power: moveInfo.power,
+                            accuracy: moveInfo.accuracy,
+                            priority: moveInfo.priority,
+                            type: moveInfo.type.name,
+                            damage_class: moveInfo.damage_class.name,
+                            effect: moveInfo.effect_entries.length > 0 
+                                ? moveInfo.effect_entries[0].effect 
+                                : "No effect",
+                        });
+                    }
+                }
+            }
+        }
+
+        let selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Converteer Map naar Array
+
+        // ✅ Vul aan met type-moves als er minder dan 4 unieke moves zijn
+        if (selectedMoves.length < 4) {
+            for (const moveData of data.moves) {
+                const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
+                const moveInfo = await moveResponse.json();
+
+                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !moveSet.has(moveInfo.name)) {
+                    moveSet.set(moveInfo.name, {
+                        name: moveInfo.name,
+                        power: moveInfo.power,
+                        accuracy: moveInfo.accuracy,
+                        priority: moveInfo.priority,
+                        type: moveInfo.type.name,
+                        damage_class: moveInfo.damage_class.name,
+                        effect: moveInfo.effect_entries.length > 0 
+                            ? moveInfo.effect_entries[0].effect 
+                            : "No effect",
+                    });
+                }
+
+                if (moveSet.size === 4) break;
+            }
+
+            selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Zorgt ervoor dat we precies 4 moves hebben
+        }
+
+        console.log("📌 Unieke moves geselecteerd:", selectedMoves);
+        return selectedMoves;
+    } catch (error) {
+        console.error(`❌ Fout bij ophalen van moves:`, error);
+        return [];
     }
 }
