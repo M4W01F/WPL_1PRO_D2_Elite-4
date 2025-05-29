@@ -41,7 +41,8 @@ async function fetchBuddyMoves(pokemonID) {
             throw new Error(`❌ Kan gebruiker niet ophalen uit database: ${response.status}`);
         }
 
-        const user = await response.json();
+        const data = await response.json();  
+        const user = data.user; // ✅ Correct extraction  
         console.log("✅ Gebruikersgegevens ontvangen:", JSON.stringify(user, null, 2));
 
         if (!user || !user.collection || !Array.isArray(user.collection)) {
