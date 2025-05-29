@@ -194,7 +194,7 @@ async function setCurrentBuddy(pokemonId, level, wins, loses) {
         buddyDiv.innerHTML = `
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" style="width: 150px; height: 150px;">
             <p><strong>Naam:</strong> ${pokemon.name}</p>
-            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${pokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${pokemon.pokemon_id}')"></p>
+            <p><strong>Bijnaam:</strong> <input type="text" id="nickname-input" value="${pokemon.nickname || ""}" style="width: 120px; border: 1px solid #ccc; padding: 5px;" onchange="handleNicknameChange('${pokemon.id}')"></p>
             <p><strong>ID:</strong> ${pokemon.id}</p>
             <p><strong>Wins:</strong> ${wins}</p>
             <p><strong>Losses:</strong> ${loses}</p>
