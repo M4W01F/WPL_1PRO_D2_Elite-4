@@ -1,143 +1,57 @@
-// Laad het JSON-bestand, vind de buddy-Pokémon, en werk de voettekst-sprite bij
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        const filePath = "./test_data/UserData.json"; // Pad naar JSON-bestand
-        const response = await fetch(filePath); // Haal JSON-bestand op
-        jsonData = await response.json(); // Parse JSON-bestand
-        console.log("Loaded JSON data:", jsonData);
-
-        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.isBuddy === true); // Vind de buddy Pokémon
-        if (buddyPokemon) {
-            await getBuddyPokemonStats(jsonData); // Verwerk buddy-Pokémon-statistieken
-        } else {
-            console.error("Geen buddy Pokémon gevonden.");
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        const buddyId = await haalBuddyUitCollectie(email); // ✅ Haalt ID en vult buddy.moves
+        if (!buddyId) {
+            console.error("Geen buddy Pokémon gevonden in de database.");
+            return;
         }
+
+        const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddyId}/`);
+        if (!buddyResponse.ok) {
+            throw new Error(`Buddy-Pokémon met ID "${buddyId}" kon niet worden gevonden.`);
+        }
+        const buddyData = await buddyResponse.json();
+
+        // ✅ Buddy stats bijwerken
+        buddy.name = buddyData.name;
+        buddy.sprite = buddyData.sprites.front_default;
+        buddy.level = buddyData.level;
+
+        console.log("[DEBUG] - Buddy geladen uit database:", buddy);
+
+        // ✅ Moves zijn al gevuld in `buddy.moves` door `haalBuddyUitCollectie()`
+        updateBuddyMoves(buddy.moves);
+        setCurrentBuddy(buddyId, buddy.level);
+        
     } catch (error) {
-        console.error("Fout bij het laden van JSON of bijwerken van buddy sprite:", error);
+        console.error("Fout bij het laden van Buddy-Pokémon uit database:", error);
     }
 });
 
-// Zet een cookie
-function setCookie(name, value, days) {
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-}
 
-// Haal een cookie op
-function getCookie(name) {
-    const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
-        const [key, val] = cookie.split('=');
-        acc[key] = decodeURIComponent(val);
-        return acc;
-    }, {});
-    return cookies[name];
-}
-
-// Controleer of een cookie leeg is
-function isCookieEmpty(name) {
-    const cookieValue = getCookie(name);
-    return !cookieValue || cookieValue === '';
-}
-
-async function initializeMovesFromJSON(id) {
+async function loadMovesFromDB(pokemonID) {
     try {
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (cookieMoves && !isCookieEmpty(`buddy_${id}_moves`)) {
-            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
-            return JSON.parse(cookieMoves); // Gebruik moves uit cookies
+        console.log(`🌐 Haal moves op uit MongoDB voor Pokémon ID: ${pokemonID}`);
+
+        const response = await fetch("/api/getMoves", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pokemon_id: pokemonID }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`❌ Kan moves niet ophalen. Status: ${response.status}`);
         }
 
-        console.log("Cookies zijn leeg. Moves worden geladen uit JSON.");
+        const data = await response.json();
+        console.log("📌 Moves geladen uit MongoDB:", data.moves);
+        return data.moves || [];
 
-        const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
-        const response = await fetch(filePath);
-        const jsonData = await response.json();
-
-        const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
-        if (buddyPokemon) {
-            const moves = buddyPokemon.moves.map(move => move.name || "Onbekende Beweging");
-            console.log("Moves geladen uit JSON:", moves);
-
-            // Sla de moves op in cookies
-            setCookie(`buddy_${id}_moves`, JSON.stringify(moves), 7);
-            console.log("Moves succesvol opgeslagen in cookies:", moves);
-
-            return moves;
-        } else {
-            console.error("Geen buddy Pokémon gevonden in JSON.");
-            return [];
-        }
     } catch (error) {
-        console.error("Fout bij het initialiseren van moves:", error);
+        console.error("❌ Fout bij het laden van moves uit MongoDB:", error);
         return [];
-    }
-}
-
-// Laad de moves uit cookies
-async function loadMoves(id) {
-    try {
-        // Controleer of moves in de cookies bestaan
-        const cookieMoves = getCookie(`buddy_${id}_moves`);
-        if (!cookieMoves || isCookieEmpty(`buddy_${id}_moves`)) {
-            console.log("Cookies zijn leeg, moves worden geladen uit JSON.");
-
-            // Laad JSON-gegevens
-            const filePath = "./test_data/UserData.json"; // Pad naar je JSON-bestand
-            const response = await fetch(filePath);
-            jsonData = await response.json();
-
-            // Vind de buddy Pokémon en stel cookies in
-            const buddyPokemon = jsonData.collection.find(pokemon => pokemon.pokemon_id === id);
-            if (buddyPokemon) {
-                setCookie(`buddy_${id}_moves`, JSON.stringify(buddyPokemon.moves), 7);
-                console.log("Moves opgeslagen in cookies:", buddyPokemon.moves);
-                return buddyPokemon.moves; // Retourneer de moves uit de JSON
-            } else {
-                console.error("Geen buddy Pokémon gevonden in JSON.");
-                return [];
-            }
-        } else {
-            console.log("Moves geladen uit cookies:", JSON.parse(cookieMoves));
-            return JSON.parse(cookieMoves); // Retourneer de moves uit de cookies
-        }
-    } catch (error) {
-        console.error("Fout bij het laden van moves:", error);
-        return [];
-    }
-}
-
-// Buddy stats en moves
-async function getBuddyPokemonStats(data) {
-    try {
-        // Vind de buddy-Pokémon in de JSON-gegevens
-        const buddyPokemon = data.collection.find(pokemon => pokemon.isBuddy === true);
-
-        if (buddyPokemon) {
-            const pokemonId = buddyPokemon.pokemon_id; // ID van de buddy-Pokémon
-            const level = buddyPokemon.level; // Niveau van de buddy
-
-            // Controleer of moves al in cookies bestaan
-            const moves = await initializeMovesFromJSON(pokemonId); // Haal moves uit cookies of JSON
-            console.log("Moves geladen:", moves);
-
-            // Stel de buddy-statistieken samen
-            const buddyStats = {
-                id: pokemonId,
-                level: level,
-                moves: moves
-            };
-
-            console.log("Buddy-Pokémon-statistieken:", buddyStats);
-            
-            // Roep de functies aan om de informatie te updaten
-            updateBuddyMoves(buddyStats.moves);
-            setCurrentBuddy(buddyStats.id, buddyStats.level)
-
-        } else {
-            console.error("Geen buddy-Pokémon gevonden in de JSON-gegevens.");
-        }
-    } catch (error) {
-        console.error("Fout bij het verwerken van buddy-Pokémon-statistieken:", error);
     }
 }
 
@@ -508,14 +422,24 @@ async function startBattle(pokemonName) {
     }
 
     try {
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        const buddyId = await haalBuddyUitCollectie(email); 
+
+        if (!buddyId) {
+            console.error("Geen buddy Pokémon gevonden in database.");
+            return;
+        }
+
+
+
         // Fetch Pokémon data van de API
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
-        const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddy.name.toLowerCase()}/`);
+        const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddyId}/`);
         if (!response.ok) {
             throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
         }
         if (!buddyResponse.ok) {
-            throw new Error(`Pokémon met de naam "${buddy.name}" kon niet worden gevonden.`);
+            throw new Error(`Pokémon met de naam "${buddyId}" kon niet worden gevonden.`);
         }
 
         const pokemonData = await response.json();
