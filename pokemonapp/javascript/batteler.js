@@ -62,6 +62,7 @@ async function haalBuddyUitCollectie(email) {
 
         console.log("[DEBUG] - Buddy ID:", buddyPokemon.pokemon_id);
         console.log("[DEBUG] - Buddy Moves:", buddy.moves);
+        updateBuddyMoves(buddy.moves);
 
         return buddyPokemon.pokemon_id; // ✅ Retourneer alleen de ID
 
