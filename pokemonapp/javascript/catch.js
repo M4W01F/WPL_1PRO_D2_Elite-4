@@ -54,7 +54,7 @@ let laatstGevangenBuddy = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
-    const selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
+    let selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
 
     if (!selectedPokemonName || typeof selectedPokemonName !== "string") {
         alert("Typ de naam van een Pokémon om te beginnen!");
