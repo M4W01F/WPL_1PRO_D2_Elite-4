@@ -97,7 +97,7 @@ function pokemonDetails(pokemon, pokemonClass) {
 
     // Maakt "Battler" knop
     const battleButton = document.createElement('button');
-    battleButton.textContent = 'Battler';
+    battleButton.textContent = 'Batteler';
     battleButton.onclick = (event) => {
         if (pokemonClass === 'collectie') {
             const confirmation = confirm('Ben je zeker dat je deze Pokémon wilt vangen?');

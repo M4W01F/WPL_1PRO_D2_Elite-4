@@ -1,9 +1,14 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        if (!email) {
+            console.error("Geen ingelogde gebruiker gevonden.");
+            return;
+        }
+
         const buddyId = await haalBuddyUitCollectie(email);
         if (!buddyId) {
-            console.error("Geen buddy Pokémon gevonden in de database.");
+            console.error("Geen buddy Pokémon gevonden in database.");
             return;
         }
 
@@ -22,7 +27,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         updateBuddyMoves(buddy.moves);
         setCurrentBuddy(buddyId, buddy.level);
-        
+
+        // ✅ Start battle pas nadat buddy correct is geladen
+        const pokemonName = getPokemonNameFromURL();
+        if (pokemonName) {
+            console.log("[DEBUG] - Pokémon gevonden in URL:", pokemonName);
+            startBattle(pokemonName);
+        } else {
+            console.error("Pokémon naam ontbreekt in de URL.");
+        }
+
     } catch (error) {
         console.error("Fout bij het laden van Buddy-Pokémon uit database:", error);
     }
@@ -159,16 +173,6 @@ function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
     return params.get('pokemonName');
 }
-
-// Event listeener om pokemon gevecht te starten uit pokedex
-document.addEventListener('DOMContentLoaded', () => {
-    const pokemonName = getPokemonNameFromURL();
-    if (pokemonName) {
-        startBattle(pokemonName); // Call startBattle with the Pokémon name
-    } else {
-        console.error('Pokémon name is missing from the URL.');
-    }
-});
 
 // De bar met uw hp en kleuren op hoeveel precentage
 function getHealthBar(character) {
