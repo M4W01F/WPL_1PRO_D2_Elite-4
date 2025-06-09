@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
-        const buddyId = await haalBuddyUitCollectie(email); // ✅ Haalt ID en vult buddy.moves
+        const buddyId = await haalBuddyUitCollectie(email);
         if (!buddyId) {
             console.error("Geen buddy Pokémon gevonden in de database.");
             return;
@@ -13,14 +13,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         const buddyData = await buddyResponse.json();
 
-        // ✅ Buddy stats bijwerken
         buddy.name = buddyData.name;
         buddy.sprite = buddyData.sprites.front_default;
         buddy.level = buddyData.level;
 
         console.log("[DEBUG] - Buddy geladen uit database:", buddy);
+        console.log("[DEBUG] - Buddy Moves:", buddy.moves);
 
-        // ✅ Moves zijn al gevuld in `buddy.moves` door `haalBuddyUitCollectie()`
         updateBuddyMoves(buddy.moves);
         setCurrentBuddy(buddyId, buddy.level);
         
@@ -56,15 +55,12 @@ async function haalBuddyUitCollectie(email) {
             return null;
         }
 
-        // ✅ Vul bestaande buddy.moves en level in met de geladen moves uit MongoDB
         buddy.moves = buddyPokemon.moves || ["", "", "", ""];
         buddy.level = buddyPokemon.level
 
         console.log("[DEBUG] - Buddy ID:", buddyPokemon.pokemon_id);
-        console.log("[DEBUG] - Buddy Moves:", buddy.moves);
-        updateBuddyMoves(buddy.moves);
 
-        return buddyPokemon.pokemon_id; // ✅ Retourneer alleen de ID
+        return buddyPokemon.pokemon_id;
 
     } catch (error) {
         console.error("Fout bij ophalen van Buddy-Pokémon:", error);
