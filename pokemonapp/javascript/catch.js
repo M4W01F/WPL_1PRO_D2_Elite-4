@@ -37,6 +37,7 @@ async function haalBuddyUitCollectie(email) {
             console.error("Geen geldige collectie gevonden in database!");
             return null;
         }
+        level = buddyPokemon.level || 1;
 
         return user.collection.find(pokemon => pokemon.isBuddy === true) || null;
 
@@ -46,6 +47,7 @@ async function haalBuddyUitCollectie(email) {
     }
 }
 
+const level = 1;
 // Globale variabelen voor laatst gevangen Pokémon
 let laatstGevangenPokemon = null;
 let laatstGevangenStats = null;
@@ -93,26 +95,33 @@ async function startCatch(pokemonName) {
         const isDuplicate = userCollection.some(pokemon => pokemon.pokemon_name && pokemon.pokemon_name.toLowerCase() === selectedPokemonName);
         console.log("[DEBUG] - Is deze Pokémon een duplicaat?", isDuplicate);
 
-        if (isDuplicate) {
-            console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
-            document.getElementsByClassName("duplicate").style.display = "flex";
+    if (isDuplicate) {
+        console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
 
-            document.getElementsByClassName("duplicate-popup-yes").addEventListener("click", () => {
-                console.log("[DEBUG] - Gebruiker kiest overschrijven.");
-                isOverwrite = true;
-                document.getElementsByClassName("duplicate").style.display = "none";
-                catchProcess(pokemonData, email);
-            });
-
-            document.getElementsByClassName("duplicate-popup-no").addEventListener("click", () => {
-                console.log("[DEBUG] - Gebruiker kiest niet overschrijven, pagina herladen.");
-
-                document.getElementsByClassName("duplicate").style.display = "none";
-                window.location.reload();
-            });
-
+        // ✅ Fix: Gebruik querySelector in plaats van getElementsByClassName
+        const duplicatePopup = document.querySelector(".duplicate");
+        if (!duplicatePopup) {
+            console.error("[DEBUG] - Duplicate-popup element niet gevonden!");
             return;
         }
+
+        duplicatePopup.style.display = "flex";
+
+        document.querySelector(".duplicate-popup-yes").addEventListener("click", () => {
+            console.log("[DEBUG] - Gebruiker kiest overschrijven.");
+            isOverwrite = true;
+            duplicatePopup.style.display = "none";
+            catchProcess(pokemonData, email);
+        });
+
+        document.querySelector(".duplicate-popup-no").addEventListener("click", () => {
+            console.log("[DEBUG] - Gebruiker kiest niet overschrijven, pagina herladen.");
+            duplicatePopup.style.display = "none";
+            window.location.reload();
+        });
+
+        return;
+    }
 
         catchProcess(pokemonData, email);
 
@@ -136,7 +145,7 @@ function catchProcess(pokemonData, email) {
         console.log("[DEBUG] - Buddy Pokémon geladen uit database:", buddyPokemon);
 
         const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
-        const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
+        const pokemonLevel = Math.max(1, level + levelVariatie);
         console.log("[DEBUG] - Tegenstander Level berekend:", pokemonLevel);
 
         let opponentStats = {
