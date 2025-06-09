@@ -29,6 +29,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+async function haalBuddyUitCollectie(email) {
+    try {
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Kan gebruiker niet ophalen. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const user = data.user;
+
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("Geen geldige collectie gevonden in database!");
+            return null;
+        }
+
+        const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
+        if (!buddyPokemon) {
+            console.error("Geen actieve Buddy-Pokémon gevonden.");
+            return null;
+        }
+
+        // ✅ Vul bestaande buddy.moves in met de geladen moves uit MongoDB
+        buddy.moves = buddyPokemon.moves || ["", "", "", ""];
+
+        console.log("[DEBUG] - Buddy ID:", buddyPokemon.pokemon_id);
+        console.log("[DEBUG] - Buddy Moves:", buddy.moves);
+
+        return buddyPokemon.pokemon_id; // ✅ Retourneer alleen de ID
+
+    } catch (error) {
+        console.error("Fout bij ophalen van Buddy-Pokémon:", error);
+        return null;
+    }
+}
 
 async function loadMovesFromDB(pokemonID) {
     try {
