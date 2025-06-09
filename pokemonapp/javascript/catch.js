@@ -95,17 +95,19 @@ async function startCatch(pokemonName) {
 
         if (isDuplicate) {
             console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
-            document.getElementById("duplicate-popup").style.display = "flex";
+            document.getElementsByClassName("duplicate").style.display = "flex";
 
-            document.getElementById("duplicate-popup-yes").addEventListener("click", () => {
+            document.getElementsByClassName("duplicate-popup-yes").addEventListener("click", () => {
                 console.log("[DEBUG] - Gebruiker kiest overschrijven.");
                 isOverwrite = true;
-                document.getElementById("duplicate-popup").style.display = "none";
+                document.getElementsByClassName("duplicate").style.display = "none";
                 catchProcess(pokemonData, email);
             });
 
-            document.getElementById("duplicate-popup-no").addEventListener("click", () => {
+            document.getElementsByClassName("duplicate-popup-no").addEventListener("click", () => {
                 console.log("[DEBUG] - Gebruiker kiest niet overschrijven, pagina herladen.");
+
+                document.getElementsByClassName("duplicate").style.display = "none";
                 window.location.reload();
             });
 
@@ -133,7 +135,8 @@ function catchProcess(pokemonData, email) {
 
         console.log("[DEBUG] - Buddy Pokémon geladen uit database:", buddyPokemon);
 
-        const pokemonLevel = buddyPokemon.level + [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
+        const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
+        const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
         console.log("[DEBUG] - Tegenstander Level berekend:", pokemonLevel);
 
         let opponentStats = {
