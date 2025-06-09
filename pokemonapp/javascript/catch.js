@@ -54,14 +54,18 @@ let laatstGevangenBuddy = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
+    console.log("[DEBUG] - startCatch() gestart met parameter:", pokemonName);
+
     let selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
 
     if (!selectedPokemonName || typeof selectedPokemonName !== "string") {
+        console.error("[DEBUG] - Ongeldige Pokémon naam:", selectedPokemonName);
         alert("Typ de naam van een Pokémon om te beginnen!");
         return;
     }
 
     selectedPokemonName = selectedPokemonName.toLowerCase();
+    console.log("[DEBUG] - Verwerkte Pokémon naam:", selectedPokemonName);
 
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
@@ -70,9 +74,11 @@ async function startCatch(pokemonName) {
         }
         const pokemonData = await response.json();
 
-        console.log("[DEBUG] - Pokémon geladen:", pokemonData.name);
+        console.log("[DEBUG] - Pokémon gegevens geladen:", pokemonData);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        console.log("[DEBUG] - Ingelogde gebruiker:", email);
+
         const userResponse = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -85,32 +91,43 @@ async function startCatch(pokemonName) {
         }
 
         const userData = await userResponse.json();
+        console.log("[DEBUG] - Gebruikersgegevens ontvangen:", userData);
+
+        if (!userData.user || !userData.user.collection) {
+            throw new Error("Gebruikersgegevens bevatten geen collectie.");
+        }
+
         const userCollection = userData.user.collection;
+        console.log("[DEBUG] - Gebruikers collectie geladen:", userCollection);
 
         // Controleer of de Pokémon al in de collectie zit
-        const isDuplicate = userCollection.some(pokemon => pokemon.name.toLowerCase() === selectedPokemonName);
+        const isDuplicate = userCollection.some(pokemon => pokemon.name && pokemon.name.toLowerCase() === selectedPokemonName);
+        console.log("[DEBUG] - Is deze Pokémon een duplicaat?", isDuplicate);
 
         if (isDuplicate) {
             console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
             document.getElementById("duplicate-popup").style.display = "flex";
 
             document.getElementById("duplicate-popup-yes").addEventListener("click", () => {
+                console.log("[DEBUG] - Gebruiker kiest overschrijven.");
                 isOverwrite = true;
                 document.getElementById("duplicate-popup").style.display = "none";
                 catchProcess(pokemonData, email);
             });
 
             document.getElementById("duplicate-popup-no").addEventListener("click", () => {
+                console.log("[DEBUG] - Gebruiker kiest niet overschrijven, pagina herladen.");
                 window.location.reload();
             });
 
             return;
         }
 
+        console.log("[DEBUG] - Pokémon is geen duplicaat, doorgaan met vangproces.");
         catchProcess(pokemonData, email);
 
     } catch (error) {
-        console.error("Fout bij vangproces:", error);
+        console.error("[DEBUG] - Fout bij vangproces:", error);
         alert(error.message);
     }
 }
