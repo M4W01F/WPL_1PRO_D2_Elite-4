@@ -54,12 +54,14 @@ let laatstGevangenBuddy = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
-    const selectedPokemonName = document.getElementById("pokemon-selector").value.toLowerCase() || pokemonName;
+    const selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
 
-    if (!selectedPokemonName) {
+    if (!selectedPokemonName || typeof selectedPokemonName !== "string") {
         alert("Typ de naam van een Pokémon om te beginnen!");
         return;
     }
+
+    selectedPokemonName = selectedPokemonName.toLowerCase();
 
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
@@ -67,6 +69,8 @@ async function startCatch(pokemonName) {
             throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
         }
         const pokemonData = await response.json();
+
+        console.log("[DEBUG] - Pokémon geladen:", pokemonData.name);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
         const userResponse = await fetch("/api/getUser", {
