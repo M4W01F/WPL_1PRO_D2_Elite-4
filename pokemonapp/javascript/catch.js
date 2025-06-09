@@ -1,5 +1,3 @@
-const isOverwrite = false;
-
 // Haal Pokémon naam uit pokedex
 function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -37,7 +35,6 @@ async function haalBuddyUitCollectie(email) {
             console.error("Geen geldige collectie gevonden in database!");
             return null;
         }
-        level = buddyPokemon.level || 1;
 
         return user.collection.find(pokemon => pokemon.isBuddy === true) || null;
 
@@ -47,7 +44,6 @@ async function haalBuddyUitCollectie(email) {
     }
 }
 
-const level = 1;
 // Globale variabelen voor laatst gevangen Pokémon
 let laatstGevangenPokemon = null;
 let laatstGevangenStats = null;
@@ -56,17 +52,12 @@ let laatstGevangenBuddy = null;
 
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
-    console.log("[DEBUG] - startCatch() gestart met parameter:", pokemonName);
+    const selectedPokemonName = document.getElementById("pokemon-selector").value.toLowerCase() || pokemonName;
 
-    let selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
-    if (!selectedPokemonName || typeof selectedPokemonName !== "string") {
-        console.error("[DEBUG] - Ongeldige Pokémon naam:", selectedPokemonName);
+    if (!selectedPokemonName) {
         alert("Typ de naam van een Pokémon om te beginnen!");
         return;
     }
-
-    selectedPokemonName = selectedPokemonName.toLowerCase();
-    console.log("[DEBUG] - Verwerkte Pokémon naam:", selectedPokemonName);
 
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonName}/`);
@@ -74,79 +65,17 @@ async function startCatch(pokemonName) {
             throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
         }
         const pokemonData = await response.json();
-        console.log("[DEBUG] - Pokémon gegevens geladen:", pokemonData.name);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
-        const userResponse = await fetch("/api/getUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-            credentials: "include"
-        });
-
-        if (!userResponse.ok) {
-            throw new Error("Gebruikersgegevens konden niet worden geladen.");
-        }
-
-        const userData = await userResponse.json();
-        const userCollection = userData.user.collection;
-        console.log("[DEBUG] - Gebruikers collectie geladen:", userCollection);
-
-        const isDuplicate = userCollection.some(pokemon => pokemon.pokemon_name && pokemon.pokemon_name.toLowerCase() === selectedPokemonName);
-        console.log("[DEBUG] - Is deze Pokémon een duplicaat?", isDuplicate);
-
-    if (isDuplicate) {
-        console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
-
-        // ✅ Fix: Gebruik querySelector in plaats van getElementsByClassName
-        const duplicatePopup = document.querySelector(".duplicate");
-        if (!duplicatePopup) {
-            console.error("[DEBUG] - Duplicate-popup element niet gevonden!");
-            return;
-        }
-
-        duplicatePopup.style.display = "flex";
-
-        document.querySelector(".duplicate-popup-yes").addEventListener("click", () => {
-            console.log("[DEBUG] - Gebruiker kiest overschrijven.");
-            isOverwrite = true;
-            duplicatePopup.style.display = "none";
-            catchProcess(pokemonData, email);
-        });
-
-        document.querySelector(".duplicate-popup-no").addEventListener("click", () => {
-            console.log("[DEBUG] - Gebruiker kiest niet overschrijven, pagina herladen.");
-            duplicatePopup.style.display = "none";
-            window.location.reload();
-        });
-
-        return;
-    }
-
-        catchProcess(pokemonData, email);
-
-    } catch (error) {
-        console.error("[DEBUG] - Fout bij vangproces:", error);
-        alert(error.message);
-    }
-}
-
-function catchProcess(pokemonData, email) {
-    try {
-        console.log("[DEBUG] - Start vangproces voor:", pokemonData.name);
-
-        const buddyPokemon = haalBuddyUitCollectie(email);
+        const buddyPokemon = await haalBuddyUitCollectie(email);
         if (!buddyPokemon) {
-            console.error("[DEBUG] - Geen actieve Buddy-Pokémon gevonden!");
             alert("Geen actieve Buddy-Pokémon gevonden.");
             return;
         }
-
-        console.log("[DEBUG] - Buddy Pokémon geladen uit database:", buddyPokemon);
+        laatstGevangenBuddy = buddyPokemon;
 
         const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
-        const pokemonLevel = Math.max(1, level + levelVariatie);
-        console.log("[DEBUG] - Tegenstander Level berekend:", pokemonLevel);
+        const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
 
         let opponentStats = {
             hp: Math.round(pokemonData.stats[0].base_stat),
@@ -166,7 +95,9 @@ function catchProcess(pokemonData, email) {
             opponentStats.special_defense = Math.round(opponentStats.special_defense + opponentStats.special_defense / 50);
         }
 
-        console.log("[DEBUG] - Tegenstander Stats berekend:", opponentStats);
+        laatstGevangenPokemon = pokemonData;
+        laatstGevangenStats = opponentStats;
+        laatstGevangenLevel = pokemonLevel;
 
         document.getElementById("pokemon-naam").textContent = `Naam: ${pokemonData.name}`;
         document.getElementById("pokemon-level").textContent = `Level: ${pokemonLevel}`;
@@ -176,10 +107,10 @@ function catchProcess(pokemonData, email) {
 
         document.getElementById("setup-container").style.display = "none";
         document.getElementById("catch-interface").style.display = "block";
-        console.log("[DEBUG] - Catch Interface getoond.");
 
     } catch (error) {
-        console.error("[DEBUG] - Fout bij voortzetting van vangproces:", error);
+        console.error("Fout bij vangproces:", error);
+        alert(error.message);
     }
 }
 
@@ -233,7 +164,7 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // ✅ Haal bestaande gebruiker en collectie op
+        // ✅ Haal bestaande gebruiker op
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -244,49 +175,24 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
         const data = await response.json();
         const user = data.user;
 
-        if (!user || !user.collection) {
-            throw new Error("Geen geldige gebruiker of collectie gevonden.");
-        }
+        // ✅ Maak een nieuw Pokémon-object
+        const nieuwePokemon = {
+            pokemon_name: pokemonData.name,
+            pokemon_id: pokemonData.id,
+            nickname: nickname || "",
+            sprite: pokemonData.sprites.front_default,
+            level: level,
+            wins: 0,
+            loses: 0,
+            stats: opponentStats,
+            isBuddy: false, // ✅ Pokémon wordt toegevoegd als geen Buddy
+            moves: await haalMoves(pokemonData.id)
+        };
 
-        // ✅ Controleer of Pokémon al in de collectie zit
-        const existingPokemonIndex = user.collection.findIndex(pokemon => pokemon.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase());
+        // ✅ Voeg de Pokémon toe aan de collectie van de gebruiker
+        user.collection.push(nieuwePokemon);
 
-        if (existingPokemonIndex !== -1 && isOverwrite) {
-            // ✅ Overschrijf bestaande Pokémon
-            console.log("[DEBUG] - Pokémon bestaat al, overschrijven...");
-            user.collection[existingPokemonIndex] = {
-                pokemon_name: pokemonData.name,
-                pokemon_id: pokemonData.id,
-                nickname: nickname || user.collection[existingPokemonIndex].nickname, // Behoud bestaande bijnaam als niet aangepast
-                sprite: pokemonData.sprites.front_default,
-                level: level,
-                wins: user.collection[existingPokemonIndex].wins, // Behoud winststatistieken
-                loses: user.collection[existingPokemonIndex].loses, // Behoud verliesstatistieken
-                stats: opponentStats,
-                isBuddy: user.collection[existingPokemonIndex].isBuddy, // Behoud Buddy-status
-                moves: await haalMoves(pokemonData.id)
-            };
-        } else if (existingPokemonIndex === -1) {
-            // ✅ Voeg nieuwe Pokémon toe als hij nog niet bestaat
-            console.log("[DEBUG] - Pokémon bestaat nog niet, toevoegen...");
-            user.collection.push({
-                pokemon_name: pokemonData.name,
-                pokemon_id: pokemonData.id,
-                nickname: nickname || "",
-                sprite: pokemonData.sprites.front_default,
-                level: level,
-                wins: 0,
-                loses: 0,
-                stats: opponentStats,
-                isBuddy: false, // ✅ Pokémon wordt toegevoegd als geen Buddy
-                moves: await haalMoves(pokemonData.id)
-            });
-        } else {
-            console.log("[DEBUG] - Geen wijziging aangebracht.");
-            return;
-        }
-
-        // ✅ Update de database met de aangepaste collectie
+        // ✅ Update de database met de nieuwe collectie
         const updateResponse = await fetch("/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -294,14 +200,10 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             credentials: "include"
         });
 
-        if (!updateResponse.ok) {
-            throw new Error("Fout bij het updaten van de database.");
-        }
-
-        console.log("[DEBUG] - Pokémon succesvol toegevoegd/aangepast in de database.");
+        console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de database.");
 
     } catch (error) {
-        console.error("[ERROR] - Fout bij toevoegen of aanpassen van Pokémon in collectie:", error);
+        console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
     }
 }
 
