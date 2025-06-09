@@ -234,7 +234,6 @@ async function updateInfo(pokemon, buddy) {
 
 // Functie om dynamisch de moves te genereren
 async function updateBuddyMoves(moves) {
-    console.log("test ",moves);
     if (!Array.isArray(moves) || moves.length === 0) {
         console.error("Moves-array is ongeldig of leeg.");
         document.getElementById('buddy-moves').innerHTML = "<p>Geen moves beschikbaar.</p>";
@@ -244,28 +243,45 @@ async function updateBuddyMoves(moves) {
     console.log("Buddy moves bijwerken:", moves);
 
     const moveDataPromises = moves.map(async (move) => {
-        const moveInfo = await GetMoveInfo(move); // Fetch move details
-        const moveType = moveInfo.type;
-        const moveColor = getTypeColor(moveType);
-        const movePower = moveInfo.power || "N/A";
-        const moveAccuracy = moveInfo.accuracy || "N/A";
+        // Controleer of move een string is
+        const moveName = typeof move === "string" ? move : move.name;
+        if (!moveName) {
+            console.error("Ongeldige move-naam:", move);
+            return `<p>Ongeldige move</p>`;
+        }
 
-        return `
-            <button style="
-                background-color: ${moveColor};
-                padding-top: 10px;
-                padding-right: 10px;
-                padding-bottom: 90px;
-                font-size: 15px;
-                font-weight: bold;
-                border-radius: 8px;
-                border: 1px solid black;
-                color: white;
-                justify-content: center;
-            " onclick="handleMoveClick('${move}')">
-                ${move}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
-            </button>
-        `;
+        try {
+            const moveInfo = await GetMoveInfo(moveName); // Gebruik correcte move-naam
+            if (!moveInfo || !moveInfo.type) {
+                console.error(`Move-info niet gevonden voor: ${moveName}`);
+                return `<p>Move-info niet beschikbaar</p>`;
+            }
+
+            const moveType = moveInfo.type;
+            const moveColor = getTypeColor(moveType);
+            const movePower = moveInfo.power || "N/A";
+            const moveAccuracy = moveInfo.accuracy || "N/A";
+
+            return `
+                <button style="
+                    background-color: ${moveColor};
+                    padding-top: 10px;
+                    padding-right: 10px;
+                    padding-bottom: 90px;
+                    font-size: 15px;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    border: 1px solid black;
+                    color: white;
+                    justify-content: center;
+                " onclick="handleMoveClick('${moveName}')">
+                    ${moveName}<br><br>Power: ${movePower}<br>Accuracy: ${moveAccuracy}%
+                </button>
+            `;
+        } catch (error) {
+            console.error(`Fout bij ophalen van move-info voor ${moveName}:`, error);
+            return `<p>Fout bij laden van move</p>`;
+        }
     });
 
     const moveButtons = await Promise.all(moveDataPromises);
