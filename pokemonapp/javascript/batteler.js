@@ -56,8 +56,9 @@ async function haalBuddyUitCollectie(email) {
             return null;
         }
 
-        // ✅ Vul bestaande buddy.moves in met de geladen moves uit MongoDB
+        // ✅ Vul bestaande buddy.moves en level in met de geladen moves uit MongoDB
         buddy.moves = buddyPokemon.moves || ["", "", "", ""];
+        buddy.level = buddyPokemon.level
 
         console.log("[DEBUG] - Buddy ID:", buddyPokemon.pokemon_id);
         console.log("[DEBUG] - Buddy Moves:", buddy.moves);
