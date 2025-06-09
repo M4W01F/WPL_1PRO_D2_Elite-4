@@ -57,7 +57,6 @@ async function startCatch(pokemonName) {
     console.log("[DEBUG] - startCatch() gestart met parameter:", pokemonName);
 
     let selectedPokemonName = pokemonName || document.getElementById("pokemon-selector").value;
-
     if (!selectedPokemonName || typeof selectedPokemonName !== "string") {
         console.error("[DEBUG] - Ongeldige Pokémon naam:", selectedPokemonName);
         alert("Typ de naam van een Pokémon om te beginnen!");
@@ -73,12 +72,9 @@ async function startCatch(pokemonName) {
             throw new Error(`Pokémon met de naam "${selectedPokemonName}" kon niet worden gevonden.`);
         }
         const pokemonData = await response.json();
-
-        console.log("[DEBUG] - Pokémon gegevens geladen:", pokemonData);
+        console.log("[DEBUG] - Pokémon gegevens geladen:", pokemonData.name);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
-        console.log("[DEBUG] - Ingelogde gebruiker:", email);
-
         const userResponse = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -91,17 +87,10 @@ async function startCatch(pokemonName) {
         }
 
         const userData = await userResponse.json();
-        console.log("[DEBUG] - Gebruikersgegevens ontvangen:", userData);
-
-        if (!userData.user || !userData.user.collection) {
-            throw new Error("Gebruikersgegevens bevatten geen collectie.");
-        }
-
         const userCollection = userData.user.collection;
         console.log("[DEBUG] - Gebruikers collectie geladen:", userCollection);
 
-        // Controleer of de Pokémon al in de collectie zit
-        const isDuplicate = userCollection.some(pokemon => pokemon.name && pokemon.name.toLowerCase() === selectedPokemonName);
+        const isDuplicate = userCollection.some(pokemon => pokemon.pokemon_name && pokemon.pokemon_name.toLowerCase() === selectedPokemonName);
         console.log("[DEBUG] - Is deze Pokémon een duplicaat?", isDuplicate);
 
         if (isDuplicate) {
@@ -123,7 +112,6 @@ async function startCatch(pokemonName) {
             return;
         }
 
-        console.log("[DEBUG] - Pokémon is geen duplicaat, doorgaan met vangproces.");
         catchProcess(pokemonData, email);
 
     } catch (error) {
@@ -134,15 +122,19 @@ async function startCatch(pokemonName) {
 
 function catchProcess(pokemonData, email) {
     try {
+        console.log("[DEBUG] - Start vangproces voor:", pokemonData.name);
+
         const buddyPokemon = haalBuddyUitCollectie(email);
         if (!buddyPokemon) {
+            console.error("[DEBUG] - Geen actieve Buddy-Pokémon gevonden!");
             alert("Geen actieve Buddy-Pokémon gevonden.");
             return;
         }
-        laatstGevangenBuddy = buddyPokemon;
 
-        const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
-        const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
+        console.log("[DEBUG] - Buddy Pokémon geladen uit database:", buddyPokemon);
+
+        const pokemonLevel = buddyPokemon.level + [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
+        console.log("[DEBUG] - Tegenstander Level berekend:", pokemonLevel);
 
         let opponentStats = {
             hp: Math.round(pokemonData.stats[0].base_stat),
@@ -162,9 +154,7 @@ function catchProcess(pokemonData, email) {
             opponentStats.special_defense = Math.round(opponentStats.special_defense + opponentStats.special_defense / 50);
         }
 
-        laatstGevangenPokemon = pokemonData;
-        laatstGevangenStats = opponentStats;
-        laatstGevangenLevel = pokemonLevel;
+        console.log("[DEBUG] - Tegenstander Stats berekend:", opponentStats);
 
         document.getElementById("pokemon-naam").textContent = `Naam: ${pokemonData.name}`;
         document.getElementById("pokemon-level").textContent = `Level: ${pokemonLevel}`;
@@ -174,9 +164,10 @@ function catchProcess(pokemonData, email) {
 
         document.getElementById("setup-container").style.display = "none";
         document.getElementById("catch-interface").style.display = "block";
+        console.log("[DEBUG] - Catch Interface getoond.");
 
     } catch (error) {
-        console.error("Fout bij voortzetting van vangproces:", error);
+        console.error("[DEBUG] - Fout bij voortzetting van vangproces:", error);
     }
 }
 
