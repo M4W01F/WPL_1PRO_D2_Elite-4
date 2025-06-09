@@ -234,6 +234,7 @@ async function updateInfo(pokemon, buddy) {
 
 // Functie om dynamisch de moves te genereren
 async function updateBuddyMoves(moves) {
+    console.log("test ",moves);
     if (!Array.isArray(moves) || moves.length === 0) {
         console.error("Moves-array is ongeldig of leeg.");
         document.getElementById('buddy-moves').innerHTML = "<p>Geen moves beschikbaar.</p>";
@@ -270,11 +271,6 @@ async function updateBuddyMoves(moves) {
     const moveButtons = await Promise.all(moveDataPromises);
     document.getElementById('buddy-moves').innerHTML = moveButtons.join('');
 }
-
-// Roep de functie aan nadat de DOM is geladen
-document.addEventListener("DOMContentLoaded", async () => {
-    await updateBuddyMoves();
-});
 
 // Functie om dynamisch de resultaten van de moves bij te werken
 function updateMoveResult(isPlayer, move, effectiveness) {
