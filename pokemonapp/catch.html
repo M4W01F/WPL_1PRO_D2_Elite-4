@@ -16,7 +16,7 @@
             </a>
         </div>
     </nav>
-
+    
     <main class="catch-main">
         <!-- Setup container -->
         <div id="setup-container">
@@ -26,6 +26,15 @@
                 <div id="pokemon-options" class="dropdown-content"></div>
             </div>
             <button onclick="startCatch()">Start met Vangen</button>
+        </div>
+
+        <!-- Duplicaat waarschuwing -->
+        <div id="duplicate-popup" style="display: none;">
+            <div id="duplicate-popup-content">
+                <p>Deze Pokémon is al gevangen! Wil je hem verwijderen of terugkeren?</p>
+                <button id="duplicate-popup-yes">Verwijderen</button>
+                <button id="duplicate-popup-no">Terugkeren</button>
+            </div>
         </div>
 
         <!-- Pokémon informatie -->

@@ -1,3 +1,5 @@
+const isOverwrite = false;
+
 // Haal Pokémon naam uit pokedex
 function getPokemonNameFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -67,7 +69,51 @@ async function startCatch(pokemonName) {
         const pokemonData = await response.json();
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
-        const buddyPokemon = await haalBuddyUitCollectie(email);
+        const userResponse = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!userResponse.ok) {
+            throw new Error("Gebruikersgegevens konden niet worden geladen.");
+        }
+
+        const userData = await userResponse.json();
+        const userCollection = userData.user.collection;
+
+        // Controleer of de Pokémon al in de collectie zit
+        const isDuplicate = userCollection.some(pokemon => pokemon.name.toLowerCase() === selectedPokemonName);
+
+        if (isDuplicate) {
+            console.log("[DEBUG] - Pokémon is al gevangen. Toon duplicate-popup.");
+            document.getElementById("duplicate-popup").style.display = "flex";
+
+            document.getElementById("duplicate-popup-yes").addEventListener("click", () => {
+                isOverwrite = true;
+                document.getElementById("duplicate-popup").style.display = "none";
+                catchProcess(pokemonData, email);
+            });
+
+            document.getElementById("duplicate-popup-no").addEventListener("click", () => {
+                window.location.reload();
+            });
+
+            return;
+        }
+
+        catchProcess(pokemonData, email);
+
+    } catch (error) {
+        console.error("Fout bij vangproces:", error);
+        alert(error.message);
+    }
+}
+
+function catchProcess(pokemonData, email) {
+    try {
+        const buddyPokemon = haalBuddyUitCollectie(email);
         if (!buddyPokemon) {
             alert("Geen actieve Buddy-Pokémon gevonden.");
             return;
@@ -109,8 +155,7 @@ async function startCatch(pokemonName) {
         document.getElementById("catch-interface").style.display = "block";
 
     } catch (error) {
-        console.error("Fout bij vangproces:", error);
-        alert(error.message);
+        console.error("Fout bij voortzetting van vangproces:", error);
     }
 }
 
@@ -164,7 +209,7 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // ✅ Haal bestaande gebruiker op
+        // ✅ Haal bestaande gebruiker en collectie op
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -175,24 +220,49 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
         const data = await response.json();
         const user = data.user;
 
-        // ✅ Maak een nieuw Pokémon-object
-        const nieuwePokemon = {
-            pokemon_name: pokemonData.name,
-            pokemon_id: pokemonData.id,
-            nickname: nickname || "",
-            sprite: pokemonData.sprites.front_default,
-            level: level,
-            wins: 0,
-            loses: 0,
-            stats: opponentStats,
-            isBuddy: false, // ✅ Pokémon wordt toegevoegd als geen Buddy
-            moves: await haalMoves(pokemonData.id)
-        };
+        if (!user || !user.collection) {
+            throw new Error("Geen geldige gebruiker of collectie gevonden.");
+        }
 
-        // ✅ Voeg de Pokémon toe aan de collectie van de gebruiker
-        user.collection.push(nieuwePokemon);
+        // ✅ Controleer of Pokémon al in de collectie zit
+        const existingPokemonIndex = user.collection.findIndex(pokemon => pokemon.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase());
 
-        // ✅ Update de database met de nieuwe collectie
+        if (existingPokemonIndex !== -1 && isOverwrite) {
+            // ✅ Overschrijf bestaande Pokémon
+            console.log("[DEBUG] - Pokémon bestaat al, overschrijven...");
+            user.collection[existingPokemonIndex] = {
+                pokemon_name: pokemonData.name,
+                pokemon_id: pokemonData.id,
+                nickname: nickname || user.collection[existingPokemonIndex].nickname, // Behoud bestaande bijnaam als niet aangepast
+                sprite: pokemonData.sprites.front_default,
+                level: level,
+                wins: user.collection[existingPokemonIndex].wins, // Behoud winststatistieken
+                loses: user.collection[existingPokemonIndex].loses, // Behoud verliesstatistieken
+                stats: opponentStats,
+                isBuddy: user.collection[existingPokemonIndex].isBuddy, // Behoud Buddy-status
+                moves: await haalMoves(pokemonData.id)
+            };
+        } else if (existingPokemonIndex === -1) {
+            // ✅ Voeg nieuwe Pokémon toe als hij nog niet bestaat
+            console.log("[DEBUG] - Pokémon bestaat nog niet, toevoegen...");
+            user.collection.push({
+                pokemon_name: pokemonData.name,
+                pokemon_id: pokemonData.id,
+                nickname: nickname || "",
+                sprite: pokemonData.sprites.front_default,
+                level: level,
+                wins: 0,
+                loses: 0,
+                stats: opponentStats,
+                isBuddy: false, // ✅ Pokémon wordt toegevoegd als geen Buddy
+                moves: await haalMoves(pokemonData.id)
+            });
+        } else {
+            console.log("[DEBUG] - Geen wijziging aangebracht.");
+            return;
+        }
+
+        // ✅ Update de database met de aangepaste collectie
         const updateResponse = await fetch("/api/updateUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -200,10 +270,14 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             credentials: "include"
         });
 
-        console.log("[DEBUG] - Pokémon succesvol toegevoegd aan de database.");
+        if (!updateResponse.ok) {
+            throw new Error("Fout bij het updaten van de database.");
+        }
+
+        console.log("[DEBUG] - Pokémon succesvol toegevoegd/aangepast in de database.");
 
     } catch (error) {
-        console.error("[ERROR] - Fout bij toevoegen van Pokémon aan collectie:", error);
+        console.error("[ERROR] - Fout bij toevoegen of aanpassen van Pokémon in collectie:", error);
     }
 }
 
