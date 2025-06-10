@@ -446,8 +446,10 @@ async function handleMoveClick(move) {
             msg1 = `${pokemon.name} kan niet meer vechten!`;
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
-
-            await voegPokemonToeAanCollectie(pokemon, pokemon.stats, pokemon.level, "", buddyIndex);
+            
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}/`);
+            const pokemonData = await response.json();
+            await voegPokemonToeAanCollectie(pokemonData, pokemon.stats, pokemon.level, "", buddyIndex);
         }
 
         const resultDiv = document.createElement('div');
