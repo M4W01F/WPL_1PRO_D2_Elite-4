@@ -1,3 +1,5 @@
+const { NONAME } = require("dns");
+
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
@@ -86,6 +88,8 @@ let currentPokemon = null; // Stores the current Pokémon data
 
 // Function to fetch a random Pokémon
 async function fetchRandomPokemon() {
+    document.getElementById("submitButton").style.display = 'flex';
+
     const randomId = Math.floor(Math.random() * 898) + 1; // Pokémon up to Gen 8
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
     const data = await response.json();
@@ -105,6 +109,8 @@ async function fetchRandomPokemon() {
 
 // Function to check the user's guess
 async function checkGuess() {
+    document.getElementById("submitButton").style.display = 'none';
+
     const userGuess = guessInput.value.trim().toLowerCase();
 
     if (!userGuess) {
