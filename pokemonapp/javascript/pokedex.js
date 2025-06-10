@@ -46,19 +46,21 @@ async function displayPokemonList() {
 
     console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
 
-    const gevangenPokemonIds = userData.user.collection.map(pokemon => pokemon.pokemon_id);
+    const buddyPokemonId = userData.user.collection.find(pokemon => pokemon.isBuddy)?.pokemon_id || null;
 
     for (let pokemonId = 1; pokemonId <= 1025; pokemonId++) {
         const pokemonData = await fetchPokemonData(pokemonId);
         if (pokemonData) {
-            const pokemonClass = gevangenPokemonIds.includes(pokemonId) ? 'collectie' : 'niet-gevangen';
+            const gevangen = userData.user.collection.some(pokemon => pokemon.pokemon_id === pokemonId);
+            const pokemonClass = gevangen ? "collectie" : "niet-gevangen";
+            const buddyIndicator = pokemonId === buddyPokemonId ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
 
             const listItem = document.createElement('div');
             listItem.className = pokemonClass;
             listItem.innerHTML = `
-                ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ''}
+                ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ""}
                 <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
-                <strong>${pokemonData.id}</strong>
+                <strong>${pokemonData.id}</strong> ${buddyIndicator}
                 <strong>${pokemonData.name}</strong>
                 ${pokemonData.types.split(', ').map(type => `
                     <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
@@ -70,7 +72,7 @@ async function displayPokemonList() {
         }
     }
 
-    console.log("[DEBUG] - Pokémon lijst succesvol weergegeven met correcte collectie-class.");
+    console.log("[DEBUG] - Pokémon lijst succesvol weergegeven met Buddy-indicator.");
 }
 
 function pokemonDetails(pokemon, pokemonClass) {

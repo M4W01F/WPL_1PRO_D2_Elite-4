@@ -69,11 +69,9 @@ async function displayCollectieList() {
                 <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
                 <strong>${pokemon.pokemon_id}</strong> ${buddyIndicator}
                 <strong>${pokemon.pokemon_name}</strong>
-                <div>
-                    ${types.split(', ').map(type => `
-                        <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-                    `).join('')}
-                </div>
+                ${types.split(', ').map(type => `
+                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                `).join('')}
             `;
 
             listItem.onclick = () => {
