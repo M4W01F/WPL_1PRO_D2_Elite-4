@@ -897,8 +897,7 @@ async function voegPokemonToeAanCollectie(pokemonName, level, nickname, buddyInd
             user.collection[bestaandePokemonIndex].wins += 1;
         } else {
             console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
-            const moveNames = await haalMoves(pokemon.id);
-            const enrichedMoves = await Promise.all(moveNames.map(async name => await GetMoveInfo(name)));
+            const enrichedMoves = await Promise.all(pokemon.moves.map(async name => await GetMoveInfo(name)));
 
             const nieuwePokemon = {
                 pokemon_name: pokemon.name,
@@ -959,78 +958,5 @@ async function updateUserCollection(email, updatedCollection) {
 
     } catch (error) {
         console.error("[ERROR] - Fout bij updaten van de Pokémon collectie:", error);
-    }
-}
-
-async function haalMoves(pokemonID) {
-    try {
-        console.log(`🌐 Haal moves op voor Pokémon ID: ${pokemonID}`);
-        const antwoord = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}`);
-
-        if (!antwoord.ok) {
-            throw new Error(`❌ Kan moves niet ophalen voor ID: ${pokemonID} - Status: ${antwoord.status}`);
-        }
-
-        const data = await antwoord.json();
-        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
-        let moveSet = new Map(); // ✅ Gebruik een Map om duplicaten te voorkomen
-
-        // ✅ Zoek alle unieke level-up moves met power > 0
-        for (const moveData of data.moves) {
-            for (const detail of moveData.version_group_details) {
-                if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
-                    const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
-                    const moveInfo = await moveResponse.json();
-
-                    if (moveInfo.power > 0 && !moveSet.has(moveInfo.name)) {
-                        moveSet.set(moveInfo.name, {
-                            name: moveInfo.name,
-                            power: moveInfo.power,
-                            accuracy: moveInfo.accuracy,
-                            priority: moveInfo.priority,
-                            type: moveInfo.type.name,
-                            damage_class: moveInfo.damage_class.name,
-                            effect: moveInfo.effect_entries.length > 0 
-                                ? moveInfo.effect_entries[0].effect 
-                                : "Geen effect",
-                        });
-                    }
-                }
-            }
-        }
-
-        let selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Converteer Map naar Array
-
-        // ✅ Vul aan met type-moves als er minder dan 4 unieke moves zijn
-        if (selectedMoves.length < 4) {
-            for (const moveData of data.moves) {
-                const moveResponse = await fetch(`https://pokeapi.co/api/v2/move/${moveData.move.name}`);
-                const moveInfo = await moveResponse.json();
-
-                if (moveInfo.power > 0 && pokemonType.includes(moveInfo.type.name) && !moveSet.has(moveInfo.name)) {
-                    moveSet.set(moveInfo.name, {
-                        name: moveInfo.name,
-                        power: moveInfo.power,
-                        accuracy: moveInfo.accuracy,
-                        priority: moveInfo.priority,
-                        type: moveInfo.type.name,
-                        damage_class: moveInfo.damage_class.name,
-                        effect: moveInfo.effect_entries.length > 0 
-                            ? moveInfo.effect_entries[0].effect 
-                            : "Geen effect",
-                    });
-                }
-
-                if (moveSet.size === 4) break;
-            }
-
-            selectedMoves = Array.from(moveSet.values()).slice(0, 4); // ✅ Zorgt ervoor dat we precies 4 moves hebben
-        }
-
-        console.log("📌 Unieke moves geselecteerd:", selectedMoves);
-        return selectedMoves;
-    } catch (error) {
-        console.error(`❌ Fout bij ophalen van moves:`, error);
-        return [];
     }
 }
