@@ -144,8 +144,62 @@ function pokemonDetails(pokemon) {
     // Maakt "buddy maken" knop
     const buddyButton = document.createElement('button');
     buddyButton.textContent = 'Buddy maken';
-    buddyButton.onclick = () => {
+    buddyButton.onclick = async () => {
+        console.log("[DEBUG] - Buddy wijziging gestart.");
 
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        const pokemonId = document.getElementById("pokemon-id").textContent;
+
+        if (!pokemonId) {
+            console.error("[ERROR] - Geen geldige Pokémon-ID gevonden.");
+            alert("Selecteer een Pokémon om als Buddy te maken.");
+            return;
+        }
+
+        try {
+            const userResponse = await fetch("/api/getUser", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+                credentials: "include"
+            });
+
+            if (!userResponse.ok) {
+                throw new Error("Fout bij ophalen van gebruikersgegevens.");
+            }
+
+            const userData = await userResponse.json();
+            if (!userData.user || !userData.user.collection) {
+                throw new Error("Gebruiker heeft geen Pokémon collectie.");
+            }
+
+            console.log("[DEBUG] - Huidige collectie opgehaald:", userData.user.collection);
+
+            userData.user.collection.forEach(pokemon => {
+                pokemon.isBuddy = pokemon.pokemon_id == pokemonId;
+            });
+
+            console.log("[DEBUG] - Nieuwe collectie met bijgewerkte Buddy-status:", userData.user.collection);
+
+            const updateResponse = await fetch("/api/updateUser", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, collection: userData.user.collection }),
+                credentials: "include"
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error("Fout bij updaten van de collectie.");
+            }
+
+            console.log("[DEBUG] - Buddy succesvol bijgewerkt!");
+            alert("Je nieuwe Buddy is ingesteld!");
+            window.location.reload();
+
+        } catch (error) {
+            console.error("[ERROR] - Fout bij het wijzigen van Buddy-status:", error);
+            alert(error.message);
+        }
     };
     actionsContainer.appendChild(buddyButton);
 }
