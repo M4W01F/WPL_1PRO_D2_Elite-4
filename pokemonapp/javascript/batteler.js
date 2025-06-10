@@ -909,7 +909,7 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
                 loses: 0,
                 stats: opponentStats,
                 isBuddy: false,
-                moves: await haalMoves(pokemonData.id)
+                moves: pokemon.moves
             };
             user.collection.push(nieuwePokemon);
         }
