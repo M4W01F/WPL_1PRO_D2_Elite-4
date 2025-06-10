@@ -146,7 +146,7 @@ async function setCurrentBuddy(pokemonId) {
         buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
         buddy.weakness = calculateCombinedWeaknesses(buddy.types);
-        updateInfo(pokemon, buddy);
+        updateInfo();
 
         buddy.chosenMove = null;
     }
@@ -202,7 +202,7 @@ function getHealthBar(character) {
 }
 
 // Update de informatie van pokemon en buddy
-async function updateInfo(pokemon, buddy) {
+async function updateInfo() {
     const pokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}/`);
     const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddy.name}/`);
     const pokemonData = await pokemonResponse.json();
@@ -380,7 +380,7 @@ async function handleMoveClick(move) {
                         defender.hp = 0;
                     }
 
-                    updateInfo(pokemon, buddy);
+                    updateInfo();
                     document.getElementById('move-resultaat').innerHTML = '';
 
                     const resultDiv = document.createElement('div');
@@ -609,7 +609,7 @@ async function startBattle(pokemonName) {
         pokemon.chosenMove = chosenMove;
 
         // Werk de gevechtsinterface aan
-        updateInfo(pokemon, buddy);
+        updateInfo();
 
         // Wissel zichtbaarheid
         document.getElementById('setup-container').style.display = 'none';
