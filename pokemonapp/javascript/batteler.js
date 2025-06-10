@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("[DEBUG] - Buddy Moves:", buddy.moves);
 
         updateBuddyMoves(buddy.moves);
-        setCurrentBuddy(buddyId);
 
         // ✅ Start battle pas nadat buddy correct is geladen
         const pokemonName = getPokemonNameFromURL();
@@ -105,50 +104,6 @@ async function loadMovesFromDB(pokemonID) {
     } catch (error) {
         console.error("❌ Fout bij het laden van moves uit MongoDB:", error);
         return [];
-    }
-}
-
-// Stel huidige buddy in en toon informatie
-async function setCurrentBuddy(pokemonId) {
-    const buddyData = await fetchPokemonData(pokemonId);
-
-    if (buddyData) {
-        
-        // Bereken statistieken
-        const baseStats = {
-            hp: buddyData.stats[0].base_stat,
-            attack: buddyData.stats[1].base_stat,
-            defense: buddyData.stats[2].base_stat,
-            sAttack: buddyData.stats[3].base_stat,
-            sDefense: buddyData.stats[4].base_stat,
-            speed: buddyData.stats[5].base_stat
-        };
-
-
-        let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
-
-        for (let i = 1; i <= buddy.level; i++) {
-            hp += hp / 50;
-            attack += attack / 50;
-            defense += defense / 50;
-            speed += speed / 50;
-            sAttack += sAttack / 50;
-            sDefense += sDefense / 50;
-        }
-        buddy.name = buddyData.name;
-        buddy.maxHp = Math.round(hp, 0);
-        buddy.hp = Math.round(hp, 0);
-        buddy.attack = attack;
-        buddy.defense = defense;
-        buddy.speed = speed;
-        buddy.sAttack = sAttack;
-        buddy.sDefense = sDefense;
-        buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
-        // Bereken typen en zwaktes dynamisch
-        buddy.weakness = calculateCombinedWeaknesses(buddy.types);
-        updateInfo();
-
-        buddy.chosenMove = null;
     }
 }
 
@@ -523,8 +478,46 @@ async function startBattle(pokemonName) {
         }
 
         const pokemonData = await response.json();
-        const buddyData = await buddyResponse.json();
+        //const buddyData = await buddyResponse.json();
 
+        const buddyData = await fetchPokemonData(buddy.id);
+
+        if (buddyData) {
+            
+            // Bereken statistieken
+            const baseStats = {
+                hp: buddyData.stats[0].base_stat,
+                attack: buddyData.stats[1].base_stat,
+                defense: buddyData.stats[2].base_stat,
+                sAttack: buddyData.stats[3].base_stat,
+                sDefense: buddyData.stats[4].base_stat,
+                speed: buddyData.stats[5].base_stat
+            };
+
+
+            let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
+
+            for (let i = 1; i <= buddy.level; i++) {
+                hp += hp / 50;
+                attack += attack / 50;
+                defense += defense / 50;
+                speed += speed / 50;
+                sAttack += sAttack / 50;
+                sDefense += sDefense / 50;
+            }
+            buddy.name = buddyData.name;
+            buddy.maxHp = Math.round(hp, 0);
+            buddy.hp = Math.round(hp, 0);
+            buddy.attack = attack;
+            buddy.defense = defense;
+            buddy.speed = speed;
+            buddy.sAttack = sAttack;
+            buddy.sDefense = sDefense;
+            buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
+            // Bereken typen en zwaktes dynamisch
+            buddy.weakness = calculateCombinedWeaknesses(buddy.types);
+            buddy.chosenMove = null;
+        }
         // Werk het globale `pokemon` object bij
         const baseStats = {
             hp: pokemonData.stats[0].base_stat,
