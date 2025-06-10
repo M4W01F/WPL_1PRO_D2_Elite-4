@@ -1,3 +1,55 @@
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        if (!email) {
+            console.error("Geen ingelogde gebruiker gevonden.");
+            return;
+        }
+
+        const buddyId = await haalBuddyUitCollectie(email);
+        if (!buddyId) {
+            console.error("Geen buddy Pokémon gevonden in database.");
+            return;
+        }
+
+        const buddyResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${buddyId}/`);
+        if (!buddyResponse.ok) {
+            throw new Error(`Buddy-Pokémon met ID "${buddyId}" kon niet worden gevonden.`);
+        }
+        const buddyData = await buddyResponse.json();
+
+        buddy.id = buddyId;
+        buddy.name = buddyData.name;
+        buddy.sprite = buddyData.sprites.front_default;
+        buddy.level = buddyData.level;
+
+        console.log("[DEBUG] - Buddy geladen uit database:", buddy);
+        console.log("[DEBUG] - Buddy Moves:", buddy.moves);
+
+        updateBuddyMoves(buddy.moves);
+
+        // ✅ Start battle pas nadat buddy correct is geladen
+        const pokemonName = getPokemonNameFromURL();
+        if (pokemonName) {
+            console.log("[DEBUG] - Pokémon gevonden in URL:", pokemonName);
+            startBattle(pokemonName);
+        } else {
+            console.error("Pokémon naam ontbreekt in de URL.");
+        }
+
+    } catch (error) {
+        console.error("Fout bij het laden van Buddy-Pokémon uit database:", error);
+    }
+});
+
+const buddy = {
+    name: "",
+    level: 0,
+    hp: 0,
+    maxHp: 0,
+    moves: ['', '', '', '']
+};
+
 const pokemonImage = document.getElementById("pokemonImage");
 const guessInput = document.getElementById("guessInput");
 const submitButton = document.getElementById("submitButton");
@@ -26,7 +78,7 @@ async function fetchRandomPokemon() {
 }
 
 // Function to check the user's guess
-function checkGuess() {
+async function checkGuess() {
     const userGuess = guessInput.value.trim().toLowerCase();
 
     if (!userGuess) {
@@ -38,6 +90,23 @@ function checkGuess() {
         result.textContent = `Correct! It's ${currentPokemon.name.toUpperCase()}!`;
         pokemonImage.style.filter = "brightness(1)"; // Reveal Pokémon
         nextButton.style.display = "block";
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+        const user = data.user;
+
+        const buddyIndex = user.collection.findIndex(p => p.pokemon_id === buddy.id);
+            if (buddyIndex !== null && user.collection[buddyIndex]) {
+                user.collection[buddyIndex].level += 1;
+                await updateUserCollection(email, user.collection);
+            }
     } else {
         result.textContent = `Wrong! The correct answer was ${currentPokemon.name.toUpperCase()}.`;
         pokemonImage.style.filter = "brightness(1)"; // Reveal Pokémon even when wrong
@@ -56,3 +125,23 @@ guessInput.addEventListener("keypress", (event) => {
 
 // Start the game
 fetchRandomPokemon();
+
+async function updateUserCollection(email, updatedCollection) {
+    try {
+        const response = await fetch("/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: updatedCollection }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Fout bij updaten van gebruiker. Status: ${response.status}`);
+        }
+
+        console.log("[DEBUG] - Pokémon collectie succesvol geüpdatet.");
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij updaten van de Pokémon collectie:", error);
+    }
+}
