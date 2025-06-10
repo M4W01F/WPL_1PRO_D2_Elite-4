@@ -19,11 +19,8 @@ async function fetchPokemonData(pokemonId) {
     }
 }
 
-let allPokemonData = [];
-
 async function displayPokemonList() {
     console.log("[DEBUG] - Laden van Pokémon lijst gestart.");
-    allPokemonData = [];
 
     const pokemonList = document.getElementById('pokemon-list');
     pokemonList.innerHTML = "";
@@ -48,6 +45,7 @@ async function displayPokemonList() {
     }
 
     console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
+
     const buddyPokemonId = userData.user.collection.find(pokemon => pokemon.isBuddy)?.pokemon_id || null;
 
     for (let pokemonId = 1; pokemonId <= 1025; pokemonId++) {
@@ -55,51 +53,27 @@ async function displayPokemonList() {
         if (pokemonData) {
             const gevangen = userData.user.collection.some(pokemon => pokemon.pokemon_id === pokemonId);
             const pokemonClass = gevangen ? "collectie" : "niet-gevangen";
-            const isBuddy = pokemonId === buddyPokemonId;
+            const buddyIndicator = pokemonId === buddyPokemonId ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
 
-            allPokemonData.push({ ...pokemonData, class: pokemonClass, isBuddy });
-        }
-    }
-
-    renderPokemonList(allPokemonData);
-    console.log("[DEBUG] - Pokémon lijst succesvol geladen en opgeslagen.");
-}
-
-function renderPokemonList(pokemonArray) {
-    const pokemonList = document.getElementById('pokemon-list');
-    pokemonList.innerHTML = pokemonArray.length > 0 ? "" : "<p>Geen Pokémon gevonden.</p>";
-
-    pokemonArray.forEach(pokemonData => {
-        const buddyIndicator = pokemonData.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
-
-        const listItem = document.createElement('div');
-        listItem.className = pokemonData.class;
-        listItem.innerHTML = `
-            ${pokemonData.class === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ""}
-            <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
-            <strong>${pokemonData.id}</strong> ${buddyIndicator}
-            <strong>${pokemonData.name}</strong>
-            <div>
+            const listItem = document.createElement('div');
+            listItem.className = pokemonClass;
+            listItem.innerHTML = `
+                ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ""}
+                <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
+                <strong>${pokemonData.id}</strong> ${buddyIndicator}
+                <strong>${pokemonData.name}</strong>
                 ${pokemonData.types.split(', ').map(type => `
                     <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
                 `).join('')}
-            </div>
-        `;
+            `;
 
-        listItem.onclick = () => pokemonDetails(pokemonData);
-        pokemonList.appendChild(listItem);
-    });
+            listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
+            pokemonList.appendChild(listItem);
+        }
+    }
+
+    console.log("[DEBUG] - Pokémon lijst succesvol weergegeven met Buddy-indicator.");
 }
-
-document.getElementById('search-input').addEventListener('input', function () {
-    const searchTerm = this.value.trim().toLowerCase();
-    const filteredPokemon = allPokemonData.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(searchTerm)
-    );
-
-    renderPokemonList(filteredPokemon);
-    console.log(`[DEBUG] - ${filteredPokemon.length} Pokémon gevonden voor zoekterm: '${searchTerm}'.`);
-});
 
 function pokemonDetails(pokemon, pokemonClass) {
     document.getElementById('pokemon-id').textContent = pokemon.id;
