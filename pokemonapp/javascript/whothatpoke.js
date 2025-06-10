@@ -23,24 +23,50 @@ document.addEventListener("DOMContentLoaded", async () => {
         buddy.sprite = buddyData.sprites.front_default;
         buddy.level = buddyData.level;
 
-        console.log("[DEBUG] - Buddy geladen uit database:", buddy);
-        console.log("[DEBUG] - Buddy Moves:", buddy.moves);
-
-        updateBuddyMoves(buddy.moves);
-
-        // ✅ Start battle pas nadat buddy correct is geladen
-        const pokemonName = getPokemonNameFromURL();
-        if (pokemonName) {
-            console.log("[DEBUG] - Pokémon gevonden in URL:", pokemonName);
-            startBattle(pokemonName);
-        } else {
-            console.error("Pokémon naam ontbreekt in de URL.");
-        }
-
     } catch (error) {
         console.error("Fout bij het laden van Buddy-Pokémon uit database:", error);
     }
 });
+
+async function haalBuddyUitCollectie(email) {
+    try {
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Kan gebruiker niet ophalen. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const user = data.user;
+
+        if (!user || !user.collection || !Array.isArray(user.collection)) {
+            console.error("Geen geldige collectie gevonden in database!");
+            return null;
+        }
+
+        const buddyPokemon = user.collection.find(pokemon => pokemon.isBuddy === true);
+        if (!buddyPokemon) {
+            console.error("Geen actieve Buddy-Pokémon gevonden.");
+            return null;
+        }
+
+        buddy.moves = buddyPokemon.moves || ["", "", "", ""];
+        buddy.level = buddyPokemon.level
+
+        console.log("[DEBUG] - Buddy ID:", buddyPokemon.pokemon_id);
+
+        return buddyPokemon.pokemon_id;
+
+    } catch (error) {
+        console.error("Fout bij ophalen van Buddy-Pokémon:", error);
+        return null;
+    }
+}
 
 const buddy = {
     name: "",
