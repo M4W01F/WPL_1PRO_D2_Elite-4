@@ -232,3 +232,42 @@ function getTypeColor(type) {
 }
 
 document.addEventListener('DOMContentLoaded', displayCollectieList);
+document.getElementById('search-input').addEventListener('input', function () {
+    const searchTerm = this.value.trim().toLowerCase();
+
+    if (!Array.isArray(allPokemonData) || allPokemonData.length === 0) {
+        console.error("[ERROR] - Pokémon data ontbreekt of is ongeldig.");
+        return;
+    }
+
+    const filteredPokemon = allPokemonData.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchTerm)
+    );
+
+    const pokemonList = document.getElementById('pokemon-list');
+    pokemonList.innerHTML = filteredPokemon.length > 0 ? "" : "<p>Geen Pokémon gevonden.</p>";
+
+    filteredPokemon.forEach(pokemonData => {
+        const pokemonClass = userCollection.some(p => p.pokemon_id === pokemonData.id) ? 'collectie' : 'niet-gevangen';
+        const buddyIndicator = pokemonData.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
+
+        const listItem = document.createElement('div');
+        listItem.className = pokemonClass;
+        listItem.innerHTML = `
+            ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ""}
+            <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
+            <strong>${pokemonData.id}</strong> ${buddyIndicator}
+            <strong>${pokemonData.name}</strong>
+            <div>
+                ${pokemonData.types.split(', ').map(type => `
+                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                `).join('')}
+            </div>
+        `;
+
+        listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
+        pokemonList.appendChild(listItem);
+    });
+
+    console.log(`[DEBUG] - ${filteredPokemon.length} Pokémon gevonden voor zoekterm: '${searchTerm}'.`);
+});

@@ -191,24 +191,20 @@ function getTypeColor(type) {
 }
 document.addEventListener('DOMContentLoaded', displayPokemonList);
 document.getElementById('search-input').addEventListener('input', function () {
-    const searchTerm = this.value.trim().toLowerCase(); // ✅ Voorkomt onnodige spaties en case-gevoeligheid
+    const searchTerm = this.value.trim().toLowerCase();
 
-    // ✅ Controleer of `allPokemonData` correct geladen is
     if (!Array.isArray(allPokemonData) || allPokemonData.length === 0) {
         console.error("[ERROR] - Pokémon data ontbreekt of is ongeldig.");
         return;
     }
 
-    // ✅ Filter Pokémon op naam
     const filteredPokemon = allPokemonData.filter(pokemon =>
         pokemon.name.toLowerCase().includes(searchTerm)
     );
 
-    // ✅ Voorkomt dat lege zoekresultaten de hele lijst overschrijven
     const pokemonList = document.getElementById('pokemon-list');
     pokemonList.innerHTML = filteredPokemon.length > 0 ? "" : "<p>Geen Pokémon gevonden.</p>";
 
-    // ✅ Loop door gefilterde Pokémon en bouw de lijst dynamisch
     filteredPokemon.forEach(pokemonData => {
         const pokemonClass = userCollection.some(p => p.pokemon_id === pokemonData.id) ? 'collectie' : 'niet-gevangen';
         const buddyIndicator = pokemonData.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
