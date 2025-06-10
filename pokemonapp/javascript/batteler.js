@@ -542,8 +542,20 @@ async function startBattle(pokemonName) {
             );
         }).map(move => move.move.name);
 
+        let fixedMoves = [];
+        for (const move of learnableMoves) {
+            const moveInfo = await GetMoveInfo(move);
+            if (moveInfo.power === 0) {
+                const alternativeMove = await zoekRandomMoveMetPower(pokemonData);
+                fixedMoves.push(alternativeMove);
+            } else {
+                fixedMoves.push(move);
+            }
+        }
+
         // Selecteerd de laatste 4 moves
-        pokemon.moves = learnableMoves.slice(-4);
+        pokemon.moves = fixedMoves.slice(-4);
+        console.log("tegenstander moves ", pokemon.moves)
 
         let maxDamage = 0;
         let chosenMove = null;
@@ -802,5 +814,28 @@ async function determineAttackOrder(pokemon, buddy) {
         } else {
             return [buddy, pokemon];
         }
+    }
+}
+
+async function zoekRandomMoveMetPower(pokemonData) {
+    try {
+        // Zoek alle moves die deze Pokémon kan leren
+        const allMoves = pokemonData.moves.map(move => move.move.name);
+
+        // Haal informatie op over deze moves
+        const moveDetails = await Promise.all(allMoves.map(async moveName => {
+            const response = await fetch(`https://pokeapi.co/api/v2/move/${moveName}/`);
+            return response.ok ? await response.json() : null;
+        }));
+
+        // Filter moves met power > 0
+        const validMoves = moveDetails.filter(move => move && move.power > 0).map(move => move.name);
+
+        // Kies een willekeurige move met power > 0
+        return validMoves.length > 0 ? validMoves[Math.floor(Math.random() * validMoves.length)] : "tackle";
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij zoeken naar een alternatieve move met power > 0:", error);
+        return "tackle";
     }
 }
