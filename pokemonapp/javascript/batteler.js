@@ -413,7 +413,7 @@ async function handleMoveClick(move) {
         }
     }
 
-    function checkBattleEnd() {
+    async function checkBattleEnd() {
         document.getElementById('move-resultaat').innerHTML = '';
         document.getElementById('buddy-moves').style.display = 'none';
 
@@ -422,10 +422,27 @@ async function handleMoveClick(move) {
             msg1 = `${buddy.name} kan niet meer vechten!`;
             msg2 = `${pokemon.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Lost aangerekend.';
+
+            const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+            const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
+            if (buddyIndex !== -1) {
+                user.collection[buddyIndex].loses += 1;
+                await updateUserCollection(email, user.collection);
+            }
+
         } else if (pokemon.hp <= 0) {
             msg1 = `${pokemon.name} kan niet meer vechten!`;
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
+
+            const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+            const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
+            if (buddyIndex !== -1) {
+                user.collection[buddyIndex].wins += 1;
+                await updateUserCollection(email, user.collection);
+            }
+
+            await voegPokemonToeAanCollectie(pokemon, pokemon.stats, pokemon.level);
         }
 
         const resultDiv = document.createElement('div');
@@ -837,5 +854,87 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     } catch (error) {
         console.error("[ERROR] - Fout bij zoeken naar HM/TM move met power > 50:", error);
         return "strength";
+    }
+}
+
+async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level) {
+    try {
+        console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonData.name);
+
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+
+        // Haal bestaande gebruiker op
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+        const user = data.user;
+
+        // Controleer of Pokémon al in de collectie zit
+        const bestaandePokemonIndex = user.collection.findIndex(pokemon =>
+            pokemon.pokemon_id === pokemonData.id || pokemon.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase()
+        );
+
+        if (bestaandePokemonIndex !== -1) {
+            // Pokémon bestaat al, update gegevens
+            console.log("[DEBUG] - Pokémon bestaat al, gegevens worden bijgewerkt.");
+            user.collection[bestaandePokemonIndex].level = level;
+            user.collection[bestaandePokemonIndex].nickname = nickname || user.collection[bestaandePokemonIndex].nickname;
+            user.collection[bestaandePokemonIndex].stats = opponentStats;
+            user.collection[bestaandePokemonIndex].wins += 1; // Optionele verbetering: wins bijhouden
+        } else {
+            // Pokémon bestaat nog niet, voeg toe aan collectie
+            console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
+            const nieuwePokemon = {
+                pokemon_name: pokemonData.name,
+                pokemon_id: pokemonData.id,
+                nickname: nickname || "",
+                sprite: pokemonData.sprites.front_default,
+                level: level,
+                wins: 0,
+                loses: 0,
+                stats: opponentStats,
+                isBuddy: false,
+                moves: await haalMoves(pokemonData.id)
+            };
+            user.collection.push(nieuwePokemon);
+        }
+
+        // Update de database met de bijgewerkte collectie
+        const updateResponse = await fetch("/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: user.collection }),
+            credentials: "include"
+        });
+
+        console.log("[DEBUG] - Pokémon collectie succesvol geüpdatet.");
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij toevoegen/updaten van Pokémon:", error);
+    }
+}
+
+async function updateUserCollection(email, updatedCollection) {
+    try {
+        const response = await fetch("/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: updatedCollection }),
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Fout bij updaten van gebruiker. Status: ${response.status}`);
+        }
+
+        console.log("[DEBUG] - Pokémon collectie succesvol geüpdatet.");
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij updaten van de Pokémon collectie:", error);
     }
 }
