@@ -47,26 +47,36 @@ async function displayCollectieList() {
     console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
 
     for (const pokemon of userData.user.collection) {
-        if (!pokemon.stats || !pokemon.stats.types) {
-            console.error(`[ERROR] - Types ontbreken voor ${pokemon.pokemon_name}.`);
-            continue; // Sla Pokémon over zonder type-informatie
+        try {
+            // ✅ Haal extra gegevens op uit de API
+            const apiResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.pokemon_id}/`);
+            if (!apiResponse.ok) {
+                throw new Error(`Kan gegevens niet ophalen voor Pokémon ID: ${pokemon.pokemon_id}`);
+            }
+
+            const apiData = await apiResponse.json();
+            const types = apiData.types.map(typeInfo => typeInfo.type.name).join(', ');
+
+            console.log(`[DEBUG] - API data opgehaald voor ${pokemon.pokemon_name}:`, types);
+
+            const listItem = document.createElement('div');
+            listItem.className = 'collectie';
+            listItem.innerHTML = `
+                <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
+                <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
+                <strong>${pokemon.pokemon_id}</strong>
+                <strong>${pokemon.pokemon_name}</strong>
+                ${types.split(', ').map(type => `
+                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                `).join('')}
+            `;
+
+            listItem.onclick = () => pokemonDetails(pokemon);
+            pokemonList.appendChild(listItem);
+
+        } catch (error) {
+            console.error(`[ERROR] - Fout bij ophalen van API data voor ${pokemon.pokemon_name}:`, error);
         }
-
-        const listItem = document.createElement('div');
-        listItem.className = 'collectie';
-        listItem.innerHTML = `
-            <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
-            <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
-            <strong>${pokemon.pokemon_id}</strong>
-            <strong>${pokemon.pokemon_name}</strong>
-            ${pokemon.stats.types.split(', ').map(type => `
-                <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-            `).join('')}
-        `;
-
-        listItem.onclick = () => pokemonDetails(pokemon);
-
-        pokemonList.appendChild(listItem);
     }
 
     console.log("[DEBUG] - Pokémon collectie succesvol weergegeven.");
