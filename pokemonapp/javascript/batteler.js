@@ -146,6 +146,7 @@ async function setCurrentBuddy(pokemonId) {
         buddy.types = buddyData.types.map(typeInfo => typeInfo.type.name);
         // Bereken typen en zwaktes dynamisch
         buddy.weakness = calculateCombinedWeaknesses(buddy.types);
+        updateInfo(pokemon, buddy);
 
         buddy.chosenMove = null;
     }
