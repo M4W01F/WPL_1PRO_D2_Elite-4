@@ -47,6 +47,11 @@ async function displayCollectieList() {
     console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
 
     for (const pokemon of userData.user.collection) {
+        if (!pokemon.stats || !pokemon.stats.types) {
+            console.error(`[ERROR] - Types ontbreken voor ${pokemon.pokemon_name}.`);
+            continue; // Sla Pokémon over zonder type-informatie
+        }
+
         const listItem = document.createElement('div');
         listItem.className = 'collectie';
         listItem.innerHTML = `
