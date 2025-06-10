@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         const buddyData = await buddyResponse.json();
 
+        buddy.id = buddyId;
         buddy.name = buddyData.name;
         buddy.sprite = buddyData.sprites.front_default;
         buddy.level = buddyData.level;
@@ -430,7 +431,7 @@ async function handleMoveClick(move) {
         const data = await response.json();
         const user = data.user;
 
-        const buddyIndex = user.collection.findIndex(p => p.pokemon_id === buddy.pokemon_id);
+        const buddyIndex = user.collection.findIndex(p => p.pokemon_id === buddy.id);
 
         if (buddy.hp <= 0) {
             msg1 = `${buddy.name} kan niet meer vechten!`;
@@ -446,7 +447,11 @@ async function handleMoveClick(move) {
             msg1 = `${pokemon.name} kan niet meer vechten!`;
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
-            
+            if (buddyIndex !== null && user.collection[buddyIndex]) {
+                user.collection[buddyIndex].wins += 1;
+                user.collection[buddyIndex].level += 1;
+                await updateUserCollection(email, user.collection);
+            }
             await voegPokemonToeAanCollectie(pokemon.name, pokemon.stats, pokemon.level, "", buddyIndex);
         }
 
@@ -863,7 +868,7 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     }
 }
 
-async function voegPokemonToeAanCollectie(pokemonName, level, nickname, buddyIndex) {
+async function voegPokemonToeAanCollectie(pokemonName, level, nickname) {
     try {
         console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonName);
 
@@ -919,11 +924,6 @@ async function voegPokemonToeAanCollectie(pokemonName, level, nickname, buddyInd
             };
 
             user.collection.push(nieuwePokemon);
-        }
-
-        if (buddyIndex !== null && user.collection[buddyIndex]) {
-            user.collection[buddyIndex].wins += 1;
-            user.collection[buddyIndex].level += 1;
         }
 
         await fetch("/api/updateUser", {
