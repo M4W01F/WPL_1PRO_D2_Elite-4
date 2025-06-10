@@ -60,18 +60,19 @@ async function displayCollectieList() {
 
             console.log(`[DEBUG] - API data opgehaald voor ${pokemon.pokemon_name}:`, types);
 
-            const buddyIndicator = pokemon.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
+            const buddyClass = pokemon.isBuddy ? 'buddy' : '';
 
             const listItem = document.createElement('div');
-            listItem.className = 'collectie';
+            listItem.className = `collectie ${buddyClass}`;
+            listItem.id = pokemon.isBuddy ? "isbuddy" : "";
             listItem.innerHTML = `
                 <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
                 <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
-                <strong>${pokemon.pokemon_id}</strong> ${buddyIndicator}
+                <strong>${pokemon.pokemon_id}</strong>
                 <strong>${pokemon.pokemon_name}</strong>
-                ${types.split(', ').map(type => `
+                <div>${types.split(', ').map(type => `
                     <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-                `).join('')}
+                `).join('')}</div>
             `;
 
             listItem.onclick = () => pokemonDetails(pokemon);
@@ -82,7 +83,7 @@ async function displayCollectieList() {
         }
     }
 
-    console.log("[DEBUG] - Pokémon collectie succesvol weergegeven met Buddy-indicatie.");
+    console.log("[DEBUG] - Pokémon collectie succesvol weergegeven met Buddy als div.");
 }
 
 function pokemonDetails(pokemon) {
