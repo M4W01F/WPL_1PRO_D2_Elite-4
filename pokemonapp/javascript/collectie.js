@@ -23,7 +23,7 @@ async function displayCollectieList() {
     console.log("[DEBUG] - Laden van Pokémon collectie gestart.");
 
     const pokemonList = document.getElementById('pokemon-list');
-    pokemonList.innerHTML = ""; // Verwijder eerdere inhoud
+    pokemonList.innerHTML = "";
 
     const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
     const userResponse = await fetch("/api/getUser", {
@@ -46,9 +46,10 @@ async function displayCollectieList() {
 
     console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
 
-    for (const pokemon of userData.user.collection) {
+    const gesorteerdeCollectie = userData.user.collection.sort((a, b) => a.pokemon_id - b.pokemon_id);
+
+    for (const pokemon of gesorteerdeCollectie) {
         try {
-            // ✅ Haal extra gegevens op uit de API
             const apiResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.pokemon_id}/`);
             if (!apiResponse.ok) {
                 throw new Error(`Kan gegevens niet ophalen voor Pokémon ID: ${pokemon.pokemon_id}`);
@@ -59,27 +60,21 @@ async function displayCollectieList() {
 
             console.log(`[DEBUG] - API data opgehaald voor ${pokemon.pokemon_name}:`, types);
 
+            const buddyIndicator = pokemon.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
+
             const listItem = document.createElement('div');
             listItem.className = 'collectie';
             listItem.innerHTML = `
                 <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
                 <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
-                <strong>${pokemon.pokemon_id}</strong>
+                <strong>${pokemon.pokemon_id}</strong> ${buddyIndicator}
                 <strong>${pokemon.pokemon_name}</strong>
                 ${types.split(', ').map(type => `
                     <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
                 `).join('')}
             `;
 
-            listItem.onclick = () => {
-                console.log("[DEBUG] - Klik op Pokémon:", pokemon.pokemon_name);
-                pokemonDetails({
-                    id: pokemon.pokemon_id,
-                    name: pokemon.pokemon_name,
-                    types: types,
-                    sprite: pokemon.sprite
-                });
-            };
+            listItem.onclick = () => pokemonDetails(pokemon);
             pokemonList.appendChild(listItem);
 
         } catch (error) {
@@ -87,7 +82,7 @@ async function displayCollectieList() {
         }
     }
 
-    console.log("[DEBUG] - Pokémon collectie succesvol weergegeven.");
+    console.log("[DEBUG] - Pokémon collectie succesvol weergegeven met Buddy-indicatie.");
 }
 
 function pokemonDetails(pokemon) {
