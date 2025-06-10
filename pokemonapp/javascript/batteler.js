@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("[DEBUG] - Buddy Moves:", buddy.moves);
 
         updateBuddyMoves(buddy.moves);
-        setCurrentBuddy(buddyId, buddy.level);
+        setCurrentBuddy(buddyId);
 
         // ✅ Start battle pas nadat buddy correct is geladen
         const pokemonName = getPokemonNameFromURL();
@@ -109,7 +109,7 @@ async function loadMovesFromDB(pokemonID) {
 }
 
 // Stel huidige buddy in en toon informatie
-async function setCurrentBuddy(pokemonId, level) {
+async function setCurrentBuddy(pokemonId) {
     const buddyData = await fetchPokemonData(pokemonId);
 
     if (buddyData) {
@@ -127,7 +127,7 @@ async function setCurrentBuddy(pokemonId, level) {
 
         let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
 
-        for (let i = 1; i <= level; i++) {
+        for (let i = 1; i <= buddy.level; i++) {
             hp += hp / 50;
             attack += attack / 50;
             defense += defense / 50;
@@ -136,7 +136,6 @@ async function setCurrentBuddy(pokemonId, level) {
             sDefense += sDefense / 50;
         }
         buddy.name = buddyData.name;
-        buddy.level = level;
         buddy.maxHp = Math.round(hp, 0);
         buddy.hp = Math.round(hp, 0);
         buddy.attack = attack;
