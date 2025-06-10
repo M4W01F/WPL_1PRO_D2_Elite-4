@@ -890,13 +890,11 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
         );
 
         if (bestaandePokemonIndex !== -1) {
-            // Pokémon bestaat al, update gegevens
-            console.log("[DEBUG] - Pokémon bestaat al, gegevens worden bijgewerkt.");
+            console.log("[DEBUG] - Verslagen Pokémon bestaat al, update stats & nickname.");
             user.collection[bestaandePokemonIndex].level = level;
             user.collection[bestaandePokemonIndex].nickname = nickname || user.collection[bestaandePokemonIndex].nickname;
             user.collection[bestaandePokemonIndex].stats = opponentStats;
-            user.collection[bestaandePokemonIndex].wins += 1;
-        } else {
+        }else {
             // Pokémon bestaat nog niet, voeg toe aan collectie
             const sprite = pokemonData.sprites?.front_default || "fallback-image.png";
 
@@ -904,8 +902,8 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             const nieuwePokemon = {
                 pokemon_name: pokemonData.name,
                 pokemon_id: pokemonData.id,
-                nickname: nickname, // Nu wordt `nickname` correct doorgegeven
-                sprite: pokemonData.sprites.front_default,
+                nickname: nickname,
+                sprite: sprite,
                 level: level,
                 wins: 0,
                 loses: 0,
@@ -914,6 +912,11 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
                 moves: await haalMoves(pokemonData.id)
             };
             user.collection.push(nieuwePokemon);
+        }
+        if (buddyIndex !== -1) {
+            console.log("[DEBUG] - Buddy wint het gevecht, +1 level, +1 win.");
+            user.collection[buddyIndex].level += 1;
+            user.collection[buddyIndex].wins += 1;
         }
 
         // Update de database met de bijgewerkte collectie
