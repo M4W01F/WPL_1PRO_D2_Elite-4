@@ -447,9 +447,7 @@ async function handleMoveClick(move) {
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
             
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}/`);
-            const pokemonData = await response.json();
-            await voegPokemonToeAanCollectie(pokemonData, pokemon.stats, pokemon.level, "", buddyIndex);
+            await voegPokemonToeAanCollectie(pokemon.name, pokemon.stats, pokemon.level, "", buddyIndex);
         }
 
         const resultDiv = document.createElement('div');
@@ -535,6 +533,8 @@ async function startBattle(pokemonName) {
 
         let hp = baseStats.hp, attack = baseStats.attack, defense = baseStats.defense, speed = baseStats.speed, sAttack = baseStats.sAttack, sDefense = baseStats.sDefense;
 
+        pokemon.id = pokemonData.id;
+        console.log("id ", pokemon.id);
         pokemon.name = pokemonData.name;
         pokemon.level = buddy.level + [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
         for (let i = 1; i <= pokemon.level; i++) {
@@ -863,9 +863,9 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     }
 }
 
-async function voegPokemonToeAanCollectie(pokemonData, level, nickname = "", buddyIndex = null) {
+async function voegPokemonToeAanCollectie(pokemonName, level, nickname, buddyIndex) {
     try {
-        console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonData.name);
+        console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonName);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
@@ -879,7 +879,7 @@ async function voegPokemonToeAanCollectie(pokemonData, level, nickname = "", bud
         const user = data.user;
 
         const bestaandePokemonIndex = user.collection.findIndex(p =>
-            p.pokemon_id === pokemonData.id || p.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase()
+            p.pokemon_id === pokemon.id || p.pokemon_name.toLowerCase() === pokemonName.toLowerCase()
         );
 
         if (bestaandePokemonIndex !== -1) {
@@ -897,13 +897,13 @@ async function voegPokemonToeAanCollectie(pokemonData, level, nickname = "", bud
             user.collection[bestaandePokemonIndex].wins += 1;
         } else {
             console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
-            const moveNames = await haalMoves(pokemonData.id);
+            const moveNames = await haalMoves(pokemon.id);
             const enrichedMoves = await Promise.all(moveNames.map(async name => await GetMoveInfo(name)));
 
             const nieuwePokemon = {
                 pokemon_name: pokemon.name,
-                pokemon_id: pokemonData.id,
-                nickname: nickname,
+                pokemon_id: pokemon.id,
+                nickname: "",
                 sprite: pokemon.sprite,
                 level: pokemon.level,
                 wins: 0,
