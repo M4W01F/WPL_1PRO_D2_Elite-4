@@ -418,12 +418,23 @@ async function handleMoveClick(move) {
         document.getElementById('buddy-moves').style.display = 'none';
 
         let msg1, msg2, msg3;
+        const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+        
+        const response = await fetch("/api/getUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+        const user = data.user;
+
         if (buddy.hp <= 0) {
             msg1 = `${buddy.name} kan niet meer vechten!`;
             msg2 = `${pokemon.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Lost aangerekend.';
 
-            const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
             const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
             if (buddyIndex !== -1) {
                 user.collection[buddyIndex].loses += 1;
@@ -435,7 +446,6 @@ async function handleMoveClick(move) {
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
 
-            const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
             const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
             if (buddyIndex !== -1) {
                 user.collection[buddyIndex].wins += 1;
@@ -462,7 +472,6 @@ async function handleMoveClick(move) {
 
         document.getElementById('move-resultaat').appendChild(resultDiv);
     }
-
     processAttack();
 }
 
