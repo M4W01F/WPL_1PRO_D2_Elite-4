@@ -123,6 +123,8 @@ document.getElementById("pokeball").addEventListener("click", async () => {
 
         kansen.textContent = aantalKansen;
         const vangstKans = Math.min(95, (100 - laatstGevangenStats.defense + laatstGevangenBuddy.stats.attack) % 100);
+        console.log(laatstGevangenStats.defense)
+        console.log(laatstGevangenBuddy.stats.attack)
         const vangstGeslaagd = Math.random() * 100 < vangstKans;
 
         if (vangstGeslaagd) {
