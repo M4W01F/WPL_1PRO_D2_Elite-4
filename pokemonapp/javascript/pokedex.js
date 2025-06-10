@@ -190,3 +190,46 @@ function getTypeColor(type) {
     return typeColors[type] || "#d3d3d3"; // Default kleur voor onbekende types
 }
 document.addEventListener('DOMContentLoaded', displayPokemonList);
+document.getElementById('search-input').addEventListener('input', function () {
+    const searchTerm = this.value.trim().toLowerCase(); // ✅ Voorkomt onnodige spaties en case-gevoeligheid
+
+    // ✅ Controleer of `allPokemonData` correct geladen is
+    if (!Array.isArray(allPokemonData) || allPokemonData.length === 0) {
+        console.error("[ERROR] - Pokémon data ontbreekt of is ongeldig.");
+        return;
+    }
+
+    // ✅ Filter Pokémon op naam
+    const filteredPokemon = allPokemonData.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchTerm)
+    );
+
+    // ✅ Voorkomt dat lege zoekresultaten de hele lijst overschrijven
+    const pokemonList = document.getElementById('pokemon-list');
+    pokemonList.innerHTML = filteredPokemon.length > 0 ? "" : "<p>Geen Pokémon gevonden.</p>";
+
+    // ✅ Loop door gefilterde Pokémon en bouw de lijst dynamisch
+    filteredPokemon.forEach(pokemonData => {
+        const pokemonClass = userCollection.some(p => p.pokemon_id === pokemonData.id) ? 'collectie' : 'niet-gevangen';
+        const buddyIndicator = pokemonData.isBuddy ? `<span class="buddy-tag">⭐ Buddy</span>` : "";
+
+        const listItem = document.createElement('div');
+        listItem.className = pokemonClass;
+        listItem.innerHTML = `
+            ${pokemonClass === 'collectie' ? `<img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">` : ""}
+            <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
+            <strong>${pokemonData.id}</strong> ${buddyIndicator}
+            <strong>${pokemonData.name}</strong>
+            <div>
+                ${pokemonData.types.split(', ').map(type => `
+                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                `).join('')}
+            </div>
+        `;
+
+        listItem.onclick = () => pokemonDetails(pokemonData, pokemonClass);
+        pokemonList.appendChild(listItem);
+    });
+
+    console.log(`[DEBUG] - ${filteredPokemon.length} Pokémon gevonden voor zoekterm: '${searchTerm}'.`);
+});
