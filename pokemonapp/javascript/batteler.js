@@ -447,13 +447,7 @@ async function handleMoveClick(move) {
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
 
-            if (buddyIndex !== -1) {
-                user.collection[buddyIndex].wins += 1;
-                user.collection[buddyIndex].level += 1;
-                await updateUserCollection(email, user.collection);
-            }
-
-            await voegPokemonToeAanCollectie(pokemon, pokemon.stats, pokemon.level);
+            await voegPokemonToeAanCollectie(pokemon, pokemon.stats, pokemon.level, "", buddyIndex);
         }
 
         const resultDiv = document.createElement('div');
@@ -867,7 +861,7 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     }
 }
 
-async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname = "") {
+async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname = "", buddyIndex) {
     try {
         console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonData.name);
 
