@@ -449,6 +449,7 @@ async function handleMoveClick(move) {
 
             if (buddyIndex !== -1) {
                 user.collection[buddyIndex].wins += 1;
+                user.collection[buddyIndex].level += 1;
                 await updateUserCollection(email, user.collection);
             }
 
