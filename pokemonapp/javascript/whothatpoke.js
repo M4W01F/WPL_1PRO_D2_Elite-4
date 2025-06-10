@@ -1,5 +1,3 @@
-const { NONAME } = require("dns");
-
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
