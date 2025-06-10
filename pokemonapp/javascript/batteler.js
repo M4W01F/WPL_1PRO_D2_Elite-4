@@ -452,7 +452,7 @@ async function handleMoveClick(move) {
                 user.collection[buddyIndex].level += 1;
                 await updateUserCollection(email, user.collection);
             }
-            await voegPokemonToeAanCollectie(pokemon.name, pokemon.stats, pokemon.level, "", buddyIndex);
+            await voegPokemonToeAanCollectie(pokemon.name);
         }
 
         const resultDiv = document.createElement('div');
@@ -868,7 +868,7 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     }
 }
 
-async function voegPokemonToeAanCollectie(pokemonName, level, nickname) {
+async function voegPokemonToeAanCollectie(pokemonName) {
     try {
         console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonName);
 
@@ -889,8 +889,8 @@ async function voegPokemonToeAanCollectie(pokemonName, level, nickname) {
 
         if (bestaandePokemonIndex !== -1) {
             console.log("[DEBUG] - Pokémon bestaat al, gegevens worden bijgewerkt.");
-            user.collection[bestaandePokemonIndex].level = level;
-            user.collection[bestaandePokemonIndex].nickname = nickname || user.collection[bestaandePokemonIndex].nickname;
+            user.collection[bestaandePokemonIndex].level = pokemon.level;
+            user.collection[bestaandePokemonIndex].nickname = "" || user.collection[bestaandePokemonIndex].nickname;
             user.collection[bestaandePokemonIndex].stats = {
                 hp: pokemon.hp,
                 attack: pokemon.attack,
@@ -899,7 +899,7 @@ async function voegPokemonToeAanCollectie(pokemonName, level, nickname) {
                 special_defense: pokemon.sDefense,
                 speed: pokemon.speed
             };
-            user.collection[bestaandePokemonIndex].wins += 1;
+            user.collection[bestaandePokemonIndex].moves = await haalMoves(pokemon.id);
         } else {
             console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
 
