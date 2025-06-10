@@ -71,7 +71,15 @@ async function displayCollectieList() {
                 `).join('')}
             `;
 
-            listItem.onclick = () => pokemonDetails(pokemon);
+            listItem.onclick = () => {
+                console.log("[DEBUG] - Klik op Pokémon:", pokemon.pokemon_name);
+                pokemonDetails({
+                    id: pokemon.pokemon_id,
+                    name: pokemon.pokemon_name,
+                    types: types,
+                    sprite: pokemon.sprite
+                });
+            };
             pokemonList.appendChild(listItem);
 
         } catch (error) {
