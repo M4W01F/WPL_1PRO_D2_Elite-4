@@ -20,28 +20,51 @@ async function fetchPokemonData(pokemonId) {
 }
 
 async function displayCollectieList() {
+    console.log("[DEBUG] - Laden van Pokémon collectie gestart.");
+
     const pokemonList = document.getElementById('pokemon-list');
+    pokemonList.innerHTML = ""; // Verwijder eerdere inhoud
 
-    for (let pokemonId = 1; pokemonId <= 12; pokemonId++) {
-        const pokemonData = await fetchPokemonData(pokemonId);
-        if (pokemonData) {
-            const listItem = document.createElement('div');
-            listItem.className = 'collectie';
-            listItem.innerHTML = `
-                <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
-                <img src="${pokemonData.sprite}" alt="${pokemonData.name}">
-                <strong>${pokemonData.id}</strong>
-                <strong>${pokemonData.name}</strong>
-                ${pokemonData.types.split(', ').map(type => `
-                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-                `).join('')}
-            `;
-            
-            listItem.onclick = () => pokemonDetails(pokemonData);
+    const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
+    const userResponse = await fetch("/api/getUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        credentials: "include"
+    });
 
-            pokemonList.appendChild(listItem);
-        }
+    if (!userResponse.ok) {
+        console.error("[ERROR] - Fout bij ophalen van gebruikersgegevens.");
+        return;
     }
+
+    const userData = await userResponse.json();
+    if (!userData.user || !userData.user.collection) {
+        console.error("[ERROR] - Geen geldige collectie gevonden.");
+        return;
+    }
+
+    console.log("[DEBUG] - Gevonden collectie:", userData.user.collection);
+
+    for (const pokemon of userData.user.collection) {
+        const listItem = document.createElement('div');
+        listItem.className = 'collectie';
+        listItem.innerHTML = `
+            <img src="./images/Poke_Ball.webp" alt="Poké Ball" style="width: 30px; height: 30px;">
+            <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
+            <strong>${pokemon.pokemon_id}</strong>
+            <strong>${pokemon.pokemon_name}</strong>
+            ${pokemon.stats.types.split(', ').map(type => `
+                <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+            `).join('')}
+        `;
+
+        listItem.onclick = () => pokemonDetails(pokemon);
+
+        pokemonList.appendChild(listItem);
+    }
+
+    console.log("[DEBUG] - Pokémon collectie succesvol weergegeven.");
 }
 
 function pokemonDetails(pokemon) {
