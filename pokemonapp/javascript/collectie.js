@@ -56,7 +56,7 @@ async function displayCollectieList() {
             }
 
             const apiData = await apiResponse.json();
-            const types = apiData.types.map(typeInfo => typeInfo.type.name).join(', ');
+            const types = apiData.types?.map(typeInfo => typeInfo.type.name).join(', ') || "Onbekend";
 
             console.log(`[DEBUG] - API data opgehaald voor ${pokemon.pokemon_name}:`, types);
 
@@ -69,9 +69,11 @@ async function displayCollectieList() {
                 <img src="${pokemon.sprite}" alt="${pokemon.pokemon_name}">
                 <strong>${pokemon.pokemon_id}</strong> ${buddyIndicator}
                 <strong>${pokemon.pokemon_name}</strong>
-                ${types.split(', ').map(type => `
-                    <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
-                `).join('')}
+                <div>
+                    ${types.split(', ').map(type => `
+                        <span class="type-badge" style="background-color: ${getTypeColor(type)}">${type}</span>
+                    `).join('')}
+                </div>
             `;
 
             listItem.onclick = () => pokemonDetails(pokemon);
