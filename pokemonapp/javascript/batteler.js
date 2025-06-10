@@ -419,7 +419,7 @@ async function handleMoveClick(move) {
 
         let msg1, msg2, msg3;
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
-        
+
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -430,12 +430,13 @@ async function handleMoveClick(move) {
         const data = await response.json();
         const user = data.user;
 
+        const buddyIndex = user.collection.findIndex(p => p.pokemon_id === buddy.pokemon_id);
+
         if (buddy.hp <= 0) {
             msg1 = `${buddy.name} kan niet meer vechten!`;
             msg2 = `${pokemon.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Lost aangerekend.';
 
-            const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
             if (buddyIndex !== -1) {
                 user.collection[buddyIndex].loses += 1;
                 await updateUserCollection(email, user.collection);
@@ -446,7 +447,6 @@ async function handleMoveClick(move) {
             msg2 = `${buddy.name} heeft dit gevecht gewonnen.`;
             msg3 = 'Je krijgt 1 Win aangerekend.';
 
-            const buddyIndex = user.collection.findIndex(pokemon => pokemon.pokemon_id === buddy.pokemon_id);
             if (buddyIndex !== -1) {
                 user.collection[buddyIndex].wins += 1;
                 await updateUserCollection(email, user.collection);
@@ -872,7 +872,7 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // ✅ Haal bestaande gebruiker op
+        // Haal bestaande gebruiker op
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -883,25 +883,27 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
         const data = await response.json();
         const user = data.user;
 
-        // ✅ Controleer of Pokémon al in de collectie zit
+        // Controleer of Pokémon al in de collectie zit
         const bestaandePokemonIndex = user.collection.findIndex(pokemon =>
             pokemon.pokemon_id === pokemonData.id || pokemon.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase()
         );
 
         if (bestaandePokemonIndex !== -1) {
-            // ✅ Pokémon bestaat al, update gegevens
+            // Pokémon bestaat al, update gegevens
             console.log("[DEBUG] - Pokémon bestaat al, gegevens worden bijgewerkt.");
             user.collection[bestaandePokemonIndex].level = level;
             user.collection[bestaandePokemonIndex].nickname = nickname || user.collection[bestaandePokemonIndex].nickname;
             user.collection[bestaandePokemonIndex].stats = opponentStats;
             user.collection[bestaandePokemonIndex].wins += 1;
         } else {
-            // ✅ Pokémon bestaat nog niet, voeg toe aan collectie
+            // Pokémon bestaat nog niet, voeg toe aan collectie
+            const sprite = pokemonData.sprites?.front_default || "fallback-image.png";
+
             console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
             const nieuwePokemon = {
                 pokemon_name: pokemonData.name,
                 pokemon_id: pokemonData.id,
-                nickname: nickname, // ✅ Nu wordt `nickname` correct doorgegeven
+                nickname: nickname, // Nu wordt `nickname` correct doorgegeven
                 sprite: pokemonData.sprites.front_default,
                 level: level,
                 wins: 0,
@@ -913,7 +915,7 @@ async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nic
             user.collection.push(nieuwePokemon);
         }
 
-        // ✅ Update de database met de bijgewerkte collectie
+        // Update de database met de bijgewerkte collectie
         await updateUserCollection(email, user.collection);
 
         console.log("[DEBUG] - Pokémon collectie succesvol geüpdatet.");
