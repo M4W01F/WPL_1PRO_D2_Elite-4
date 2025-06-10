@@ -272,6 +272,11 @@ a:hover {
     text-decoration: underline;
 }
 
+#who-pokemon{
+  background-image: url(/pokemonapp/images/achtergrond.jpg);
+  background-size: cover;
+}
+
 /* Style for login */
 #inlog-page{
   background-image: url(/pokemonapp/images/achtergrond.jpg);
@@ -1128,6 +1133,7 @@ div.niet-gevangen {
   border-radius: 10px;
   max-width: 900px;
   gap: 20px;
+  place-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -1170,6 +1176,7 @@ div.niet-gevangen {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  align-content: center;
 }
 
 .stats-table th, .stats-table td {
@@ -1188,12 +1195,15 @@ div.niet-gevangen {
   display: flex;
   flex-direction: column;
   align-items: center;
+  place-items: center;
+  
 }
 
 #comparison-container h3 {
   margin-bottom: 15px;
   color: #333;
 }
+
 
 /* Medium devices (tablets, 768px and up) */
 @media (max-width: 900px) {
