@@ -795,8 +795,8 @@ div.niet-gevangen {
         font-size: 22px;
     }
 }
-/* stijlen voor landingpagina */
 
+/* stijlen voor landingpagina */
 #Landingpagina {
   min-height: 100vh;
   background-image: url(/pokemonapp/images/background.jpg);
@@ -830,15 +830,46 @@ div.niet-gevangen {
   display: flex;
   transition: transform 0.5s ease-in-out;
 }
+.gifs{
+    
+    display: grid;
+    grid-template-columns: 1fr  1fr;
 
+}
+.gif{
+    background-image: url(../images/pikachu-gif.gif);
+    background-size: 120px;
+    height: 300px;
+    background-repeat: no-repeat;
+    width: auto;
+    justify-content: left;
+
+}
+.gif2{
+    background-image: url(../images/pikachu-gif.gif);
+    background-size: 120px;
+    height: 300px;
+    background-repeat: no-repeat;
+    width: auto;
+    transform:scaleX(-1);
+}
+.page-title{
+    text-align: center;
+    margin-top: 10px;
+    color: black;
+    font-style: italic;
+    text-decoration: underline ;
+    
+}
 .projecten {
+   
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
   width: 100%;
   max-width: 1200px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .project {
@@ -860,7 +891,7 @@ div.niet-gevangen {
 
 .project img {
   width: 300px;
-  height: 300px;
+  height: 250px;
   border-radius: 8px;
 }
 
@@ -873,21 +904,21 @@ div.niet-gevangen {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
+  background: red;
   color: #fff;
   border: none;
   cursor: pointer;
   padding: 10px;
-  font-size: 18px;
+  font-size: 20px;
   z-index: 1;
 }
 
 .carousel-button.prev {
-  left: 10px;
+  left: 20px;
 }
 
 .carousel-button.next {
-  right: 10px;
+  right: 20px;
 }
 @media (max-width: 600px) {
   body #Landingpagina {
