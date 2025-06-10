@@ -818,3 +818,24 @@ async function determineAttackOrder(pokemon, buddy) {
         }
     }
 }
+
+async function zoekHMTMMoveMetPower(pokemonData) {
+    try {
+        const allMoves = pokemonData.moves.filter(move => 
+            move.version_group_details.some(detail => detail.move_learn_method.name.includes('machine'))
+        ).map(move => move.move.name);
+
+        const moveDetails = await Promise.all(allMoves.map(async moveName => {
+            const response = await fetch(`https://pokeapi.co/api/v2/move/${moveName}/`);
+            return response.ok ? await response.json() : null;
+        }));
+
+        const validMoves = moveDetails.filter(move => move && move.power > 50).map(move => move.name);
+
+        return validMoves.length > 0 ? validMoves[Math.floor(Math.random() * validMoves.length)] : "strength";
+
+    } catch (error) {
+        console.error("[ERROR] - Fout bij zoeken naar HM/TM move met power > 50:", error);
+        return "strength";
+    }
+}
