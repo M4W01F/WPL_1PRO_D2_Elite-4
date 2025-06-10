@@ -861,60 +861,77 @@ async function zoekHMTMMoveMetPower(pokemonData) {
     }
 }
 
-async function voegPokemonToeAanCollectie(pokemonData, opponentStats, level, nickname = "", buddyIndex) {
+async function voegPokemonToeAanCollectie(pokemonData, level, nickname = "", buddyIndex = null) {
     try {
         console.log("[DEBUG] - Pokémon toevoegen of updaten in collectie:", pokemonData.name);
 
         const email = JSON.parse(localStorage.getItem("loggedInUser")).email;
 
-        // Haal bestaande gebruiker op
         const response = await fetch("/api/getUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
             credentials: "include"
         });
-
         const data = await response.json();
         const user = data.user;
 
-        // Controleer of Pokémon al in de collectie zit
-        const bestaandePokemonIndex = user.collection.findIndex(pokemon =>
-            pokemon.pokemon_id === pokemonData.id || pokemon.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase()
+        const bestaandePokemonIndex = user.collection.findIndex(p =>
+            p.pokemon_id === pokemonData.id || p.pokemon_name.toLowerCase() === pokemonData.name.toLowerCase()
         );
 
         if (bestaandePokemonIndex !== -1) {
-            console.log("[DEBUG] - Verslagen Pokémon bestaat al, update stats & nickname.");
+            console.log("[DEBUG] - Pokémon bestaat al, gegevens worden bijgewerkt.");
             user.collection[bestaandePokemonIndex].level = level;
             user.collection[bestaandePokemonIndex].nickname = nickname || user.collection[bestaandePokemonIndex].nickname;
-            user.collection[bestaandePokemonIndex].stats = opponentStats;
-        }else {
-            // Pokémon bestaat nog niet, voeg toe aan collectie
-            const sprite = pokemonData.sprites?.front_default || "fallback-image.png";
-
+            user.collection[bestaandePokemonIndex].stats = {
+                hp: pokemon.hp,
+                attack: pokemon.attack,
+                defense: pokemon.defense,
+                special_attack: pokemon.sAttack,
+                special_defense: pokemon.sDefense,
+                speed: pokemon.speed
+            };
+            user.collection[bestaandePokemonIndex].wins += 1;
+        } else {
             console.log("[DEBUG] - Nieuwe Pokémon wordt toegevoegd.");
+            const moveNames = await haalMoves(pokemonData.id);
+            const enrichedMoves = await Promise.all(moveNames.map(async name => await GetMoveInfo(name)));
+
             const nieuwePokemon = {
-                pokemon_name: pokemonData.name,
+                pokemon_name: pokemon.name,
                 pokemon_id: pokemonData.id,
                 nickname: nickname,
-                sprite: sprite,
-                level: level,
+                sprite: pokemon.sprite,
+                level: pokemon.level,
                 wins: 0,
                 loses: 0,
-                stats: opponentStats,
+                stats: {
+                    hp: pokemon.hp,
+                    attack: pokemon.attack,
+                    defense: pokemon.defense,
+                    special_attack: pokemon.sAttack,
+                    special_defense: pokemon.sDefense,
+                    speed: pokemon.speed
+                },
                 isBuddy: false,
-                moves: pokemon.moves
+                moves: enrichedMoves
             };
+
             user.collection.push(nieuwePokemon);
         }
-        if (buddyIndex !== -1) {
-            console.log("[DEBUG] - Buddy wint het gevecht, +1 level, +1 win.");
-            user.collection[buddyIndex].level += 1;
+
+        if (buddyIndex !== null && user.collection[buddyIndex]) {
             user.collection[buddyIndex].wins += 1;
+            user.collection[buddyIndex].level += 1;
         }
 
-        // Update de database met de bijgewerkte collectie
-        await updateUserCollection(email, user.collection);
+        await fetch("/api/updateUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, collection: user.collection }),
+            credentials: "include"
+        });
 
         console.log("[DEBUG] - Pokémon collectie succesvol geüpdatet.");
 
