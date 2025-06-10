@@ -44,6 +44,12 @@ async function haalBuddyUitCollectie(email) {
     }
 }
 
+// Globale variabelen voor laatst gevangen Pokémon
+let laatstGevangenPokemon = null;
+let laatstGevangenStats = null;
+let laatstGevangenLevel = null;
+let laatstGevangenBuddy = null;
+
 // Start het vangen van een Pokémon
 async function startCatch(pokemonName) {
     const selectedPokemonName = document.getElementById("pokemon-selector").value.toLowerCase() || pokemonName;
@@ -66,6 +72,7 @@ async function startCatch(pokemonName) {
             alert("Geen actieve Buddy-Pokémon gevonden.");
             return;
         }
+        laatstGevangenBuddy = buddyPokemon;
 
         const levelVariatie = [-3, -2, -1, 0, 1, 2, 3][Math.floor(Math.random() * 7)];
         const pokemonLevel = Math.max(1, buddyPokemon.level + levelVariatie);
@@ -79,54 +86,67 @@ async function startCatch(pokemonName) {
             speed: Math.round(pokemonData.stats[5].base_stat)
         };
 
+        for (let i = 1; i <= pokemonLevel; i++) {
+            opponentStats.hp = Math.round(opponentStats.hp + opponentStats.hp / 50);
+            opponentStats.attack = Math.round(opponentStats.attack + opponentStats.attack / 50);
+            opponentStats.defense = Math.round(opponentStats.defense + opponentStats.defense / 50);
+            opponentStats.speed = Math.round(opponentStats.speed + opponentStats.speed / 50);
+            opponentStats.special_attack = Math.round(opponentStats.special_attack + opponentStats.special_attack / 50);
+            opponentStats.special_defense = Math.round(opponentStats.special_defense + opponentStats.special_defense / 50);
+        }
+
+        laatstGevangenPokemon = pokemonData;
+        laatstGevangenStats = opponentStats;
+        laatstGevangenLevel = pokemonLevel;
+
         document.getElementById("pokemon-naam").textContent = `Naam: ${pokemonData.name}`;
         document.getElementById("pokemon-level").textContent = `Level: ${pokemonLevel}`;
-        document.getElementById("pokemon-image").innerHTML = `<img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}" />`;
+        document.getElementById("pokemon-image").innerHTML = `
+            <img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}" />
+        `;
 
         document.getElementById("setup-container").style.display = "none";
         document.getElementById("catch-interface").style.display = "block";
-
-        // ✅ Sla opponentStats en Buddy direct op voor vangstkans berekening
-        document.getElementById("pokeball").addEventListener("click", async () => {
-            const kansen = document.getElementById("kansen");
-            let aantalKansen = parseInt(kansen.textContent);
-
-            if (aantalKansen > 0) {
-                aantalKansen--;
-
-                kansen.textContent = aantalKansen;
-
-                const vangstKans = Math.min(95, (100 - opponentStats.defense + buddyPokemon.stats.attack) % 100);
-                const vangstGeslaagd = Math.random() * 100 < vangstKans;
-
-                if (vangstGeslaagd) {
-                    document.getElementById("popup").style.display = "flex";
-                } else {
-                    if (aantalKansen === 0) {
-                        window.location.href = "./index.html";
-                    } else {
-                        alert("Niet gelukt! Probeer opnieuw.");
-                    }
-                }
-            }
-        });
-
-        document.getElementById("popup-yes").addEventListener("click", () => {
-            document.getElementById("popup").style.display = "none";
-            document.getElementById("bijnaam-panel").style.display = "block";
-        });
-
-        document.getElementById("popup-no").addEventListener("click", async () => {
-            document.getElementById("popup").style.display = "none";
-            await voegPokemonToeAanCollectie(pokemonData, opponentStats, pokemonLevel, "");
-            window.location.href = "./index.html";
-        });
 
     } catch (error) {
         console.error("Fout bij vangproces:", error);
         alert(error.message);
     }
 }
+
+document.getElementById("pokeball").addEventListener("click", async () => {
+    const kansen = document.getElementById("kansen");
+    let aantalKansen = parseInt(kansen.textContent);
+
+    if (aantalKansen > 0) {
+        aantalKansen--;
+
+        kansen.textContent = aantalKansen;
+        const vangstKans = Math.min(95, (100 - laatstGevangenStats.defense + laatstGevangenBuddy.stats.attack) % 100);
+        const vangstGeslaagd = Math.random() * 100 < vangstKans;
+
+        if (vangstGeslaagd) {
+            document.getElementById("popup").style.display = "flex";
+        } else {
+            if (aantalKansen === 0) {
+                window.location.href = "./index.html";
+            } else {
+                alert("Niet gelukt! Probeer opnieuw.");
+            }
+        }
+    }
+});
+
+document.getElementById("popup-yes").addEventListener("click", () => {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("bijnaam-panel").style.display = "block";
+});
+
+document.getElementById("popup-no").addEventListener("click", async () => {
+    document.getElementById("popup").style.display = "none";
+    await voegPokemonToeAanCollectie(laatstGevangenPokemon, laatstGevangenStats, laatstGevangenLevel, "");
+    window.location.href = "./index.html";
+});
 
 // Event Listener voor bijnaam
 document.getElementById("submit-bijnaam").addEventListener("click", async () => {
@@ -209,9 +229,10 @@ async function haalMoves(pokemonID) {
         }
 
         const data = await antwoord.json();
-        const pokemonType = data.types.map(t => t.type.name);
-        let moveSet = new Map();
+        const pokemonType = data.types.map(t => t.type.name); // ✅ Haal het type van de Pokémon op
+        let moveSet = new Map(); // ✅ Gebruik een Map om duplicaten te voorkomen
 
+        // ✅ Zoek alle unieke level-up moves met power > 0
         for (const moveData of data.moves) {
             for (const detail of moveData.version_group_details) {
                 if (detail.move_learn_method.name === "level-up" && detail.level_learned_at > 0) {
