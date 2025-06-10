@@ -892,12 +892,12 @@ async function voegPokemonToeAanCollectie(pokemonName) {
             user.collection[bestaandePokemonIndex].level = pokemon.level;
             user.collection[bestaandePokemonIndex].nickname = "" || user.collection[bestaandePokemonIndex].nickname;
             user.collection[bestaandePokemonIndex].stats = {
-                hp: pokemon.hp,
-                attack: pokemon.attack,
-                defense: pokemon.defense,
-                special_attack: pokemon.sAttack,
-                special_defense: pokemon.sDefense,
-                speed: pokemon.speed
+                hp: Math.round(pokemon.hp),
+                attack: Math.round(pokemon.attack),
+                defense: Math.round(pokemon.defense),
+                special_attack: Math.round(pokemon.sAttack),
+                special_defense: Math.round(pokemon.sDefense),
+                speed: Math.round(pokemon.speed)
             };
             user.collection[bestaandePokemonIndex].moves = await haalMoves(pokemon.id);
         } else {
@@ -912,12 +912,12 @@ async function voegPokemonToeAanCollectie(pokemonName) {
                 wins: 0,
                 loses: 0,
                 stats: {
-                    hp: pokemon.hp,
-                    attack: pokemon.attack,
-                    defense: pokemon.defense,
-                    special_attack: pokemon.sAttack,
-                    special_defense: pokemon.sDefense,
-                    speed: pokemon.speed
+                    hp: Math.round(pokemon.hp),
+                    attack: Math.round(pokemon.attack),
+                    defense: Math.round(pokemon.defense),
+                    special_attack: Math.round(pokemon.sAttack),
+                    special_defense: Math.round(pokemon.sDefense),
+                    speed: Math.round(pokemon.speed)
                 },
                 isBuddy: false,
                 moves: await haalMoves(pokemon.id)
