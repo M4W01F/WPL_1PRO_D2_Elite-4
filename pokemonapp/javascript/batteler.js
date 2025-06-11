@@ -322,7 +322,7 @@ async function handleMoveClick(move) {
                         effectivenessText = 'Niet effectief';
                     } else if (effectiveness >= 1 && effectiveness < 2) {
                         effectivenessText = 'Effectief';
-                    } else if (effectiveness >= 2 && effectiveness <= 4) {
+                    } else if (effectiveness >= 2 && effectiveness < 4) {
                         effectivenessText = 'Super effectief';
                     } else {
                         effectivenessText = 'Extreem effectief';
