@@ -202,7 +202,7 @@ a:hover {
 }
 /* style voor registreren */
 #register-page {
-    background-image: url(/pokemonapp/images/achtergrond.jpg);
+    background-image: url(../images/achtergrond.jpg);
     background-size: cover;
     color: #333;
     min-height: 100vh;
@@ -273,13 +273,13 @@ a:hover {
 }
 
 #who-pokemon{
-  background-image: url(/pokemonapp/images/achtergrond.jpg);
+  background-image: url(../images/achtergrond.jpg);
   background-size: cover;
 }
 
 /* Style for login */
 #inlog-page{
-  background-image: url(/pokemonapp/images/achtergrond.jpg);
+  background-image: url(../images/achtergrond.jpg);
   background-size: cover;
 }
 
